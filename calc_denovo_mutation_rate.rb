@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.1.0"
+CALCDENOVOVER = "0.2.0"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -14,6 +14,9 @@ $previous_snp = nil # Global variable storing previous SNP information if phasin
 $total_sites = 0 # Total number of retained sites
 $total_denovo = {} # Hash of denovo variants keyed by offspring
 $sample_index = {} # Hash of offspring names keyed by index
+$windows = [] # Array of completed bootstrap windows
+$current_windows = []  # Array of active uncompleted bootstrap windows
+$bootstraps = {} # Hash of bootstrap replicate summary values keyed by offspring
 #-----------------------------------------------------------------------------------------
 class Snp
 	attr_accessor :sire, :dam, :offspring, :alleles, :denovo
@@ -51,13 +54,20 @@ class Snp
 		end
 		case mutation_class
 		when "single-forward"
-			$total_denovo[offspr][0] += 1
+			update_denovo_counts(offspr, 0)
 		when "double-forward"
-			$total_denovo[offspr][1] += 1
+			update_denovo_counts(offspr, 1)
 		when "backward"
-			$total_denovo[offspr][2] += 1
+			update_denovo_counts(offspr, 2)
 		end
 		return mutation_class
+	end
+	#-------------------------------------------------------------------------------------
+	def update_denovo_counts(offspr, type)
+		$total_denovo[offspr][type] += 1
+		for window in $current_windows
+			window.denovo[offspr][type] += 1
+		end
 	end
 	#-------------------------------------------------------------------------------------
 	def check_phasing(poss_genotypes)
@@ -93,8 +103,24 @@ class Snp
 	end
 end
 #-----------------------------------------------------------------------------------------
+class Bootstrap_Window
+	attr_accessor :startbp, :endbp, :denovo # Window start, end coordinates. Hash of observed mutations
+	def initialize(startbp)
+		@startbp = startbp
+		@denovo = {}
+		for key in $total_denovo.keys
+			@denovo[key] = [0,0,0]
+		end
+	end
+	def length # Get length of bootstrap window
+		return @endbp - @startbp + 1
+	end
+end
+#-----------------------------------------------------------------------------------------
 def read_vcf # Method to read vcf
 	collect_data = false # Flag to start collecting data
+	next_window_site = 1 # Site to start new window
+	next_window_close_site = next_window_site + $options.window - 1 # Site to close window and calculate rate
 	File.open($options.infile) do |f1|
 		while line = f1.gets
 			if line[0..5] == "#CHROM"
@@ -114,6 +140,16 @@ def read_vcf # Method to read vcf
 				snp_array = line[0..-2].split("\t")
 				$total_sites += 1 
 				$total_sites += snp_array[7].split("=")[1].to_i - snp_array[1].to_i if $options.gvcf # Adjust for gVCF blocks
+				while $total_sites >= next_window_site # Allow multiple windows to pass if gVCF block sufficiently long
+					$current_windows.push(Bootstrap_Window.new(next_window_site))
+					next_window_site += $options.step
+				end
+				while $total_sites >= next_window_close_site
+					$current_windows[0].endbp = next_window_close_site
+					$windows.push($current_windows[0])
+					next_window_close_site += $options.step
+					$current_windows.shift
+				end
 				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
 				alleles.delete("<NON_REF>") if alleles.include?("<NON_REF>")
 				if alleles.size > 1 # Only process sites with actual SNPs in them
@@ -134,6 +170,11 @@ def read_vcf # Method to read vcf
 			end
 		end
 	end
+	# Finish remaining uncompleted windows
+	for window in $current_windows
+		window.endbp = $total_sites
+		$windows.push(window) if window.length >= $options.minbslen # Discard undersized windows
+	end
 end
 #-----------------------------------------------------------------------------------------
 def print_results # Method to print basic results
@@ -150,6 +191,60 @@ def print_results # Method to print basic results
 	end
 end
 #-----------------------------------------------------------------------------------------
+def mean(values)
+	return values.sum.to_f/values.size.to_f
+end
+#-----------------------------------------------------------------------------------------
+def conf95(values)
+	meanval = mean(values)
+	sdnum = values.map { |x| (x - meanval) * (x + meanval) }
+	stdev = Math.sqrt(sdnum.sum/(values.size.to_f - 1.0))
+	critval = 1.96 * stdev/Math.sqrt(values.size.to_f)
+	finalstring = meanval.to_s + "\t" + (meanval - critval).to_s + "-" + (meanval + critval).to_s
+	return finalstring
+end
+#-----------------------------------------------------------------------------------------
+def bootstrap_results
+	for offspr in $total_denovo.keys
+		$bootstraps[offspr] = [[],[]]
+	end
+	for i in 1..$options.bootstrap
+		puts "\nBootstrap Replicate " + i.to_s + ":"
+		current_bootstrap_length = 0
+		bootstrap_denovo = {}
+		for offspr in $total_denovo.keys
+			bootstrap_denovo[offspr] = [0,0,0]
+		end
+		while current_bootstrap_length < $total_sites
+			selected_window = $windows[rand($windows.size)]
+			current_bootstrap_length += selected_window.length
+			for offspr in $total_denovo.keys
+				for val in 0..2
+					bootstrap_denovo[offspr][val] += selected_window.denovo[offspr][val]
+				end
+			end
+		end
+		puts "Total number of retained sites: " + current_bootstrap_length.to_s
+		puts "\nTotal numbers of observed de novo mutations:"
+		puts "Offspring\tSingle-Forward\tDouble-Forward\tBackward"
+		for offspr in bootstrap_denovo.keys
+			puts offspr + "\t" + bootstrap_denovo[offspr].join("\t")
+		end
+		puts "\nInferred mutation rates:"
+		puts "Offspring\tAllsites\tSingle-ForwardOnly"
+		for offspr in bootstrap_denovo.keys
+			puts offspr + "\t" + (bootstrap_denovo[offspr].sum.to_f/current_bootstrap_length.to_f).to_s + "\t" + (bootstrap_denovo[offspr][0].to_f/current_bootstrap_length.to_f).to_s
+			$bootstraps[offspr][0].push(bootstrap_denovo[offspr].sum.to_f/current_bootstrap_length.to_f)
+			$bootstraps[offspr][1].push(bootstrap_denovo[offspr][0].to_f/current_bootstrap_length.to_f)
+		end
+	end
+	puts "\nBootstrapped Estimates:"
+	puts "Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:"
+	for offspr in $bootstraps.keys
+		puts offspr + "\t" + conf95($bootstraps[offspr][0]) + "\t" + conf95($bootstraps[offspr][1])
+	end
+end
+#-----------------------------------------------------------------------------------------
 class Parser
 	def self.parse(options)
 		# Set defaults
@@ -157,6 +252,10 @@ class Parser
 		args.infile = "" # Input file
 		args.sire = "" # Sire name 
 		args.dam = "" # Dam name
+		args.window = 1000000 # Window length for bootstrapping
+		args.minbslen = 1000000 # Minimum window length for bootstrapping
+		args.step = 1000000 # Window step for bootrapping
+		args.bootstrap = 0 # Number of bootstrap replicates
 		args.gvcf = false # Whether input VCF is a gVCF
 		opt_parser = OptionParser.new do |opts|
 			opts.banner = "\033[1mcalc_denovo_mutation_rate " + CALCDENOVOVER + "\033[0m"
@@ -170,6 +269,18 @@ class Parser
 			end
 			opts.on("-d", "--dam [NAME]", String, "Dam's name in VCF") do |dam|
 				args.dam = dam if dam != nil
+			end
+			opts.on("-w", "--window [VALUE]", Integer, "Sequence window length (bp) for bootstrapping (Default = 1000000)") do |window|
+				args.window = window if window != nil
+			end
+			opts.on("-S", "--step [VALUE]", Integer, "Window step (bp) for bootstrapping (Default = 1000000)") do |step|
+				args.step = step if step != nil
+			end
+			opts.on("-b", "--bootstrap [VALUE]", Integer, "Number of bootstrap replicates (Default = 0)") do |bs|
+				args.bootstrap = bs if bs != nil
+			end
+			opts.on("-l", "--minbootstraplength [VALUE]", Integer, "Minimum bootstrap window length (bp) to retain (Default = 1000000)") do |minbslen|
+				args.minbslen = minbslen if minbslen != nil
 			end
 			opts.on("-g", "--gvcf", "Input is a gVCF (Default = false)") do |gvcf|
 				args.gvcf = true
@@ -190,5 +301,7 @@ end
 #-----------------------------------------------------------------------------------------
 ARGV[0] ||= "-h"
 $options = Parser.parse(ARGV)
+$options.minbslen = $options.window if $options.minbslen > $options.window # Prevent nonsensical results
 read_vcf
 print_results
+bootstrap_results if $options.bootstrap > 0

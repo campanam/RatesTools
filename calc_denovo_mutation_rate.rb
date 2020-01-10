@@ -146,9 +146,8 @@ def read_vcf # Method to read vcf
 				end
 				while $total_sites >= next_window_close_site
 					$current_windows[0].endbp = next_window_close_site
-					$windows.push($current_windows[0])
+					$windows.push($current_windows.shift)
 					next_window_close_site += $options.step
-					$current_windows.shift
 				end
 				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
 				alleles.delete("<NON_REF>") if alleles.include?("<NON_REF>")

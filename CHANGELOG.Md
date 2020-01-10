@@ -1,4 +1,4 @@
-# CHANGELOG  
+# CHANGE LOG  
 Michael G. Campana, 2019-2020  
 Smithsonian Conservation Biology Institute  
 

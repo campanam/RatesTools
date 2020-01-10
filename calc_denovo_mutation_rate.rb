@@ -3,7 +3,7 @@
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
 CALCDENOVOVER = "0.1.0"
-# Michael G. Campana, 2019
+# Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 

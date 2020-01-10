@@ -6,7 +6,7 @@ Smithsonian Conservation Biology Institute
 ### Version 0.1.0  
 Initial script to calculate point estimate de novo mutation rate  
 
-## indels_to_bed  
+## indels2bed  
 ### Version 0.1.0  
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 

@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.2.0"
+CALCDENOVOVER = "0.3.0"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -177,6 +177,7 @@ def read_vcf # Method to read vcf
 end
 #-----------------------------------------------------------------------------------------
 def print_results # Method to print basic results
+	puts "\nTotal Sample Results:"
 	puts "Total number of retained sites: " + $total_sites.to_s
 	puts "\nTotal numbers of observed de novo mutations:"
 	puts "Offspring\tSingle-Forward\tDouble-Forward\tBackward"
@@ -244,6 +245,14 @@ def bootstrap_results
 	end
 end
 #-----------------------------------------------------------------------------------------
+def print_options
+	puts "calc_denovo_mutation_rate " + CALCDENOVOVER.to_s + " started with parameters:"
+	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s
+	cmdline << " -g" if $options.gvcf
+	cmdline << " --rng " + $options.rng.to_s
+	puts cmdline
+end
+#-----------------------------------------------------------------------------------------
 class Parser
 	def self.parse(options)
 		# Set defaults
@@ -256,6 +265,7 @@ class Parser
 		args.step = 1000000 # Window step for bootrapping
 		args.bootstrap = 0 # Number of bootstrap replicates
 		args.gvcf = false # Whether input VCF is a gVCF
+		args.rng = srand # Random number seed
 		opt_parser = OptionParser.new do |opts|
 			opts.banner = "\033[1mcalc_denovo_mutation_rate " + CALCDENOVOVER + "\033[0m"
 			opts.separator ""
@@ -284,6 +294,9 @@ class Parser
 			opts.on("-g", "--gvcf", "Input is a gVCF (Default = false)") do |gvcf|
 				args.gvcf = true
 			end
+			opts.on("--rng [VALUE]", Integer, "Random number seed") do |rng|
+				args.rng = rng if rng != nil
+			end
 			opts.on("-v", "--version", "Show program version") do
 				puts "calc_denovo_mutation_rate version " + CALCDENOVOVER
 				exit
@@ -301,6 +314,8 @@ end
 ARGV[0] ||= "-h"
 $options = Parser.parse(ARGV)
 $options.minbslen = $options.window if $options.minbslen > $options.window # Prevent nonsensical results
+srand($options.rng)
+print_options
 read_vcf
 print_results
 bootstrap_results if $options.bootstrap > 0

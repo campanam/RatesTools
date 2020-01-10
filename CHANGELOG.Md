@@ -3,6 +3,10 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.3.0  
+Random number seed setting  
+Interpreted options printed at start-up  
+
 ### Version 0.2.0  
 Bootstrapping  
 

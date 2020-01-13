@@ -28,5 +28,9 @@ Outputs usage if no parameters specified
 ### Version 0.1.0  
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
+## summarize_denovo
+### Version 0.1.0  
+Initial script to summarize parallelized de novo rate calculations  
+
 ## References
 Smit, AFA, Hubley, R & Green, P. RepeatMasker Open-4.0. 2013-2015 (http://www.repeatmasker.org).  

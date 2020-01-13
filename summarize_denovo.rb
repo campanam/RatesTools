@@ -9,7 +9,7 @@ SUMMARIZEDENOVOVER = "0.1.0"
 
 #----------------------------------------------------------------------------------------
 def mean_ci(mean, crit)
-	return (mean/$total_bp.to_f).to_s + "\t" + ((mean-crit)/$total_bp.to_f).to_s + ":" + ((mean+crit)/$total_bp.to_f).to_s
+	return (mean/$total_bp.to_f).to_s + "\t" + ((mean-crit)/$total_bp.to_f).to_s + "-" + ((mean+crit)/$total_bp.to_f).to_s
 end
 #----------------------------------------------------------------------------------------
 def print_summary

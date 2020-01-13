@@ -17,6 +17,10 @@ Initial script to calculate point estimate de novo mutation rate
 ### Version 0.1.0  
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
+## parallel_denovo  
+### Version 0.1.0  
+Initial script to parallelize de novo mutation rate calcuations on Grid Engine HPC  
+
 ## RM2bed  
 ### Version 0.2.0  
 Outputs usage if no parameters specified  

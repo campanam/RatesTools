@@ -2,13 +2,13 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "0.2.0"
+SUMMARIZEDENOVOVER = "0.3.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
 def mean_ci(mean, crit)
-	return (mean/$total_bp.to_f).to_s + "\t" + ((mean-crit)/$total_bp.to_f).to_s + "-" + ((mean+crit)/$total_bp.to_f).to_s
+	return (mean/$bootstrap_bp.to_f).to_s + "\t" + ((mean-crit)/$bootstrap_bp.to_f).to_s + "-" + ((mean+crit)/$bootstrap_bp.to_f).to_s
 end
 #----------------------------------------------------------------------------------------
 def print_summary
@@ -25,6 +25,7 @@ def print_summary
 		puts offspr + "\t" + ($total_mutations[offspr].sum.to_f/$total_bp.to_f).to_s + "\t" + ($total_mutations[offspr][0].to_f/$total_bp.to_f).to_s
 	end
 	puts "\nBootstrapped Estimates:"
+	puts "Bootstrapped retained sites: " + $bootstrap_bp.to_s
 	puts "Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:"
 	for offspr in $total_boot_rate.keys
 		puts offspr + "\t" + mean_ci($total_boot_rate[offspr][0],$total_boot_rate[offspr][1]) + "\t" + mean_ci($total_boot_rate[offspr][2],$total_boot_rate[offspr][3])
@@ -37,6 +38,7 @@ if ARGV[0].nil?
 	puts "\nUsage: ruby summarize_denovo.rb <directory> > <out.txt>"
 else
 	$total_bp = 0 # Total length of observed bp across all chromosomes
+	$bootstrap_bp = 0 # Total length of bootstrapped bp across all chromosomes
 	$total_mutations = {} # Total mutations across all chromosomes keyed by offspring
 	$total_boot_rate = {} # Total bootstrapped mutation rates across all chromosomes keyed by offspring
 	$mutations = "\nIdentified de novo mutations:\n" # Reduced VCF of ided mutations
@@ -81,6 +83,7 @@ else
 							end
 						elsif line[0..8] == "Bootstrap"
 							collection_stage = 2
+							$bootstrap_bp += @current_contig_bp # Only add this value if the contig is actually bootstrapped
 						elsif line[0..31] == "Total number of retained sites: "
 							@current_contig_bp = line.split(" ")[-1].to_i
 							$total_bp += @current_contig_bp

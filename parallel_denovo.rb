@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # parallel_denovo
-PARDENOVOVER = "0.2.0"
+PARDENOVOVER = "0.3.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -79,6 +79,7 @@ class ParallelParser
 		args.dam = "" # Dam name
 		args.window = 1000000 # Window length for bootstrapping
 		args.minbslen = 1000000 # Minimum window length for bootstrapping
+		args.minwindows = 10 # Minimum number of bootstrap windows
 		args.step = 1000000 # Window step for bootrapping
 		args.bootstrap = 0 # Number of bootstrap replicates
 		args.gvcf = false # Whether input VCF is a gVCF
@@ -117,6 +118,10 @@ class ParallelParser
 			end
 			opts.on("-l", "--minbootstraplength [VALUE]", Integer, "Minimum bootstrap window length (bp) to retain (Default = 1000000)") do |minbslen|
 				args.minbslen = minbslen if minbslen != nil
+			end
+			opts.on("-M", "--minwindows [VALUE]", Integer, "Minimum number of bootstrap windows to retain contig (Default = 10)") do |minwindows|
+				args.minwindows = minwindows if minwindows != nil
+				args.minwindows = 1 if args.minwindows < 1
 			end
 			opts.on("-g", "--gvcf", "Input is a gVCF (Default = false)") do |gvcf|
 				args.gvcf = true

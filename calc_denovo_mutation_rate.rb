@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.4.0"
+CALCDENOVOVER = "0.5.0"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -268,7 +268,7 @@ end
 #-----------------------------------------------------------------------------------------
 def print_options
 	puts "calc_denovo_mutation_rate " + CALCDENOVOVER + " started with parameters:"
-	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s
+	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -m " + $options.minwindows.to_s
 	cmdline << " -g" if $options.gvcf
 	cmdline << " --rng " + $options.rng.to_s
 	puts cmdline
@@ -284,6 +284,7 @@ class Parser
 		args.window = 1000000 # Window length for bootstrapping
 		args.minbslen = 1000000 # Minimum window length for bootstrapping
 		args.step = 1000000 # Window step for bootrapping
+		args.minwindows = 10 # Minimum number of bootstrap windows
 		args.bootstrap = 0 # Number of bootstrap replicates
 		args.gvcf = false # Whether input VCF is a gVCF
 		args.rng = srand # Random number seed
@@ -312,6 +313,10 @@ class Parser
 			opts.on("-l", "--minbootstraplength [VALUE]", Integer, "Minimum bootstrap window length (bp) to retain (Default = 1000000)") do |minbslen|
 				args.minbslen = minbslen if minbslen != nil
 			end
+			opts.on("-M", "--minwindows [VALUE]", Integer, "Minimum number of bootstrap windows to retain contig (Default = 10)") do |minwindows|
+				args.minwindows = minwindows if minwindows != nil
+				args.minwindows = 1 if args.minwindows < 1
+			end
 			opts.on("-g", "--gvcf", "Input is a gVCF (Default = false)") do |gvcf|
 				args.gvcf = true
 			end
@@ -339,4 +344,4 @@ srand($options.rng)
 print_options
 read_vcf
 print_results
-bootstrap_results if $options.bootstrap > 0
+bootstrap_results if ($options.bootstrap > 0 && $windows.size >= $options.minwindows)

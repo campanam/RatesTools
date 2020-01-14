@@ -42,6 +42,9 @@ Outputs usage if no parameters specified
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
 ## summarize_denovo  
+### Version 0.3.0  
+Unbootstrapped contigs are now excluded from calculations of bootstrap sequence lengths  
+
 ### Version 0.2.0  
 Concatenates headerless VCF results of identified de novo mutations  
 

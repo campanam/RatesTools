@@ -2,13 +2,14 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.3.0"
+CALCDENOVOVER = "0.4.0"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
 require 'ostruct'
 require 'optparse'
+require 'zlib'
 
 $previous_snp = nil # Global variable storing previous SNP information if phasing is known. nil when new contig/scaffold or new phasing block.
 $total_sites = 0 # Total number of retained sites
@@ -17,6 +18,7 @@ $sample_index = {} # Hash of offspring names keyed by index
 $windows = [] # Array of completed bootstrap windows
 $current_windows = []  # Array of active uncompleted bootstrap windows
 $bootstraps = {} # Hash of bootstrap replicate summary values keyed by offspring
+$mutations = "\nIdentified de novo mutations:\n" # Reduced VCF of ided mutations
 #-----------------------------------------------------------------------------------------
 class Snp
 	attr_accessor :sire, :dam, :offspring, :alleles, :denovo
@@ -116,14 +118,24 @@ class Bootstrap_Window
 		return @endbp - @startbp + 1
 	end
 end
+#-----------------------------------------------------------------------------------------------
+# From BaitsTools 1.6.5: Campana et al. 2018
+def gz_file_open(file)
+	if file[-3..-1] == ".gz"
+		return "Zlib::GzipReader"
+	else
+		return "File"
+	end
+end
 #-----------------------------------------------------------------------------------------
 def read_vcf # Method to read vcf
 	collect_data = false # Flag to start collecting data
 	next_window_site = 1 # Site to start new window
 	next_window_close_site = next_window_site + $options.window - 1 # Site to close window and calculate rate
-	File.open($options.infile) do |f1|
+	eval(gz_file_open($options.infile)).open($options.infile) do |f1|
 		while line = f1.gets
 			if line[0..5] == "#CHROM"
+				$mutations << line
 				collect_data = true
 				header_arr = line[0..-2].split("\t")
 				for sample in header_arr[9..-1]
@@ -165,6 +177,14 @@ def read_vcf # Method to read vcf
 						end
 					end
 					snp.identify_denovo
+					printline = false # check whether to print site
+					for offspr in snp.offspring.keys
+						if snp.denovo[offspr][0]
+							printline = true 
+							break # maybe save a bit of processing
+						end
+					end
+					$mutations << line if printline
 				end
 			end
 		end
@@ -189,6 +209,7 @@ def print_results # Method to print basic results
 	for offspr in $total_denovo.keys
 		puts offspr + "\t" + ($total_denovo[offspr].sum.to_f/$total_sites.to_f).to_s + "\t" + ($total_denovo[offspr][0].to_f/$total_sites.to_f).to_s
 	end
+	puts $mutations
 end
 #-----------------------------------------------------------------------------------------
 def mean(values)

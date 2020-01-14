@@ -268,7 +268,7 @@ end
 #-----------------------------------------------------------------------------------------
 def print_options
 	puts "calc_denovo_mutation_rate " + CALCDENOVOVER + " started with parameters:"
-	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -m " + $options.minwindows.to_s
+	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s
 	cmdline << " -g" if $options.gvcf
 	cmdline << " --rng " + $options.rng.to_s
 	puts cmdline

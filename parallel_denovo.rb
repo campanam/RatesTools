@@ -2,20 +2,21 @@
 
 #----------------------------------------------------------------------------------------
 # parallel_denovo
-PARDENOVOVER = "0.1.0"
+PARDENOVOVER = "0.2.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
 require 'ostruct'
 require 'optparse'
+require 'zlib'
 
 def split_vcf
 	@vcfs = [] # Array of VCF names. Exclude filepath from names
 	start = false
 	header = ""
 	outfile = ""
-	File.open($options.infile) do |f1|
+	eval(gz_file_open($options.infile)).open($options.infile) do |f1|
 		while line = f1.gets
 			if start
 				contig = line.split("\t")[0]
@@ -38,6 +39,15 @@ def split_vcf
 		end
 	end
 	return @vcfs
+end
+#-----------------------------------------------------------------------------------------------
+# From BaitsTools 1.6.5: Campana et al. 2018 -- Some redundant code
+def gz_file_open(file)
+	if file[-3..-1] == ".gz"
+		return "Zlib::GzipReader"
+	else
+		return "File"
+	end
 end
 #-----------------------------------------------------------------------------------------
 def execute_qsub(file)

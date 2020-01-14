@@ -3,6 +3,10 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.4.0  
+Can read gzipped input VCFs (Imported from BaitsTools 1.6.5)  
+Outputs VCF lines of identified de novo mutations  
+
 ### Version 0.3.0  
 Random number seed setting  
 Interpreted options printed at start-up  
@@ -33,4 +37,5 @@ Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to
 Initial script to summarize parallelized de novo rate calculations  
 
 ## References
+Campana, MG. 2018. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources* __18__, 356-361. ( https://doi.org/10.1111/1755-0998.12721)
 Smit, AFA, Hubley, R & Green, P. RepeatMasker Open-4.0. 2013-2015 (http://www.repeatmasker.org).  

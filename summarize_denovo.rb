@@ -2,12 +2,11 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "0.1.0"
+SUMMARIZEDENOVOVER = "0.2.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
-#----------------------------------------------------------------------------------------
 def mean_ci(mean, crit)
 	return (mean/$total_bp.to_f).to_s + "\t" + ((mean-crit)/$total_bp.to_f).to_s + "-" + ((mean+crit)/$total_bp.to_f).to_s
 end
@@ -30,6 +29,7 @@ def print_summary
 	for offspr in $total_boot_rate.keys
 		puts offspr + "\t" + mean_ci($total_boot_rate[offspr][0],$total_boot_rate[offspr][1]) + "\t" + mean_ci($total_boot_rate[offspr][2],$total_boot_rate[offspr][3])
 	end
+	puts $mutations
 end
 #----------------------------------------------------------------------------------------
 if ARGV[0].nil?
@@ -39,11 +39,14 @@ else
 	$total_bp = 0 # Total length of observed bp across all chromosomes
 	$total_mutations = {} # Total mutations across all chromosomes keyed by offspring
 	$total_boot_rate = {} # Total bootstrapped mutation rates across all chromosomes keyed by offspring
+	$mutations = "\nIdentified de novo mutations:\n" # Reduced VCF of ided mutations
+	vcf_header_collected = false # Whether reduced VCF header has been collected
 	Dir.foreach(ARGV[0] + "/") do |f1|
 		if f1[-3..-1] == "log"
 			File.open(ARGV[0] + "/" + f1) do |f2|
 				collection_stage = 0 # 0: no collection, 1: collect original data, 2: collect boostrapped data
 				collect_offspring = false # Get offspring data
+				collect_vcf = false # Get VCF data
 				while line = f2.gets
 					if line == "Total Sample Results:\n" # If never triggered, prevents inclusion of bad data
 						collection_stage = 1
@@ -63,6 +66,18 @@ else
 										$total_mutations[line_arr[0]][i-1] += line_arr[i].to_i
 									end
 								end 
+							end
+						elsif line[0..5] == "#CHROM"
+							collect_vcf = true
+							unless vcf_header_collected
+								$mutations << line
+								vcf_header_collected = true
+							end
+						elsif collect_vcf
+							if line == "\n"
+								collect_vcf = false
+							else
+								$mutations << line
 							end
 						elsif line[0..8] == "Bootstrap"
 							collection_stage = 2

@@ -22,6 +22,9 @@ Initial script to calculate point estimate de novo mutation rate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## parallel_denovo  
+### Version 0.2.0  
+Can read gzipped input VCFs (Imported from BaitsTools 1.6.5)  
+
 ### Version 0.1.0  
 Initial script to parallelize de novo mutation rate calcuations on Grid Engine HPC  
 

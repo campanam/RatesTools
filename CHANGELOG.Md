@@ -3,6 +3,9 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.5.0  
+Can specify minimum bootstrapping windows to perform analysis  
+
 ### Version 0.4.0  
 Can read gzipped input VCFs (Imported from BaitsTools 1.6.5)  
 Outputs VCF lines of identified de novo mutations  
@@ -22,6 +25,9 @@ Initial script to calculate point estimate de novo mutation rate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## parallel_denovo  
+### Version 0.3.0  
+Can specify minimum bootstrapping windows to perform analysis  
+
 ### Version 0.2.0  
 Can read gzipped input VCFs (Imported from BaitsTools 1.6.5)  
 

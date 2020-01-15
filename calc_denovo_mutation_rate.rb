@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.5.0"
+CALCDENOVOVER = "0.6.0"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -150,7 +150,8 @@ def read_vcf # Method to read vcf
 				end
 			elsif collect_data
 				snp_array = line[0..-2].split("\t")
-				$total_sites += 1 
+				$total_sites += 1
+				$stderr.puts $total_sites.to_s + " processed" if $total_sites % 1000000 == 0
 				$total_sites += snp_array[7].split("=")[1].to_i - snp_array[1].to_i if $options.gvcf # Adjust for gVCF blocks
 				while $total_sites >= next_window_site # Allow multiple windows to pass if gVCF block sufficiently long
 					$current_windows.push(Bootstrap_Window.new(next_window_site))

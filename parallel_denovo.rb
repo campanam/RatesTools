@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # parallel_denovo
-PARDENOVOVER = "0.3.0"
+PARDENOVOVER = "0.4.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -16,11 +16,20 @@ def split_vcf
 	start = false
 	header = ""
 	outfile = ""
+	outlines = "" # Lines to store until writing to disk
+	writecycles = 0 # Number of write cycles passed
 	eval(gz_file_open($options.infile)).open($options.infile) do |f1|
 		while line = f1.gets
 			if start
 				contig = line.split("\t")[0]
 				if contig != outfile
+					if outfile != "" # Write remaining lines stored in memory
+						File.open($options.outdir + "/chr" + outfile + ".vcf", 'a') do |write|
+							write << outlines
+						end
+					end
+					writecycles = 0 # Reset write cycles count
+					outlines = "" # Reset outlines
 					outfile = contig
 					@vcfs.push("chr" + outfile) # Need to add chr to avoid qsub issue with contigs IDed by only a number
 					File.open($options.outdir + "/chr" + outfile + ".vcf", 'w') do |write|
@@ -28,8 +37,15 @@ def split_vcf
 						write.puts line
 					end
 				else
-					File.open($options.outdir + "/chr" + outfile + ".vcf", 'a') do |write|
-						write << line
+					writecycles += 1
+					if writecycles == $options.writecycles
+						File.open($options.outdir + "/chr" + outfile + ".vcf", 'a') do |write|
+							write << outlines + line
+						end
+						writecycles = 0 # Reset for next round
+						outlines = "" # Reset for next round
+					else
+						outlines << line
 					end
 				end
 			elsif line[0..5] == "#CHROM"
@@ -37,6 +53,9 @@ def split_vcf
 				header = line
 			end
 		end
+	end
+	File.open($options.outdir + "/chr" + outfile + ".vcf", 'a') do |write| # Output final line
+		write << outlines
 	end
 	return @vcfs
 end
@@ -84,6 +103,7 @@ class ParallelParser
 		args.bootstrap = 0 # Number of bootstrap replicates
 		args.gvcf = false # Whether input VCF is a gVCF
 		args.rng = srand # Random number seed
+		args.writecycles = 1000000 # Number of variants to read before writing to disk
 		args.memory = "1G" # Memory reserved
 		args.himem = false # High memory flag
 		args.lopri = false # Low priority falg
@@ -97,9 +117,6 @@ class ParallelParser
 			opts.separator "calc_denovo_mutation_rate options:"
 			opts.on("-i","--input [FILE]", String, "Input VCF") do |infile|
 				args.infile = File.expand_path(infile) if infile != nil
-			end
-			opts.on("-o","--output [DIRECTORY]", String, "Output Directory (Default is current directory)") do |outdir|
-				args.outdir = File.expand_path(outdir) if outdir != nil
 			end
 			opts.on("-s","--sire [NAME]", String, "Sire's name in VCF") do |sire|
 				args.sire = sire if sire != nil
@@ -128,6 +145,15 @@ class ParallelParser
 			end
 			opts.on("--rng [VALUE]", Integer, "Random number seed") do |rng|
 				args.rng = rng if rng != nil
+			end
+			opts.separator ""
+			opts.separator "parallel_denovo Options:"
+			opts.on("-o","--output [DIRECTORY]", String, "Output Directory (Default is current directory)") do |outdir|
+				args.outdir = File.expand_path(outdir) if outdir != nil
+			end
+			opts.on("-W", "--writecycles [VALUE]", Integer, "Number of variants to read before writing to disk (Default = 1000000)") do |wrt|
+				args.writecycles = wrt if wrt != nil
+				args.writecycles = 1 if args.writecycles < 1
 			end
 			opts.separator ""
 			opts.separator "SI/HPC Options:"

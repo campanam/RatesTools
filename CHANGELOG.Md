@@ -3,6 +3,9 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.6.0  
+Prints progress updates to STDERR  
+
 ### Version 0.5.0  
 Can specify minimum bootstrapping windows to perform analysis  
 

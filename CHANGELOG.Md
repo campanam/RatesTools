@@ -25,6 +25,10 @@ Initial script to calculate point estimate de novo mutation rate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## parallel_denovo  
+### Version 0.5.0  
+Template qsub written once and arguments passed to it  
+Can restart processing from a previously split VCF  
+
 ### Version 0.4.0  
 Can specify the number of variants to read while splitting before writing to disk  
 

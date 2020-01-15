@@ -25,6 +25,9 @@ Initial script to calculate point estimate de novo mutation rate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## parallel_denovo  
+### Version 0.4.0  
+Can specify the number of variants to read while splitting before writing to disk  
+
 ### Version 0.3.0  
 Can specify minimum bootstrapping windows to perform analysis  
 

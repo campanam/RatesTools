@@ -2,14 +2,12 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.6.0"
+CALCDENOVOVER = "0.7.0"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
-require 'ostruct'
-require 'optparse'
-require 'zlib'
+require_relative 'denovolib'
 
 $previous_snp = nil # Global variable storing previous SNP information if phasing is known. nil when new contig/scaffold or new phasing block.
 $total_sites = 0 # Total number of retained sites
@@ -118,21 +116,12 @@ class Bootstrap_Window
 		return @endbp - @startbp + 1
 	end
 end
-#-----------------------------------------------------------------------------------------------
-# From BaitsTools 1.6.5: Campana et al. 2018
-def gz_file_open(file)
-	if file[-3..-1] == ".gz"
-		return "Zlib::GzipReader"
-	else
-		return "File"
-	end
-end
 #-----------------------------------------------------------------------------------------
 def read_vcf # Method to read vcf
 	collect_data = false # Flag to start collecting data
 	next_window_site = 1 # Site to start new window
 	next_window_close_site = next_window_site + $options.window - 1 # Site to close window and calculate rate
-	eval(gz_file_open($options.infile)).open($options.infile) do |f1|
+	gz_file_open($options.infile).open($options.infile) do |f1|
 		while line = f1.gets
 			if line[0..5] == "#CHROM"
 				$mutations << line
@@ -273,69 +262,6 @@ def print_options
 	cmdline << " -g" if $options.gvcf
 	cmdline << " --rng " + $options.rng.to_s
 	puts cmdline
-end
-#-----------------------------------------------------------------------------------------
-class Parser
-	def self.parse(options)
-		# Set defaults
-		args = OpenStruct.new
-		args.infile = "" # Input file
-		args.sire = "" # Sire name 
-		args.dam = "" # Dam name
-		args.window = 1000000 # Window length for bootstrapping
-		args.minbslen = 1000000 # Minimum window length for bootstrapping
-		args.step = 1000000 # Window step for bootrapping
-		args.minwindows = 10 # Minimum number of bootstrap windows
-		args.bootstrap = 0 # Number of bootstrap replicates
-		args.gvcf = false # Whether input VCF is a gVCF
-		args.rng = srand # Random number seed
-		opt_parser = OptionParser.new do |opts|
-			opts.banner = "\033[1mcalc_denovo_mutation_rate " + CALCDENOVOVER + "\033[0m"
-			opts.separator ""
-			opts.separator "Command-line usage: ruby calc_denovo_mutation_rate.rb [options]"
-			opts.on("-i","--input [FILE]", String, "Input file") do |infile|
-				args.infile = File.expand_path(infile) if infile != nil
-			end
-			opts.on("-s","--sire [NAME]", String, "Sire's name in VCF") do |sire|
-				args.sire = sire if sire != nil
-			end
-			opts.on("-d", "--dam [NAME]", String, "Dam's name in VCF") do |dam|
-				args.dam = dam if dam != nil
-			end
-			opts.on("-w", "--window [VALUE]", Integer, "Sequence window length (bp) for bootstrapping (Default = 1000000)") do |window|
-				args.window = window if window != nil
-			end
-			opts.on("-S", "--step [VALUE]", Integer, "Window step (bp) for bootstrapping (Default = 1000000)") do |step|
-				args.step = step if step != nil
-			end
-			opts.on("-b", "--bootstrap [VALUE]", Integer, "Number of bootstrap replicates (Default = 0)") do |bs|
-				args.bootstrap = bs if bs != nil
-			end
-			opts.on("-l", "--minbootstraplength [VALUE]", Integer, "Minimum bootstrap window length (bp) to retain (Default = 1000000)") do |minbslen|
-				args.minbslen = minbslen if minbslen != nil
-			end
-			opts.on("-M", "--minwindows [VALUE]", Integer, "Minimum number of bootstrap windows to retain contig (Default = 10)") do |minwindows|
-				args.minwindows = minwindows if minwindows != nil
-				args.minwindows = 1 if args.minwindows < 1
-			end
-			opts.on("-g", "--gvcf", "Input is a gVCF (Default = false)") do |gvcf|
-				args.gvcf = true
-			end
-			opts.on("--rng [VALUE]", Integer, "Random number seed") do |rng|
-				args.rng = rng if rng != nil
-			end
-			opts.on("-v", "--version", "Show program version") do
-				puts "calc_denovo_mutation_rate version " + CALCDENOVOVER
-				exit
-			end
-			opts.on_tail("-h","--help", "Show help") do
-				puts opts
-				exit
-			end
-		end
-		opt_parser.parse!(options)
-		return args
-	end
 end
 #-----------------------------------------------------------------------------------------
 ARGV[0] ||= "-h"

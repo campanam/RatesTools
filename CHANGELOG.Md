@@ -3,6 +3,9 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.7.0  
+Redundant methods (Parser, gz_open_file) moved to denovolib  
+
 ### Version 0.6.0  
 Prints progress updates to STDERR  
 
@@ -23,11 +26,20 @@ Bootstrapping
 ### Version 0.1.0  
 Initial script to calculate point estimate de novo mutation rate  
 
+## denovolib
+### Version 0.1.0  
+Redundant methods (Parser, gz_open_file) moved to denovolib  
+gz_open_file improved to version in BaitsTools 1.6.6  
+
 ## indels2bed  
 ### Version 0.1.0  
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## parallel_denovo  
+### Version 0.6.0  
+Redundant methods (Parser, gz_open_file) moved to denovolib  
+summarize_denovo automatically called upon completion of all split jobs  on cluster  
+
 ### Version 0.5.0  
 Template qsub written once and arguments passed to it  
 Can restart processing from a previously split VCF  

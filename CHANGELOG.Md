@@ -3,6 +3,9 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.8.0  
+print_results moved to denovolib  
+
 ### Version 0.7.0  
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 
@@ -26,7 +29,10 @@ Bootstrapping
 ### Version 0.1.0  
 Initial script to calculate point estimate de novo mutation rate  
 
-## denovolib
+## denovolib  
+### Version 0.2.0  
+print_results moved to denovolib  
+
 ### Version 0.1.0  
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 gz_open_file improved to version in BaitsTools 1.6.6  
@@ -64,6 +70,9 @@ Outputs usage if no parameters specified
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
 ## summarize_denovo  
+### Version 0.4.0  
+Redundant print_summary code moved to denovolib print_results  
+
 ### Version 0.3.0  
 Unbootstrapped contigs are now excluded from calculations of bootstrap sequence lengths  
 

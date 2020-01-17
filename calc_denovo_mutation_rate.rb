@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.7.0"
+CALCDENOVOVER = "0.8.0"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -186,22 +186,6 @@ def read_vcf # Method to read vcf
 	end
 end
 #-----------------------------------------------------------------------------------------
-def print_results # Method to print basic results
-	puts "\nTotal Sample Results:"
-	puts "Total number of retained sites: " + $total_sites.to_s
-	puts "\nTotal numbers of observed de novo mutations:"
-	puts "Offspring\tSingle-Forward\tDouble-Forward\tBackward"
-	for offspr in $total_denovo.keys
-		puts offspr + "\t" + $total_denovo[offspr].join("\t")
-	end
-	puts "\nInferred mutation rates:"
-	puts "Offspring\tAllsites\tSingle-ForwardOnly"
-	for offspr in $total_denovo.keys
-		puts offspr + "\t" + ($total_denovo[offspr].sum.to_f/$total_sites.to_f).to_s + "\t" + ($total_denovo[offspr][0].to_f/$total_sites.to_f).to_s
-	end
-	puts $mutations
-end
-#-----------------------------------------------------------------------------------------
 def mean(values)
 	return values.sum.to_f/values.size.to_f
 end
@@ -272,3 +256,4 @@ print_options
 read_vcf
 print_results
 bootstrap_results if ($options.bootstrap > 0 && $windows.size >= $options.minwindows)
+puts $mutations

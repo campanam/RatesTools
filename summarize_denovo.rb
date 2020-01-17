@@ -2,28 +2,19 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "0.3.0"
+SUMMARIZEDENOVOVER = "0.4.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
+
+require_relative 'denovolib'
 
 def mean_ci(mean, crit)
 	return (mean/$bootstrap_bp.to_f).to_s + "\t" + ((mean-crit)/$bootstrap_bp.to_f).to_s + "-" + ((mean+crit)/$bootstrap_bp.to_f).to_s
 end
 #----------------------------------------------------------------------------------------
 def print_summary
-	puts "\nTotal Sample Results:"
-	puts "Total number of retained sites: " + $total_bp.to_s
-	puts "\nTotal numbers of observed de novo mutations:"
-	puts "Offspring\tSingle-Forward\tDouble-Forward\tBackward"
-	for offspr in $total_mutations.keys
-		puts offspr + "\t" + $total_mutations[offspr].join("\t")
-	end
-	puts "\nInferred mutation rates:"
-	puts "Offspring\tAllsites\tSingle-ForwardOnly"
-	for offspr in $total_mutations.keys
-		puts offspr + "\t" + ($total_mutations[offspr].sum.to_f/$total_bp.to_f).to_s + "\t" + ($total_mutations[offspr][0].to_f/$total_bp.to_f).to_s
-	end
+	print_results
 	puts "\nBootstrapped Estimates:"
 	puts "Bootstrapped retained sites: " + $bootstrap_bp.to_s
 	puts "Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:"
@@ -37,9 +28,9 @@ if ARGV[0].nil?
 	puts "\033[1msummarize_denovo " + SUMMARIZEDENOVOVER + "\033[0m"
 	puts "\nUsage: ruby summarize_denovo.rb <directory> > <out.txt>"
 else
-	$total_bp = 0 # Total length of observed bp across all chromosomes
+	$total_sites = 0 # Total length of observed bp across all chromosomes
 	$bootstrap_bp = 0 # Total length of bootstrapped bp across all chromosomes
-	$total_mutations = {} # Total mutations across all chromosomes keyed by offspring
+	$total_denovo = {} # Total mutations across all chromosomes keyed by offspring
 	$total_boot_rate = {} # Total bootstrapped mutation rates across all chromosomes keyed by offspring
 	$mutations = "\nIdentified de novo mutations:\n" # Reduced VCF of ided mutations
 	vcf_header_collected = false # Whether reduced VCF header has been collected
@@ -60,12 +51,12 @@ else
 								collect_offspring = false
 							else
 								line_arr = line.split("\t")
-								unless $total_mutations.keys.include?(line_arr[0])
-									$total_mutations[line_arr[0]] = line_arr[1..3].map { |x| x.to_i }
+								unless $total_denovo.keys.include?(line_arr[0])
+									$total_denovo[line_arr[0]] = line_arr[1..3].map { |x| x.to_i }
 									$total_boot_rate[line_arr[0]] = [0,0,0,0]
 								else
 									for i in 1..3
-										$total_mutations[line_arr[0]][i-1] += line_arr[i].to_i
+										$total_denovo[line_arr[0]][i-1] += line_arr[i].to_i
 									end
 								end 
 							end
@@ -86,7 +77,7 @@ else
 							$bootstrap_bp += @current_contig_bp # Only add this value if the contig is actually bootstrapped
 						elsif line[0..31] == "Total number of retained sites: "
 							@current_contig_bp = line.split(" ")[-1].to_i
-							$total_bp += @current_contig_bp
+							$total_sites += @current_contig_bp
 						end
 					elsif collection_stage == 2
 						if line == "Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:\n"

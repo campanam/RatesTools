@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.1.0"
+DENOVOLIBVER = "0.2.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -18,6 +18,21 @@ def gz_file_open(file)
 		return Zlib::GzipReader
 	else
 		return File
+	end
+end
+#-----------------------------------------------------------------------------------------
+def print_results # Method to print basic results
+	puts "\nTotal Sample Results:"
+	puts "Total number of retained sites: " + $total_sites.to_s
+	puts "\nTotal numbers of observed de novo mutations:"
+	puts "Offspring\tSingle-Forward\tDouble-Forward\tBackward"
+	for offspr in $total_denovo.keys
+		puts offspr + "\t" + $total_denovo[offspr].join("\t")
+	end
+	puts "\nInferred mutation rates:"
+	puts "Offspring\tAllsites\tSingle-ForwardOnly"
+	for offspr in $total_denovo.keys
+		puts offspr + "\t" + ($total_denovo[offspr].sum.to_f/$total_sites.to_f).to_s + "\t" + ($total_denovo[offspr][0].to_f/$total_sites.to_f).to_s
 	end
 end
 #-----------------------------------------------------------------------------------------

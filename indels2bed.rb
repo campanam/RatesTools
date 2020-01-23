@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # indels2bed
-INDELS2BEDVER = "0.1.1"
+INDELS2BEDVER = "0.1.2"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -12,7 +12,6 @@ if ARGV[0].nil?
 	puts "\nUsage: ruby indels2bed.rb <indels.vcf> <bp_to_exclude_upstream/downstream> > <out.bed>"
 else
 	$contigs = {} # Hash of contig lengths
-	puts "#chrom\tchromStart\tchromEnd"
 	start = false
 	File.open(ARGV[0]) do |f1|
 		while line = f1.gets

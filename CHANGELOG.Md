@@ -37,6 +37,10 @@ print_results moved to denovolib
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 gz_open_file improved to version in BaitsTools 1.6.6  
 
+## FilterGM  
+### Version 0.1.0  
+Filters GenMap output by specified mappabilities  
+
 ## indels2bed  
 ### Version 0.1.2  
 Outputs headerless BED rather than incorrect BED header  

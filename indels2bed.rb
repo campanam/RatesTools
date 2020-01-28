@@ -2,14 +2,15 @@
 
 #----------------------------------------------------------------------------------------
 # indels2bed
-INDELS2BEDVER = "0.1.2"
+INDELS2BEDVER = "0.2.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
+require_relative 'denovolib'
+
 if ARGV[0].nil?
-	puts "\033[1mindels2bed " + INDELS2BEDVER + "\033[0m"
-	puts "\nUsage: ruby indels2bed.rb <indels.vcf> <bp_to_exclude_upstream/downstream> > <out.bed>"
+	format_splash('indels2bed', INDELS2BEDVER, '<indels.vcf> <bp_to_exclude_upstream/downstream> > <out.bed>')
 else
 	$contigs = {} # Hash of contig lengths
 	start = false

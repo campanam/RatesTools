@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "0.4.0"
+SUMMARIZEDENOVOVER = "0.5.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -25,8 +25,7 @@ def print_summary
 end
 #----------------------------------------------------------------------------------------
 if ARGV[0].nil?
-	puts "\033[1msummarize_denovo " + SUMMARIZEDENOVOVER + "\033[0m"
-	puts "\nUsage: ruby summarize_denovo.rb <directory> > <out.txt>"
+	format_splash('summarize_denovo', SUMMARIZEDENOVOVER, '<directory> > <out.txt>')
 else
 	$total_sites = 0 # Total length of observed bp across all chromosomes
 	$bootstrap_bp = 0 # Total length of bootstrapped bp across all chromosomes

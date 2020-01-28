@@ -2,14 +2,15 @@
 
 #----------------------------------------------------------------------------------------
 # RM2bed
-RM2BEDVER = "0.2.2"
+RM2BEDVER = "0.3.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
+require_relative 'denovolib'
+
 if ARGV[0].nil?
-	puts "\033[1mRM2bed " + RM2BEDVER + "\033[0m"
-	puts "\nUsage: ruby RM2bed.rb <in_RM.txt> > <out.bed>"
+	format_splash('RM2bed', RM2BEDVER, '<in_RM.txt> > <out.bed>')
 else
 	start = false
 	File.open(ARGV[0]) do |f1|

@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.2.0"
+DENOVOLIBVER = "0.3.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -19,6 +19,11 @@ def gz_file_open(file)
 	else
 		return File
 	end
+end
+#-----------------------------------------------------------------------------------------
+def format_splash(cmd, version, cmdline)
+	puts "\033[1m#{cmd} #{version}\033[0m"
+	puts "\nUsage: ruby #{cmd}.rb #{cmdline}"
 end
 #-----------------------------------------------------------------------------------------
 def print_results # Method to print basic results

@@ -30,6 +30,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.3.0  
+Method 'format_splash' simplifies basic script method output  
+
 ### Version 0.2.0  
 print_results moved to denovolib  
 
@@ -37,11 +40,18 @@ print_results moved to denovolib
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 gz_open_file improved to version in BaitsTools 1.6.6  
 
-## FilterGM  
+## filterGM  
+### Version 0.2.0  
+Uses denovolib 'format_splash' method  
+Script capitalization consistency correction  
+
 ### Version 0.1.0  
 Filters GenMap output by specified mappabilities  
 
 ## indels2bed  
+### Version 0.2.0  
+Uses denovolib 'format_splash' method  
+
 ### Version 0.1.2  
 Outputs headerless BED rather than incorrect BED header  
 
@@ -73,6 +83,9 @@ Can read gzipped input VCFs (Imported from BaitsTools 1.6.5)
 Initial script to parallelize de novo mutation rate calcuations on Grid Engine HPC  
 
 ## RM2bed  
+### Version 0.3.0  
+Uses denovolib 'format_splash' method  
+
 ### Version 0.2.2  
 Outputs headerless BED rather than incorrect BED header  
 
@@ -86,6 +99,9 @@ Outputs usage if no parameters specified
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
 ## summarize_denovo  
+### Version 0.5.0  
+Uses denovolib 'format_splash' method  
+
 ### Version 0.4.0  
 Redundant print_summary code moved to denovolib print_results  
 

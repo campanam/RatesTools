@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.3.0"
+DENOVOLIBVER = "0.4.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -64,6 +64,8 @@ class Parser
 			args.queue = "sThC.q" # Qsub queue
 			args.email = "" # Email address to notify
 			args.restart = false # Restart if partitioned VCFs already exit
+			args.submit = false # Submit previously generated jobs
+			args.nosubmit = false # Generate split VCFs and jobs, but do not submit
 		end
 		opt_parser = OptionParser.new do |opts|
 			if parallel
@@ -120,7 +122,14 @@ class Parser
 					args.writecycles = wrt if wrt != nil
 					args.writecycles = 1 if args.writecycles < 1
 				end
+				opts.on("--nosubmit", "Generate split VCFs and jobs, but do not submit them") do |nosubmit|
+					args.nosubmit = true
+				end
 				opts.on("-r", "--restart", "Restart from previously split VCFs (Default = false)") do |restart|
+					args.restart = true
+				end
+				opts.on("--submit", "Submit previously generated jobs and split VCFs (Implies -r)") do |submit|
+					args.submit = true
 					args.restart = true
 				end
 				opts.separator ""

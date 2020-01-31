@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # parallel_denovo
-PARDENOVOVER = "0.6.0"
+PARDENOVOVER = "0.7.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -101,8 +101,10 @@ ARGV[0] ||= "-h"
 $options = Parser.parse(ARGV, true)
 Dir.mkdir($options.outdir) if !FileTest.directory?($options.outdir)
 $options.restart ? vcfs = get_vcfs : vcfs = split_vcf
-write_qsub
-for vcf in vcfs
-	execute_qsub(vcf)
+write_qsub unless $options.submit
+unless $options.nosubmit
+	for vcf in vcfs
+		execute_qsub(vcf)
+	end
+	summarize_vcfs(vcfs)
 end
-summarize_vcfs(vcfs)

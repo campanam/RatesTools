@@ -30,6 +30,10 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.4.0  
+Option '--nosubmit' splits VCFs and writes jobs, but does not submit them  
+Option '--submit' submits previously generated jobs and split VCFs  
+
 ### Version 0.3.0  
 Method 'format_splash' simplifies basic script method output  
 
@@ -62,6 +66,10 @@ Output BED header line starts with # as appropriate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## parallel_denovo  
+### Version 0.7.0  
+Option '--nosubmit' splits VCFs and writes jobs, but does not submit them  
+Option '--submit' submits previously generated jobs and split VCFs  
+
 ### Version 0.6.0  
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 summarize_denovo automatically called upon completion of all split jobs  on cluster  

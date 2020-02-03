@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "0.5.0"
+SUMMARIZEDENOVOVER = "0.5.1"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -82,15 +82,19 @@ else
 						if line == "Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:\n"
 							collect_offspring = true
 						elsif collect_offspring
-							line_arr = line.split("\t")
-							for i in 1..4
-								case i
-								when 1,3
-									@current_mean = line_arr[i].to_f
-									$total_boot_rate[line_arr[0]][i-1] += @current_mean * @current_contig_bp.to_f
-								when 2,4
-									crit = @current_mean - line_arr[i].split("-")[0].to_f
-									$total_boot_rate[line_arr[0]][i-1] += crit * @current_contig_bp.to_f
+							if line == "\n"
+								collect_offspring = false
+							else
+								line_arr = line.split("\t")
+								for i in 1..4
+									case i
+									when 1,3
+										@current_mean = line_arr[i].to_f
+										$total_boot_rate[line_arr[0]][i-1] += @current_mean * @current_contig_bp.to_f
+									when 2,4
+										crit = @current_mean - line_arr[i].split("-")[0].to_f
+										$total_boot_rate[line_arr[0]][i-1] += crit * @current_contig_bp.to_f
+									end
 								end
 							end
 						end

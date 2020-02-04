@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # parallel_denovo
-PARDENOVOVER = "0.7.0"
+PARDENOVOVER = "0.7.1"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -94,6 +94,7 @@ def write_qsub
 	header << " > #{$options.outdir}/${SCAFFOLD}.log"
 	File.open("#{$options.outdir}/calc_denovo_mutation_rate.job", 'w') do |qsub|
 		qsub.puts header
+		qsub.puts "gzip #{$options.outdir}/${SCAFFOLD}.vcf"
 	end
 end
 #-----------------------------------------------------------------------------------------

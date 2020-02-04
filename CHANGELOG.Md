@@ -66,6 +66,9 @@ Output BED header line starts with # as appropriate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## parallel_denovo  
+### Version 0.7.1  
+'write_qsub' calc_denovo_mutation_rate.job file now gzips analyzed split VCFs  
+
 ### Version 0.7.0  
 Option '--nosubmit' splits VCFs and writes jobs, but does not submit them  
 Option '--submit' submits previously generated jobs and split VCFs  

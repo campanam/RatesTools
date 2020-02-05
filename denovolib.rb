@@ -12,7 +12,7 @@ require 'optparse'
 require 'zlib'
 
 #-----------------------------------------------------------------------------------------------
-# From BaitsTools 1.6.6: Campana et al. 2018
+# From BaitsTools 1.6.6: Campana 2018
 def gz_file_open(file)
 	if file[-3..-1] == ".gz"
 		return Zlib::GzipReader

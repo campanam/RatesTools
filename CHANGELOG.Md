@@ -110,6 +110,9 @@ Outputs usage if no parameters specified
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
 ## summarize_denovo  
+### Version 0.5.2  
+Retained SNP collation bug fixed  
+
 ### Version 0.5.1  
 Fixed collect_offspring bug  
 

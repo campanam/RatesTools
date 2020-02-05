@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "0.5.1"
+SUMMARIZEDENOVOVER = "0.5.2"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -84,6 +84,7 @@ else
 						elsif collect_offspring
 							if line == "\n"
 								collect_offspring = false
+								collection_stage = 1 # need to reset stage to collect unbootstrapped mutations
 							else
 								line_arr = line.split("\t")
 								for i in 1..4

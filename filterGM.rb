@@ -10,7 +10,7 @@ FILTERGMVER = "0.3.0"
 require_relative 'denovolib'
 
 if ARGV[0].nil?
-	format_splash('filterGM', FILTERGMVER, '<in_GenMap.bed> <cutoff> > <out.bed>')
+	format_splash('filterGM', FILTERGMVER, '<in_GenMap.bed[.gz]> <cutoff> > <out.bed>')
 else
 	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|
 		while line = f1.gets

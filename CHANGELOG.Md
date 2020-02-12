@@ -53,6 +53,11 @@ Script capitalization consistency correction
 Filters GenMap output by specified mappabilities  
 
 ## indels2bed  
+### Version 0.3.0  
+Can read gzipped input VCFs  
+Identifies deletions coded by * character  
+Identifies indels from allele lengths without need for external previous filter  
+
 ### Version 0.2.0  
 Uses denovolib 'format_splash' method  
 

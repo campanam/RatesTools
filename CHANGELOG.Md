@@ -47,6 +47,7 @@ gz_open_file improved to version in BaitsTools 1.6.6
 ## filterGM  
 ### Version 0.3.0  
 Can read gzipped files  
+Optional "exclude" parameter produces inverse BED file for exclusion  
 
 ### Version 0.2.0  
 Uses denovolib 'format_splash' method  

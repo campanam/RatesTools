@@ -10,7 +10,7 @@ INDELS2BEDVER = "0.3.0"
 require_relative 'denovolib'
 
 if ARGV[0].nil?
-	format_splash('indels2bed', INDELS2BEDVER, '<indels.vcf> <bp_to_exclude_upstream/downstream> > <out.bed>')
+	format_splash('indels2bed', INDELS2BEDVER, '<indels.vcf[.gz]> <bp_to_exclude_upstream/downstream> > <out.bed>')
 else
 	$contigs = {} # Hash of contig lengths
 	start = false

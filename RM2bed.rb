@@ -10,7 +10,7 @@ RM2BEDVER = "0.4.0"
 require_relative 'denovolib'
 
 if ARGV[0].nil?
-	format_splash('RM2bed', RM2BEDVER, '<in_RM.txt> > <out.bed>')
+	format_splash('RM2bed', RM2BEDVER, '<in_RM.txt[.gz]> > <out.bed>')
 else
 	start = false
 	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|

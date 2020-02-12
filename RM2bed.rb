@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # RM2bed
-RM2BEDVER = "0.3.0"
+RM2BEDVER = "0.4.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -13,7 +13,7 @@ if ARGV[0].nil?
 	format_splash('RM2bed', RM2BEDVER, '<in_RM.txt> > <out.bed>')
 else
 	start = false
-	File.open(ARGV[0]) do |f1|
+	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|
 		while line = f1.gets
 			if start
 				line_arr = line.split(" ")

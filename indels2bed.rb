@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # indels2bed
-INDELS2BEDVER = "0.2.0"
+INDELS2BEDVER = "0.3.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ if ARGV[0].nil?
 else
 	$contigs = {} # Hash of contig lengths
 	start = false
-	File.open(ARGV[0]) do |f1|
+	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|
 		while line = f1.gets
 			if line[0..5] == "#CHROM"
 				start = true
@@ -26,9 +26,15 @@ else
 				alleles = [line_arr[3],line_arr[4].split(",")].flatten
 				allele_lengths = alleles.map { |x| x.length}
 				max_allele_length = allele_lengths.max
-				chromEnd = line_arr[1].to_i + ARGV[1].to_i + max_allele_length - 1 # 1 bp of indel is reference base
-				chromEnd = $contigs[chrom] if chromEnd > $contigs[chrom]
-				puts chrom + "\t" + chromStart.to_s + "\t" + chromEnd.to_s
+				if max_allele_length > 1
+					chromEnd = line_arr[1].to_i + ARGV[1].to_i + max_allele_length - 1 # 1 bp of indel is reference base
+					chromEnd = $contigs[chrom] if chromEnd > $contigs[chrom]
+					puts chrom + "\t" + chromStart.to_s + "\t" + chromEnd.to_s
+				elsif alleles.include?("*")
+					chromEnd = line_arr[1].to_i + ARGV[1].to_i
+					chromEnd = $contigs[chrom] if chromEnd > $contigs[chrom]
+					puts chrom + "\t" + chromStart.to_s + "\t" + chromEnd.to_s
+				end
 			elsif line[0..12] == "##contig=<ID="
 				key = line.split(",")[0][13..-1]
 				value = line.split("=")[-1][0..-3].to_i #Remove final line break and closing >

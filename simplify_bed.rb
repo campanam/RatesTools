@@ -10,7 +10,7 @@ SIMBEDVER = "0.1.0"
 require_relative 'denovolib'
 
 if ARGV[0].nil?
-	format_splash('simplify_bed', SIMBEDVER, '<in_bed[.gz]> > <out.bed>')
+	format_splash('simplify_bed', SIMBEDVER, '<in.bed[.gz]> > <out.bed>')
 else
 	$contig_hash = {} # Hash of contigs and annotated BED regions
 	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|

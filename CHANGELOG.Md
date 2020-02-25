@@ -121,6 +121,10 @@ Outputs usage if no parameters specified
 ### Version 0.1.0  
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
+## simplify_bed  
+### Version 0.1.0  
+Initial script to combine overlapping BED entries for region inclusion/exclusion  
+
 ## summarize_denovo  
 ### Version 0.5.2  
 Retained SNP collation bug fixed  

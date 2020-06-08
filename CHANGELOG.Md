@@ -3,6 +3,9 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.8.1  
+Corrected site denominator for diploidy in bootstrap_results  
+
 ### Version 0.8.0  
 print_results moved to denovolib  
 
@@ -30,6 +33,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.4.1  
+Corrected site denominator for diploidy in print_results  
+
 ### Version 0.4.0  
 Option '--nosubmit' splits VCFs and writes jobs, but does not submit them  
 Option '--submit' submits previously generated jobs and split VCFs  

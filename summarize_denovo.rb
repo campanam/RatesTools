@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "0.5.2"
+SUMMARIZEDENOVOVER = "0.5.3"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -10,7 +10,8 @@ SUMMARIZEDENOVOVER = "0.5.2"
 require_relative 'denovolib'
 
 def mean_ci(mean, crit)
-	return (mean/$bootstrap_bp.to_f).to_s + "\t" + ((mean-crit)/$bootstrap_bp.to_f).to_s + "-" + ((mean+crit)/$bootstrap_bp.to_f).to_s
+	bootdenom = 2 * $bootstrap_bp.to_f
+	return (mean/bootdenom).to_s + "\t" + ((mean-crit)/bootdenom).to_s + "-" + ((mean+crit)/bootdenom).to_s
 end
 #----------------------------------------------------------------------------------------
 def print_summary

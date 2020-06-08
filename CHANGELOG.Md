@@ -132,6 +132,9 @@ Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to
 Initial script to combine overlapping BED entries for region inclusion/exclusion  
 
 ## summarize_denovo  
+### Version 0.5.3  
+Corrected site denominator for diploidy in mean_ci  
+
 ### Version 0.5.2  
 Retained SNP collation bug fixed  
 

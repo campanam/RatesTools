@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.8.0"
+CALCDENOVOVER = "0.8.1"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -228,9 +228,10 @@ def bootstrap_results
 		puts "\nInferred mutation rates:"
 		puts "Offspring\tAllsites\tSingle-ForwardOnly"
 		for offspr in bootstrap_denovo.keys
-			puts offspr + "\t" + (bootstrap_denovo[offspr].sum.to_f/current_bootstrap_length.to_f).to_s + "\t" + (bootstrap_denovo[offspr][0].to_f/current_bootstrap_length.to_f).to_s
-			$bootstraps[offspr][0].push(bootstrap_denovo[offspr].sum.to_f/current_bootstrap_length.to_f)
-			$bootstraps[offspr][1].push(bootstrap_denovo[offspr][0].to_f/current_bootstrap_length.to_f)
+			bootdenom = 2 * current_bootstrap_length.to_f
+			puts offspr + "\t" + (bootstrap_denovo[offspr].sum.to_f/bootdenom).to_s + "\t" + (bootstrap_denovo[offspr][0].to_f/bootdenom).to_s
+			$bootstraps[offspr][0].push(bootstrap_denovo[offspr].sum.to_f/bootdenom)
+			$bootstraps[offspr][1].push(bootstrap_denovo[offspr][0].to_f/bootdenom)
 		end
 	end
 	puts "\nBootstrapped Estimates:"

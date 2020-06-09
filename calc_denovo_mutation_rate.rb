@@ -158,7 +158,7 @@ def read_vcf # Method to read vcf
 				if alleles.size > 1 # Only process sites with actual SNPs in them
 					snp = Snp.new
 					snp.alleles = alleles
-					tags = line_arr[8].split(":") # Get indexes of AD and GT tags
+					tags = snp_array[8].split(":") # Get indexes of AD and GT tags
 					ad = gt = nil # Reset from previous cycle
 					ad = tags.index("AD") if tags.include?("AD")
 					gt = tags.index("GT")

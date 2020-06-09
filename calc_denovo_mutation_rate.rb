@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.9.0"
+CALCDENOVOVER = "0.9.1"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -155,6 +155,7 @@ def read_vcf # Method to read vcf
 				end
 				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
 				alleles.delete("<NON_REF>") if alleles.include?("<NON_REF>")
+				alleles.delete(".") if alleles.include?(".") # Ignore for non-polymorphic sites
 				if alleles.size > 1 # Only process sites with actual SNPs in them
 					snp = Snp.new
 					snp.alleles = alleles
@@ -164,16 +165,19 @@ def read_vcf # Method to read vcf
 					gt = tags.index("GT")
 					for i in 9...snp_array.size
 						genotype = snp_array[i].split(":")[gt]
-						if $options.minAD1 
+						if $options.minAD1
 							if ad.nil?
-								$stderr.puts("AD tag required for minAD1 filter. Exiting.")
+								$stderr.puts("AD tag required for minAD1 filter. Exiting.\nError found here:")
+								$stderr.puts line
 								exit
 							elsif i == sire_index || i == dam_index # do not redo alleles for offspring
-								adepth = snp_array[i].split(":")[ad] # Convert allele coverages to alleles
+								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
 								genotype = []
 								for all in 0 ... adepth.size
 									genotype.push(all.to_s) if adepth[all].to_i > 0
 								end
+								genotype.push(genotype[0]) if genotype.size == 1 # Make homozygotes
+								genotype = genotype.join("/")
 							end
 						end
 						if i == sire_index

@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.8.1"
+CALCDENOVOVER = "0.9.0"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -94,9 +94,11 @@ class Snp
 			offspr_alleles, offspr_phased = split_alleles(offspring[offspr])
 			offspr_phased && dam_phased && sire_phased ? genopool = check_phasing(poss_genotypes_unphased) : genopool = poss_genotypes_unphased # Determine whether to use phased or unphased genotypes	
 			denovo_status = [false,""] # Default status is no de novo mutation
-			unless genopool.include?(offspr_alleles)
-				mutation_class = classify_denovo(sire_alleles, dam_alleles, offspr_alleles, offspr)
-				denovo_status = [true,mutation_class]
+			unless $options.parhom && sire_alleles.uniq.size != 1 && dam_alleles.uniq.size != 1 # Do not classify as denovo if parents heterozyogous and options parhom
+				unless genopool.include?(offspr_alleles)
+					mutation_class = classify_denovo(sire_alleles, dam_alleles, offspr_alleles, offspr)
+					denovo_status = [true,mutation_class]
+				end
 			end
 			@denovo[offspr] = denovo_status
 		end
@@ -156,8 +158,24 @@ def read_vcf # Method to read vcf
 				if alleles.size > 1 # Only process sites with actual SNPs in them
 					snp = Snp.new
 					snp.alleles = alleles
+					tags = line_arr[8].split(":") # Get indexes of AD and GT tags
+					ad = gt = nil # Reset from previous cycle
+					ad = tags.index("AD") if tags.include?("AD")
+					gt = tags.index("GT")
 					for i in 9...snp_array.size
-						genotype = snp_array[i].split(":")[0] # Assuming GT in first slot for now
+						genotype = snp_array[i].split(":")[gt]
+						if $options.minAD1 
+							if ad.nil?
+								$stderr.puts("AD tag required for minAD1 filter. Exiting.")
+								exit
+							elsif i == sire_index || i == dam_index # do not redo alleles for offspring
+								adepth = snp_array[i].split(":")[ad] # Convert allele coverages to alleles
+								genotype = []
+								for all in 0 ... adepth.size
+									genotype.push(all.to_s) if adepth[all].to_i > 0
+								end
+							end
+						end
 						if i == sire_index
 							snp.sire = genotype
 						elsif i == dam_index

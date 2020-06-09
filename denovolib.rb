@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.4.1"
+DENOVOLIBVER = "0.5.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -57,6 +57,8 @@ class Parser
 		args.bootstrap = 0 # Number of bootstrap replicates
 		args.gvcf = false # Whether input VCF is a gVCF
 		args.rng = srand # Random number seed
+		args.parhom = false # Flag to require homozygous for sire/dam DNMs
+		args.minAD1 = false # Flag for exclusion of DNMs that parents have any alleles for
 		if parallel
 			args.writecycles = 1000000 # Number of variants to read before writing to disk
 			args.memory = "1G" # Memory reserved
@@ -90,6 +92,12 @@ class Parser
 			end
 			opts.on("-d", "--dam [NAME]", String, "Dam's name in VCF") do |dam|
 				args.dam = dam if dam != nil
+			end
+			opts.on("--parhom", "Require parents to be homozoygous at DNM sites") do |parhom|
+				args.parhom = true
+			end
+			opts.on("--minAD1", "Discard DNMs if parents have DNM alleles even if not called") do |minAD1|
+				args.minAD1 = true
 			end
 			opts.on("-w", "--window [VALUE]", Integer, "Sequence window length (bp) for bootstrapping (Default = 1000000)") do |window|
 				args.window = window if window != nil

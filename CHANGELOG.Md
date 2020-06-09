@@ -3,6 +3,10 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.9.1  
+Fixed minAD1 option  
+Alleles no longer includes "." as valid allele  
+
 ### Version 0.9.0  
 Added minAD1 and parhom options  
 

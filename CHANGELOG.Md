@@ -6,6 +6,7 @@ Smithsonian Conservation Biology Institute
 ### Version 0.9.2  
 --minAD1 and --parhom now shown in interpreted command output  
 --minAD1 regenotyping now applies to offspring too  
+--parhom flag fixed  
 
 ### Version 0.9.1  
 Fixed minAD1 option  

@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.9.1"
+CALCDENOVOVER = "0.9.2"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -85,6 +85,11 @@ class Snp
 		poss_genotypes_unphased = [] # Array holding possible unphased genotypes without mutation
 		sire_alleles, sire_phased = split_alleles(@sire)
 		dam_alleles, dam_phased = split_alleles(@dam)
+		parhom_filter = false # Do not classify as denovo if parents heterozyogous and options parhom
+		if $options.parhom
+			parhom_filter = true if sire_alleles.uniq.size != 1
+			parhom_filter = true if dam_alleles.uniq.size != 1
+		end
 		poss_genotypes_unphased.push([sire_alleles[0],dam_alleles[0]].sort) # Resorting because could change during recombination
 		poss_genotypes_unphased.push([sire_alleles[0],dam_alleles[1]].sort)
 		poss_genotypes_unphased.push([sire_alleles[1],dam_alleles[0]].sort)
@@ -94,7 +99,7 @@ class Snp
 			offspr_alleles, offspr_phased = split_alleles(offspring[offspr])
 			offspr_phased && dam_phased && sire_phased ? genopool = check_phasing(poss_genotypes_unphased) : genopool = poss_genotypes_unphased # Determine whether to use phased or unphased genotypes	
 			denovo_status = [false,""] # Default status is no de novo mutation
-			unless $options.parhom && sire_alleles.uniq.size != 1 && dam_alleles.uniq.size != 1 # Do not classify as denovo if parents heterozyogous and options parhom
+			unless parhom_filter # Do not classify as denovo if parents heterozyogous and options parhom
 				unless genopool.include?(offspr_alleles)
 					mutation_class = classify_denovo(sire_alleles, dam_alleles, offspr_alleles, offspr)
 					denovo_status = [true,mutation_class]
@@ -170,7 +175,7 @@ def read_vcf # Method to read vcf
 								$stderr.puts("AD tag required for minAD1 filter. Exiting.\nError found here:")
 								$stderr.puts line
 								exit
-							elsif i == sire_index || i == dam_index # do not redo alleles for offspring
+							else
 								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
 								genotype = []
 								for all in 0 ... adepth.size
@@ -266,6 +271,8 @@ end
 def print_options
 	puts "calc_denovo_mutation_rate " + CALCDENOVOVER + " started with parameters:"
 	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s
+	cmdline << " --parhom" if $options.parhom
+	cmdline << " --minAD1" if $options.minAD1
 	cmdline << " -g" if $options.gvcf
 	cmdline << " --rng " + $options.rng.to_s
 	puts cmdline

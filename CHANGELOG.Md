@@ -5,6 +5,7 @@ Smithsonian Conservation Biology Institute
 ## calc_denovo_mutation_rate  
 ### Version 0.9.2  
 --minAD1 and --parhom now shown in interpreted command output  
+--minAD1 regenotyping now applies to offspring too  
 
 ### Version 0.9.1  
 Fixed minAD1 option  

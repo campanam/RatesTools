@@ -40,6 +40,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.5.1  
+Site denominator bug fix  
+
 ### Version 0.5.0  
 Added minAD1 and parhom options  
 

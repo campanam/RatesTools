@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.5.0"
+DENOVOLIBVER = "0.5.1"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ def print_results # Method to print basic results
 	puts "\nInferred mutation rates:"
 	puts "Offspring\tAllsites\tSingle-ForwardOnly"
 	for offspr in $total_denovo.keys
-		sitedenom = 2 * $totalsites.to_f
+		sitedenom = 2 * $total_sites.to_f
 		puts offspr + "\t" + ($total_denovo[offspr].sum.to_f/sitedenom).to_s + "\t" + ($total_denovo[offspr][0].to_f/sitedenom).to_s
 	end
 end

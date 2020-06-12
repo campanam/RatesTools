@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # parallel_denovo
-PARDENOVOVER = "0.7.1"
+PARDENOVOVER = "0.8.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -91,6 +91,8 @@ def write_qsub
 	end
 	header << "ruby calc_denovo_mutation_rate.rb -i #{$options.outdir}/${SCAFFOLD}.vcf -s #{$options.sire} -d #{$options.dam} -w #{$options.window} -S #{$options.step} -b #{$options.bootstrap} --rng #{$options.rng}"
 	header << " -g" if $options.gvcf
+	header << " --parhom" if $options.parhom
+	header << " --minAD1" if $options.minAD1
 	header << " > #{$options.outdir}/${SCAFFOLD}.log"
 	File.open("#{$options.outdir}/calc_denovo_mutation_rate.job", 'w') do |qsub|
 		qsub.puts header

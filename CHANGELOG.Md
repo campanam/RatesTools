@@ -3,6 +3,9 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.10.0  
+--minAF filter  
+
 ### Version 0.9.2  
 --minAD1 and --parhom now shown in interpreted command output  
 --minAD1 regenotyping now applies to offspring too  
@@ -45,6 +48,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.6.0  
+--minAF filter  
+
 ### Version 0.5.1  
 Site denominator bug fix  
 
@@ -99,6 +105,9 @@ Output BED header line starts with # as appropriate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## parallel_denovo  
+### Version 0.9.0  
+--minAF filter  
+
 ### Version 0.8.0  
 --parhom and --minAD1 options added to write_qsub  
 

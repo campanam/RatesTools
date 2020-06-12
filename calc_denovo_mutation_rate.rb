@@ -133,7 +133,7 @@ end
 def depth_to_alleles(adepth, comparator) # Method to convert allele coverages/frequencies to alleles
 	genotype = []
 	for all in 0 ... adepth.size
-		genotype.push(all.to_s) if adepth[all].to_i >= comparator
+		genotype.push(all.to_s) if adepth[all].to_f >= comparator
 	end
 	genotype.push(genotype[0]) if genotype.size == 1 # Make homozygotes
 	return genotype.join("/")
@@ -190,7 +190,7 @@ def read_vcf # Method to read vcf
 								ad_exit("minAD1")
 							else
 								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
-								genotype = depth_to_alleles(adepth, 1)
+								genotype = depth_to_alleles(adepth, 1.0)
 							end
 						elsif !$options.minAF.nil?
 							if ad.nil?

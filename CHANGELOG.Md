@@ -3,6 +3,9 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.10.1  
+conf95 uses ".." to separate CI values to permit negative exponents  
+
 ### Version 0.10.0  
 --minAF filter  
 
@@ -162,6 +165,10 @@ Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to
 Initial script to combine overlapping BED entries for region inclusion/exclusion  
 
 ## summarize_denovo  
+### Version 0.5.4  
+Site denominator returned to previous value as bootstrapped estimates already multiplied by two  
+Resolved issue with mean_ci confidence interval splits using - as separator  
+
 ### Version 0.5.3  
 Corrected site denominator for diploidy in mean_ci  
 

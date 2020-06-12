@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "0.5.3"
+SUMMARIZEDENOVOVER = "0.5.4"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -10,8 +10,8 @@ SUMMARIZEDENOVOVER = "0.5.3"
 require_relative 'denovolib'
 
 def mean_ci(mean, crit)
-	bootdenom = 2 * $bootstrap_bp.to_f
-	return (mean/bootdenom).to_s + "\t" + ((mean-crit)/bootdenom).to_s + "-" + ((mean+crit)/bootdenom).to_s
+	bootdenom = $bootstrap_bp.to_f # bootdenom does NOT need to be multiplied by 2 (already done during previous bootstrapped calculation)
+	return (mean/bootdenom).to_s + "\t" + ((mean-crit)/bootdenom).to_s + ".." + ((mean+crit)/bootdenom).to_s
 end
 #----------------------------------------------------------------------------------------
 def print_summary
@@ -94,7 +94,7 @@ else
 										@current_mean = line_arr[i].to_f
 										$total_boot_rate[line_arr[0]][i-1] += @current_mean * @current_contig_bp.to_f
 									when 2,4
-										crit = @current_mean - line_arr[i].split("-")[0].to_f
+										crit = @current_mean - line_arr[i].split("..")[0].to_f
 										$total_boot_rate[line_arr[0]][i-1] += crit * @current_contig_bp.to_f
 									end
 								end

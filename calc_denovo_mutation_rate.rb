@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.10.0"
+CALCDENOVOVER = "0.10.1"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ def conf95(values)
 	sdnum = values.map { |x| (x - meanval) * (x + meanval) }
 	stdev = Math.sqrt(sdnum.sum/(values.size.to_f - 1.0))
 	critval = 1.96 * stdev/Math.sqrt(values.size.to_f)
-	finalstring = meanval.to_s + "\t" + (meanval - critval).to_s + "-" + (meanval + critval).to_s
+	finalstring = meanval.to_s + "\t" + (meanval - critval).to_s + ".." + (meanval + critval).to_s
 	return finalstring
 end
 #-----------------------------------------------------------------------------------------

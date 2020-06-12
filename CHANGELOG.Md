@@ -99,6 +99,9 @@ Output BED header line starts with # as appropriate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## parallel_denovo  
+### Version 0.8.0  
+--parhom and --minAD1 options added to write_qsub  
+
 ### Version 0.7.1  
 'write_qsub' calc_denovo_mutation_rate.job file now gzips analyzed split VCFs  
 

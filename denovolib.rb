@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.5.1"
+DENOVOLIBVER = "0.6.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -59,6 +59,7 @@ class Parser
 		args.rng = srand # Random number seed
 		args.parhom = false # Flag to require homozygous for sire/dam DNMs
 		args.minAD1 = false # Flag for exclusion of DNMs that parents have any alleles for
+		args.minAF = nil # Value for minimum frequency to include allele. Nil = off
 		if parallel
 			args.writecycles = 1000000 # Number of variants to read before writing to disk
 			args.memory = "1G" # Memory reserved
@@ -98,6 +99,9 @@ class Parser
 			end
 			opts.on("--minAD1", "Discard DNMs if parents have DNM alleles even if not called") do |minAD1|
 				args.minAD1 = true
+			end
+			opts.on("--minAF [VALUE]", Float, "Filter alleles by minimum frequency") do |minAF|
+				args.minAF = minAF
 			end
 			opts.on("-w", "--window [VALUE]", Integer, "Sequence window length (bp) for bootstrapping (Default = 1000000)") do |window|
 				args.window = window if window != nil

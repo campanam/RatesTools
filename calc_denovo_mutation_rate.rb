@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.9.2"
+CALCDENOVOVER = "0.10.0"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -124,6 +124,21 @@ class Bootstrap_Window
 	end
 end
 #-----------------------------------------------------------------------------------------
+def ad_exit(filter) # Method to exit program if AD tag missing
+	$stderr.puts("AD tag required for #{filter} filter. Exiting.\nError found here:")
+	$stderr.puts line
+	exit
+end
+#-----------------------------------------------------------------------------------------
+def depth_to_alleles(adepth, comparator) # Method to convert allele coverages/frequencies to alleles
+	genotype = []
+	for all in 0 ... adepth.size
+		genotype.push(all.to_s) if adepth[all].to_i >= comparator
+	end
+	genotype.push(genotype[0]) if genotype.size == 1 # Make homozygotes
+	return genotype.join("/")
+end
+#-----------------------------------------------------------------------------------------
 def read_vcf # Method to read vcf
 	collect_data = false # Flag to start collecting data
 	next_window_site = 1 # Site to start new window
@@ -172,17 +187,20 @@ def read_vcf # Method to read vcf
 						genotype = snp_array[i].split(":")[gt]
 						if $options.minAD1
 							if ad.nil?
-								$stderr.puts("AD tag required for minAD1 filter. Exiting.\nError found here:")
-								$stderr.puts line
-								exit
+								ad_exit("minAD1")
 							else
 								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
-								genotype = []
-								for all in 0 ... adepth.size
-									genotype.push(all.to_s) if adepth[all].to_i > 0
-								end
-								genotype.push(genotype[0]) if genotype.size == 1 # Make homozygotes
-								genotype = genotype.join("/")
+								genotype = depth_to_alleles(adepth, 1)
+							end
+						elsif !options.minAF.nil?
+							if ad.nil?
+								ad_exit("minAF")
+							else
+								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
+								adepth.map! { |x| x.to_f }
+								total_depth = adepth.sum
+								adepth.map! { |x| x/total_depth } # Convert allele coverages to frequencies
+								genotype = depth_to_alleles(adepth, $options.minAF)
 							end
 						end
 						if i == sire_index
@@ -273,6 +291,7 @@ def print_options
 	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s
 	cmdline << " --parhom" if $options.parhom
 	cmdline << " --minAD1" if $options.minAD1
+	cmdline << " --minAF " $options.minAF.to_s unless $options.minAF.nil?
 	cmdline << " -g" if $options.gvcf
 	cmdline << " --rng " + $options.rng.to_s
 	puts cmdline

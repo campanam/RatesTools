@@ -192,7 +192,7 @@ def read_vcf # Method to read vcf
 								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
 								genotype = depth_to_alleles(adepth, 1)
 							end
-						elsif !options.minAF.nil?
+						elsif !$options.minAF.nil?
 							if ad.nil?
 								ad_exit("minAF")
 							else

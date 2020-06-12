@@ -291,7 +291,7 @@ def print_options
 	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s
 	cmdline << " --parhom" if $options.parhom
 	cmdline << " --minAD1" if $options.minAD1
-	cmdline << " --minAF " $options.minAF.to_s unless $options.minAF.nil?
+	cmdline << " --minAF " + $options.minAF.to_s unless $options.minAF.nil?
 	cmdline << " -g" if $options.gvcf
 	cmdline << " --rng " + $options.rng.to_s
 	puts cmdline

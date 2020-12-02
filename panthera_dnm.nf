@@ -201,12 +201,13 @@ process genotypegVCFs {
 	val prefix from params.prefix
 	
 	output:
-	file "${prefix}.vcf.*" into combined_vcf_ch
+	file "${prefix}_combined.vcf.*" into combined_vcf_ch
+	file "${prefix}_combined.vcf.gz" into combined_indels_ch
 	
 	"""
 	VARPATH=""
 	for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-	java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o ${prefix}.vcf.gz -R ${refseq} --includeNonVariantSites\$VARPATH
+	java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o ${prefix}_combined.vcf.gz -R ${refseq} --includeNonVariantSites\$VARPATH
 	"""
 }
 
@@ -244,6 +245,22 @@ process genMap {
 	"""
 
 } */
+
+process maskIndels {
+
+	// Mask indel-affected regions using indels2bed
+	
+	input:
+	file combo_vcf from combined_indels_ch
+	
+	output:
+	file "${combo_vcf.baseName}_indels.bed" into indels_ch
+	
+	"""
+	indels2bed.rb ${combo_vcf} 5 > ${combo_vcf.baseName}_indels.bed
+	"""
+
+}
 
 /* process seqdictfai {
 

@@ -17,6 +17,7 @@ params.gatk = "$baseDir/GenomeAnalysisTK.jar" // Path for GATK 3.8
 params.gatk_java = "" // Java options for GATK
 params.gatk_nct = 16 // Parallelization for GATK (when available)
 params.rm_species = "ref" // Species name for RepeatMasker
+params.rm_pa = 24 // Number of parallel jobs for RepeatMasker/RepeatModeler
 params.prefix = "out" // Prefix for final datasets
 
 process prepareRef {
@@ -228,23 +229,34 @@ process genMap {
 	"""
 }
 
-/* process repeatMask {
+process repeatMask {
 
 	// Mask repeats using RepeatMasker and RepeatModeler
 	
 	input:
 	path refseq from params.refseq
 	val rm_species from params.rm_species
+	val rm_pa from params.rm_pa
 	
 	output:
+	file "${refseq}.masked.masked" into masked_ref_ch
 	
 	"""
-	repeatmasker -pa 24 -gccalc -nolow -species ${rm_species} ${refseq}
+	repeatmasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
+	if ( ! test -f ${refseq}.masked); then # Handling for no repeats detected
+		cp ${refseq} ${refseq}.masked
+	fi
 	BuildDatabase -name ${refseq.baseName}-soft ${refseq}.masked
-	RepeatModeler -pa 24 -database ${refseq.baseName}-soft
+	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
+	if ( ! test -f */consensi.fa.classified); then
+		cp ${refseq} ${refseq}.masked.masked
+	else
+		mv */consensi.fa* ./
+		repeatmasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified ${refseq}.masked
+	fi
 	"""
 
-} */
+}
 
 process maskIndels {
 
@@ -254,10 +266,10 @@ process maskIndels {
 	file combo_vcf from combined_indels_ch
 	
 	output:
-	file "${combo_vcf.baseName}_indels.bed" into indels_ch
+	file "${combo_vcf.simpleName}_indels.bed" into indels_ch
 	
 	"""
-	indels2bed.rb ${combo_vcf} 5 > ${combo_vcf.baseName}_indels.bed
+	indels2bed.rb ${combo_vcf} 5 > ${combo_vcf.simpleName}_indels.bed
 	"""
 
 }

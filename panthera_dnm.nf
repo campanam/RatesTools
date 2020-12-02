@@ -16,6 +16,8 @@ params.picard_java = "" // Java options for Picard
 params.gatk = "$baseDir/GenomeAnalysisTK.jar" // Path for GATK 3.8
 params.gatk_java = "" // Java options for GATK
 params.gatk_nct = 16 // Parallelization for GATK (when available)
+params.rm_species = "ref" // Species name for RepeatMasker
+params.prefix = "out" // Prefix for final datasets
 
 process prepareRef {
 
@@ -177,13 +179,32 @@ process callVariants {
 	file "*" from bwa_index_ch
 	
 	output:
-	file "${fix_bam.simpleName}.vcf" into var_vcf_ch
+	file "${fix_bam.simpleName}.g.vcf" into var_vcf_ch
 	
 	"""
 	java ${picard_java} -jar ${picard} BuildBamIndex I=${fix_bam}
-	java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${gatk_nct} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.vcf -ERC GVCF -out_mode EMIT_ALL_SITES -variant_index_type LINEAR -variant_index_parameter 128000
+	java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${gatk_nct} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf -ERC GVCF -out_mode EMIT_ALL_SITES
 	"""
 
+}
+
+process genotypegVCFs {
+
+	// Joint genotype gVCFs using GATK
+	
+	input:
+	path refseq from params.refseq
+	file "*" from bwa_index_ch
+	file "*" from var_vcf_ch.collect()
+	val gatk from params.gatk
+	val gatk_java from params.gatk_java
+	val prefix from params.prefix
+	
+	"""
+	VARPATH=""
+	for file in *.vcf; do VARPATH+=" --variant \$file"; done
+	java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o ${prefix} -R ${refseq} --includeNonVariantSites\$VARPATH
+	"""
 }
 
 process genMap {
@@ -209,6 +230,15 @@ process genMap {
 	
 	input:
 	path refseq from params.refseq
+	val rm_species from params.rm_species
+	
+	output:
+	
+	"""
+	repeatmasker -pa 24 -gccalc -nolow -species ${rm_species} ${refseq}
+	BuildDatabase -name ${refseq.baseName}-soft ${refseq}.masked
+	RepeatModeler -pa 24 -database ${refseq.baseName}-soft
+	"""
 
 } */
 

@@ -2,14 +2,14 @@
 
 #----------------------------------------------------------------------------------------
 # split_vcf
-SPLITVCFVER = "0.1.0"
+SPLITVCFVER = "0.2.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
 require_relative 'denovolib'
 
-def split_vcf
+def split_vcf(gzip = false)
 	@vcfs = [] # Array of VCF names. Exclude filepath from names
 	start = false
 	header = ""
@@ -25,6 +25,7 @@ def split_vcf
 						File.open($options.outdir + "/chr" + outfile + ".vcf", 'a') do |write|
 							write << outlines
 						end
+						`gzip #{$options.outdir + "/chr" + outfile + ".vcf"}` if gzip # If outputting compressed vcfs
 					end
 					writecycles = 0 # Reset write cycles count
 					outlines = "" # Reset outlines
@@ -55,5 +56,6 @@ def split_vcf
 	File.open($options.outdir + "/chr" + outfile + ".vcf", 'a') do |write| # Output final line
 		write << outlines
 	end
+	`gzip #{$options.outdir + "/chr" + outfile + ".vcf"}` if gzip # If outputting compressed vcfs
 	return @vcfs
 end

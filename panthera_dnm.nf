@@ -346,11 +346,16 @@ process splitVCFs {
 
 	// Split VCFs by contig/chromosome/scaffold etc
 	
+	publishDir "$params.outdir/SplitVCFs"
+	
 	input:
 	file filtvcf from regionfilt_vcf_ch
 	
+	output:
+	file "splitvcfs_${filtvcf.simpleName}/*vcf.gz" into split_vcfs_ch
+	
 	"""
-	split_vcf.rb --infile ${filtvcf} --outdir splitvcfs_${filtvcf.simpleName}
+	nextflow_split.rb -i ${filtvcf} -o splitvcfs_${filtvcf.simpleName}
 	"""
 	
 }

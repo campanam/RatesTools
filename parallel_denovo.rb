@@ -2,13 +2,12 @@
 
 #----------------------------------------------------------------------------------------
 # parallel_denovo
-PARDENOVOVER = "0.10.0"
+PARDENOVOVER = "0.10.1"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
 require_relative 'denovolib'
-require_relative 'split_vcf'
 
 def get_vcfs
 	@vcfs = []

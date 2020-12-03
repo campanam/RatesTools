@@ -2,12 +2,12 @@
 
 #----------------------------------------------------------------------------------------
 # split_nextflow
-SPLITNFVCFVER = "0.1.0"
+SPLITNFVCFVER = "0.1.1"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
-require_relative 'split_vcf'
+require_relative 'denovolib'
 
 #----------------------------------------------------------------------------------------
 class Nextflow_Parser

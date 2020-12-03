@@ -107,7 +107,17 @@ Output BED header line starts with # as appropriate
 ### Version 0.1.0  
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
+## nextflow_split  
+### Version 0.1.0  
+Accessor script for split_vcf for nextflow  
+
+## panthera_dnm.nf  
+Nextflow pipeline for de novo mutation discovery *under construction*  
+
 ## parallel_denovo  
+### Version 0.10.0  
+split_vcf moved to split_vcf.rb for separate access by nextflow  
+
 ### Version 0.9.0  
 --minAF filter  
 
@@ -163,6 +173,13 @@ Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to
 ## simplify_bed  
 ### Version 0.1.0  
 Initial script to combine overlapping BED entries for region inclusion/exclusion  
+
+## split_vcf  
+### Version 0.2.0  
+Now option to gzip output for file saving  
+
+### Version 0.1.0  
+split_vcf moved to split_vcf.rb for separate access by nextflow  
 
 ## summarize_denovo  
 ### Version 0.5.4  

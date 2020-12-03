@@ -111,6 +111,9 @@ Output BED header line starts with # as appropriate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## nextflow_split  
+### Version 0.1.1  
+Requires denovolib rather than split_vcf  
+
 ### Version 0.1.0  
 Accessor script for split_vcf for nextflow  
 

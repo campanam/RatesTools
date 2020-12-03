@@ -19,6 +19,7 @@ params.gatk_nct = 16 // Parallelization for GATK (when available)
 params.rm_species = "ref" // Species name for RepeatMasker
 params.rm_pa = 24 // Number of parallel jobs for RepeatMasker/RepeatModeler
 params.prefix = "out" // Prefix for final datasets
+params.outdir = "results" // Directory for final results
 
 process prepareRef {
 
@@ -168,7 +169,8 @@ process fixMate {
 process callVariants {
 
 	// Index final bam and call variants using GATK
-	
+	publishDir "$params.outdir/gVCFs"
+		
 	input:
 	path refseq from params.refseq
 	path fix_bam from fix_bam_ch
@@ -180,7 +182,7 @@ process callVariants {
 	file "*" from bwa_index_ch
 	
 	output:
-	file "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch
+	file "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch 
 	
 	"""
 	java ${picard_java} -jar ${picard} BuildBamIndex I=${fix_bam}
@@ -192,6 +194,9 @@ process callVariants {
 process genotypegVCFs {
 
 	// Joint genotype gVCFs using GATK
+	// Uncompressed combined VCF because GATK 3.8-1 inflate/deflate is glitched for this tool
+	
+	publishDir "$params.outdir/CombinedVCF"
 	
 	input:
 	path refseq from params.refseq
@@ -202,13 +207,14 @@ process genotypegVCFs {
 	val prefix from params.prefix
 	
 	output:
-	file "${prefix}_combined.vcf.*" into combined_vcf_ch
+	file "${prefix}_combined.vcf*" into combined_vcf_ch 
 	file "${prefix}_combined.vcf.gz" into combined_indels_ch
 	
 	"""
 	VARPATH=""
 	for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-	java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o ${prefix}_combined.vcf.gz -R ${refseq} --includeNonVariantSites\$VARPATH
+	java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o ${prefix}_combined.vcf -R ${refseq} --includeNonVariantSites\$VARPATH
+	gzip ${prefix}_combined.vcf # Clean up giant VCF before going on with filtering
 	"""
 }
 
@@ -239,7 +245,7 @@ process repeatMask {
 	val rm_pa from params.rm_pa
 	
 	output:
-	file "${refseq}.masked.masked" into masked_ref_ch
+	file "${refseq}.RM.bed" into rm_bed_ch
 	
 	"""
 	repeatmasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
@@ -248,12 +254,18 @@ process repeatMask {
 	fi
 	BuildDatabase -name ${refseq.baseName}-soft ${refseq}.masked
 	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
+	
+	# If no output, make dummy values
 	if ( ! test -f */consensi.fa.classified); then
 		cp ${refseq} ${refseq}.masked.masked
+		cp ${refseq}.out ${refseq}.masked.out
 	else
 		mv */consensi.fa* ./
 		repeatmasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified ${refseq}.masked
 	fi
+	
+	# Convert out file into BED for downstream
+	RM2bed.rb ${refseq}.masked.out > ${refseq}.RM.bed
 	"""
 
 }
@@ -274,6 +286,28 @@ process maskIndels {
 
 }
 
+process simplifyBed {
+
+	// Reduce number of unique BED entries using simplify_bed
+	
+	publishDir "$params.outdir/ExcludedRegions"
+	
+	input:
+	file indel_bed from indels_ch
+	file rm_bed from rm_bed_ch
+	file gm_bed from genmap_ch
+	val prefix from params.prefix
+	
+	output:
+	file "${prefix}_excluded_reduced.bed" into exclude_bed_ch
+	
+	"""
+	cat ${indel_bed} ${rm_bed} ${gm_bed} > ${prefix}_excluded.bed
+	simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
+	"""
+
+}
+
 /* process seqdictfai {
 
 	cpus 1
@@ -286,5 +320,5 @@ process maskIndels {
 	samtools faidx $refseq
 	samtools dict $refseq > ${refseq.getParent()}/$dict
 	"""
-	
+	#for i in *.g.vcf; do gzip `readlink \$i`; mv \$i \${i}.gz; mv $baseDir/${params.outdir}/gVCFs/\$i $baseDir/${params.outdir}/gVCFs/\${i}.gz; done
 } */

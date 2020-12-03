@@ -20,6 +20,8 @@ params.rm_species = "ref" // Species name for RepeatMasker
 params.rm_pa = 24 // Number of parallel jobs for RepeatMasker/RepeatModeler
 params.prefix = "out" // Prefix for final datasets
 params.outdir = "results" // Directory for final results
+params.dam = "ind1" // Sample name for dam
+params.sire = "ind2" // Sample name for sire
 
 process prepareRef {
 
@@ -51,7 +53,7 @@ process alignSeqs {
 	
 	output:
 	file "${pair_id}_${refseq.baseName}.srt.bam" into sorted_bam_ch
-	val pair_id into sample_ch // sample name for downstream use
+	val pair_id into (sample_ch,filt_sample_ch) // sample name for downstream use
 	
 	"""
 	bwa mem -t ${bwa_threads} ${refseq} ${reads} | samtools view -bS - | samtools sort > ${pair_id}_${refseq.baseName}.srt.bam
@@ -151,7 +153,8 @@ process filterBAMs {
 process fixMate {
 
 	// Fix mate information using Picard
-	
+	publishDir "$params.outdir/FinalBAMs"
+		
 	input:
 	path filt_bam from filt_bam_ch
 	path picard from params.picard
@@ -304,6 +307,51 @@ process simplifyBed {
 	"""
 	cat ${indel_bed} ${rm_bed} ${gm_bed} > ${prefix}_excluded.bed
 	simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
+	"""
+
+}
+
+filt_sample_ch2 = filt_sample_ch.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
+
+process filterSites {
+
+	// Filter sites using VCFtools
+	
+	publishDir "$params.outdir/SiteFilteredVCFs"
+	
+	input:
+	file "*" from combined_vcf_ch
+	val dam from params.dam
+	val sire from params.sire
+	val prefix from params.prefix
+	val pair_id from filt_sample_ch2
+	
+	output:
+	file "${prefix}_offspring*_sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
+	
+	"""
+	vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}_sitefilt --minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2 --indv ${dam} --indv ${sire} --indv ${pair_id}
+	gzip ${prefix}_offspring*_sitefilt.recode.vcf
+	"""
+
+}
+
+process filterRegions {
+
+	// Filter regions using VCFtools
+	
+	publishDir "$params.outdir/RegionFilteredVCFs"
+	
+	input:
+	file site_vcf from sitefilt_vcf_ch
+	file exclude_bed from exclude_bed_ch
+	
+	output:
+	file "${site_vcf.simpleName}_regionfilt.recode.vcf.gz" into regionfilt_vcf_ch
+	
+	"""
+	vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}_regionfilt --exclude-bed ${exclude_bed}
+	gzip ${site_vcf.simpleName}_regionfilt.recode.vcf
 	"""
 
 }

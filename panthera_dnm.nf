@@ -1,27 +1,12 @@
 #!/usr/bin/env nextflow
 
-params.refseq = "$baseDir/ref.fa" // Reference sequence
-params.reads = "$baseDir/*_{R1,R2}_001.fastq*" // Read pairs
-readpairs_ch = Channel.fromFilePairs(params.reads)
-params.bwa_alg = "" // algorithm for BWA index. Next lines make into command-line option for prepareRef
+readpairs_ch = Channel.fromFilePairs(params.reads) // Group read pairs
+// algorithm for BWA index. Next lines make into command-line option for prepareRef
 if ( params.bwa_alg == "" ) {
 	bwa_alg = ""
 } else {
 	bwa_alg = "-a " + params.bwa_alg + " "
 }	
-params.bwa_threads = 20 // Number of threads for BWA-MEM
-params.markDuplicates = "picard" // Choice of picard or sambamba for markDuplicates
-params.picard = "$baseDir/picard.jar" // Path for Picard
-params.picard_java = "" // Java options for Picard
-params.gatk = "$baseDir/GenomeAnalysisTK.jar" // Path for GATK 3.8
-params.gatk_java = "" // Java options for GATK
-params.gatk_nct = 16 // Parallelization for GATK (when available)
-params.rm_species = "ref" // Species name for RepeatMasker
-params.rm_pa = 24 // Number of parallel jobs for RepeatMasker/RepeatModeler
-params.prefix = "out" // Prefix for final datasets
-params.outdir = "results" // Directory for final results
-params.dam = "ind1" // Sample name for dam
-params.sire = "ind2" // Sample name for sire
 
 process prepareRef {
 

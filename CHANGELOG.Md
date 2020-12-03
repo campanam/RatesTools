@@ -51,6 +51,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.7.0  
+split_vcf moved to denovolib  
+
 ### Version 0.6.0  
 --minAF filter  
 
@@ -115,6 +118,9 @@ Accessor script for split_vcf for nextflow
 Nextflow pipeline for de novo mutation discovery *under construction*  
 
 ## parallel_denovo  
+### Version 0.10.1
+split_vcf.rb no longer required  
+
 ### Version 0.10.0  
 split_vcf moved to split_vcf.rb for separate access by nextflow  
 
@@ -174,13 +180,6 @@ Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to
 ### Version 0.1.0  
 Initial script to combine overlapping BED entries for region inclusion/exclusion  
 
-## split_vcf  
-### Version 0.2.0  
-Now option to gzip output for file saving  
-
-### Version 0.1.0  
-split_vcf moved to split_vcf.rb for separate access by nextflow  
-
 ## summarize_denovo  
 ### Version 0.5.4  
 Site denominator returned to previous value as bootstrapped estimates already multiplied by two  
@@ -209,6 +208,14 @@ Concatenates headerless VCF results of identified de novo mutations
 
 ### Version 0.1.0  
 Initial script to summarize parallelized de novo rate calculations  
+
+# DEFUNCT  
+## split_vcf  
+### Version 0.2.0  
+Now option to gzip output for file saving  
+
+### Version 0.1.0  
+split_vcf moved to split_vcf.rb for separate access by nextflow  
 
 ## References
 Campana, MG. 2018. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources* __18__, 356-361. ( https://doi.org/10.1111/1755-0998.12721)  

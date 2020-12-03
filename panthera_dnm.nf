@@ -306,6 +306,7 @@ process filterSites {
 	
 	input:
 	file "*" from combined_vcf_ch
+	val site_filters from params.site_filters
 	val dam from params.dam
 	val sire from params.sire
 	val prefix from params.prefix
@@ -315,7 +316,7 @@ process filterSites {
 	file "${prefix}_offspring*_sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
 	
 	"""
-	vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}_sitefilt --minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2 --indv ${dam} --indv ${sire} --indv ${pair_id}
+	vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}_sitefilt ${site_filters} --indv ${dam} --indv ${sire} --indv ${pair_id}
 	gzip ${prefix}_offspring*_sitefilt.recode.vcf
 	"""
 
@@ -339,6 +340,19 @@ process filterRegions {
 	gzip ${site_vcf.simpleName}_regionfilt.recode.vcf
 	"""
 
+}
+
+process splitVCFs {
+
+	// Split VCFs by contig/chromosome/scaffold etc
+	
+	input:
+	file filtvcf from regionfilt_vcf_ch
+	
+	"""
+	split_vcf.rb --infile ${filtvcf} --outdir splitvcfs_${filtvcf.simpleName}
+	"""
+	
 }
 
 /* process seqdictfai {

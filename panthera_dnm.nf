@@ -7,6 +7,7 @@ if ( params.bwa_alg == "" ) {
 } else {
 	bwa_alg = "-a " + params.bwa_alg + " "
 }	
+chr_file = file(params.chr_file)
 
 process prepareRef {
 
@@ -342,6 +343,33 @@ process filterRegions {
 
 }
 
+process filterChr {
+	
+	// Optionally include only specific chromsomes
+	
+	publishDir "$params.outdir/FilterChrVCFs"
+	
+	input:
+	file region_vcf from regionfilt_vcf_ch
+	file chrs from chr_file
+	
+	output:
+	file "${region_vcf.simpleName}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch
+	
+	script:
+	if (chrs.name == "NULL")
+		"""
+		cp $region_vcf ${region_vcf.simpleName}.chrfilt.recode.vcf.gz
+		"""
+	else
+		"""
+		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
+		vcftools --gzvcf $region_vcf --recode --out ${region_vcf.simpleName}.chrfilt \$chr_line
+		gzip ${region_vcf.simpleName}.chrfilt.recode.vcf
+		"""
+	
+}
+
 process splitVCFs {
 
 	// Split VCFs by contig/chromosome/scaffold etc
@@ -349,7 +377,7 @@ process splitVCFs {
 	publishDir "$params.outdir/SplitVCFs"
 	
 	input:
-	file filtvcf from regionfilt_vcf_ch
+	file filtvcf from chrfilt_vcf_ch
 	
 	output:
 	file "${filtvcf.simpleName}_split/*vcf.gz" into split_vcfs_ch

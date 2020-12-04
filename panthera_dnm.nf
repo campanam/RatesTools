@@ -313,11 +313,11 @@ process filterSites {
 	val pair_id from filt_sample_ch2
 	
 	output:
-	file "${prefix}_offspring*_sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
+	file "${prefix}_offspring*.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
 	
 	"""
-	vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}_sitefilt ${site_filters} --indv ${dam} --indv ${sire} --indv ${pair_id}
-	gzip ${prefix}_offspring*_sitefilt.recode.vcf
+	vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}.sitefilt ${site_filters} --indv ${dam} --indv ${sire} --indv ${pair_id}
+	gzip ${prefix}_offspring*.sitefilt.recode.vcf
 	"""
 
 }
@@ -333,11 +333,11 @@ process filterRegions {
 	file exclude_bed from exclude_bed_ch
 	
 	output:
-	file "${site_vcf.simpleName}_regionfilt.recode.vcf.gz" into regionfilt_vcf_ch
+	file "${site_vcf.simpleName}.regionfilt.recode.vcf.gz" into regionfilt_vcf_ch
 	
 	"""
-	vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}_regionfilt --exclude-bed ${exclude_bed}
-	gzip ${site_vcf.simpleName}_regionfilt.recode.vcf
+	vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed ${exclude_bed}
+	gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
 	"""
 
 }
@@ -352,12 +352,59 @@ process splitVCFs {
 	file filtvcf from regionfilt_vcf_ch
 	
 	output:
-	file "splitvcfs_${filtvcf.simpleName}/*vcf.gz" into split_vcfs_ch
+	file "${filtvcf.simpleName}_split/*vcf.gz" into split_vcfs_ch
 	
 	"""
-	nextflow_split.rb -i ${filtvcf} -o splitvcfs_${filtvcf.simpleName}
+	nextflow_split.rb -i ${filtvcf} -o ${filtvcf.simpleName}_split
+	cd ${filtvcf.simpleName}_split
+	for file in *vcf.gz; do mv \$file ${filtvcf.simpleName}_\${file}; done
+	cd ..
 	"""
 	
+}
+
+process calcDNMRate {
+
+	// Calculate de novo mutations using calc_denovo_mutation_rate
+	
+	publishDir "$params.outdir/SplitCalcDNMLogs"
+	
+	input:
+	file splitvcf from split_vcfs_ch
+	val sire from params.sire
+	val dam from params.dam
+	val dnm_opts from params.dnm_opts
+	
+	output:
+	file "${splitvcf.simpleName}.log" into split_logs_ch
+	
+	"""
+	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} > ${splitvcf.simpleName}.log
+	"""
+}
+
+process summarizeDNM {
+
+	// Calculate genome-wide DNM rate using summarize_denovo
+	
+	publishDir "$params.outdir/SummarizeDNMLogs"
+	
+	input:
+	file "*" from split_logs_ch.collect()
+	
+	output:
+	file "*_summary.log"
+	
+	"""
+	for file in *.log; do 
+		if ( ! \${file%_chr*.log} -d ); then
+			mkdir \${file%_chr*.log}
+		fi
+		mv \$file \${file%_chr*.log}/
+	done
+	for outdir in *; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
+	"""
+
 }
 
 /* process seqdictfai {

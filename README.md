@@ -1,2 +1,2 @@
-# panthera_mutation_rate
-Scripts to calculate Panthera de novo mutation rates
+# RatesTools  
+Scripts to calculate de novo mutation rates

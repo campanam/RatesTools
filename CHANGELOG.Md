@@ -117,8 +117,9 @@ Requires denovolib rather than split_vcf
 ### Version 0.1.0  
 Accessor script for split_vcf for nextflow  
 
-## panthera_dnm.nf  
-Nextflow pipeline for de novo mutation discovery *under construction*  
+## ratestools.nf  
+### Version 0.1.0  
+Nextflow pipeline for de novo mutation discovery. Previously panthera_dnm.nf during construction    
 
 ## parallel_denovo  
 ### Version 0.10.1

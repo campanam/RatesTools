@@ -268,7 +268,7 @@ process repeatMask {
 	file "${refseq}.RM.bed" into rm_bed_ch
 	
 	"""
-	repeatmasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
+	RepeatMasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
 	if ( ! test -f ${refseq}.masked); then # Handling for no repeats detected
 		cp ${refseq} ${refseq}.masked
 	fi
@@ -281,7 +281,7 @@ process repeatMask {
 		cp ${refseq}.out ${refseq}.masked.out
 	else
 		mv */consensi.fa* ./
-		repeatmasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified ${refseq}.masked
+		RepeatMasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified ${refseq}.masked
 	fi
 	
 	# Convert out file into BED for downstream

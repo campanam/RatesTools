@@ -13,6 +13,9 @@ process prepareRef {
 
 	// Prepare reference sequence for downstream processing
 	
+	label 'bwa'
+	label 'samtools'
+	
 	input:
 	path refseq from params.refseq
 	
@@ -30,6 +33,8 @@ process prepareRef {
 process alignSeqs {
 
 	// Align fastqs against reference sequence
+	
+	label 'bwa'
 	
 	input:
 	path refseq from params.refseq
@@ -50,6 +55,9 @@ process alignSeqs {
 process markDuplicates {
 
 	// Mark duplicates using sambamba or picard
+	
+	label 'sambamba'
+	label 'picard'
 	
 	input:
 	file sorted_bam from sorted_bam_ch
@@ -76,6 +84,8 @@ process fixReadGroups {
 
 	// Fix read groups using picard
 	
+	label 'picard'
+	
 	input:
 	path markdup_bam from markdup_bam_ch
 	path picard from params.picard
@@ -94,6 +104,9 @@ process fixReadGroups {
 process realignIndels {
 
 	// GATK RealignerTargetCreator. Index bam with picard.
+	
+	label 'gatk'
+	label 'picard'
 	
 	input:
 	path rg_bam from rg_bam_ch
@@ -119,6 +132,8 @@ process filterBAMs {
 
 	// Filter BAMs using GATK
 	
+	label 'gatk'
+	
 	input:
 	path refseq from params.refseq
 	path realn_bam from realn_bam_ch
@@ -139,6 +154,9 @@ process filterBAMs {
 process fixMate {
 
 	// Fix mate information using Picard
+	
+	label 'picard'
+	
 	publishDir "$params.outdir/FinalBAMs"
 		
 	input:
@@ -158,6 +176,10 @@ process fixMate {
 process callVariants {
 
 	// Index final bam and call variants using GATK
+	
+	label 'picard'
+	label 'gatk'
+	
 	publishDir "$params.outdir/gVCFs"
 		
 	input:
@@ -185,6 +207,8 @@ process genotypegVCFs {
 	// Joint genotype gVCFs using GATK
 	// Uncompressed combined VCF because GATK 3.8-1 inflate/deflate is glitched for this tool
 	
+	label 'gatk'
+	
 	publishDir "$params.outdir/CombinedVCF"
 	
 	input:
@@ -211,6 +235,9 @@ process genMap {
 
 	// Calculate mappability using genMap and filter using filterGM
 	
+	label 'genmap'
+	label 'ruby'
+	
 	input:
 	path refseq from params.refseq
 	
@@ -227,6 +254,10 @@ process genMap {
 process repeatMask {
 
 	// Mask repeats using RepeatMasker and RepeatModeler
+	
+	label 'repeatmasker'
+	label 'repeatmodeler'
+	label 'ruby'
 	
 	input:
 	path refseq from params.refseq
@@ -263,6 +294,8 @@ process maskIndels {
 
 	// Mask indel-affected regions using indels2bed
 	
+	label 'ruby'
+	
 	input:
 	file combo_vcf from combined_indels_ch
 	
@@ -278,6 +311,8 @@ process maskIndels {
 process simplifyBed {
 
 	// Reduce number of unique BED entries using simplify_bed
+	
+	label 'ruby'
 	
 	publishDir "$params.outdir/ExcludedRegions"
 	
@@ -303,6 +338,8 @@ process filterSites {
 
 	// Filter sites using VCFtools
 	
+	label 'vcftools'
+	
 	publishDir "$params.outdir/SiteFilteredVCFs"
 	
 	input:
@@ -327,6 +364,8 @@ process filterRegions {
 
 	// Filter regions using VCFtools
 	
+	label 'vcftools'
+	
 	publishDir "$params.outdir/RegionFilteredVCFs"
 	
 	input:
@@ -346,6 +385,8 @@ process filterRegions {
 process filterChr {
 	
 	// Optionally include only specific chromsomes
+	
+	label 'vcftools'
 	
 	publishDir "$params.outdir/FilterChrVCFs"
 	
@@ -374,6 +415,8 @@ process splitVCFs {
 
 	// Split VCFs by contig/chromosome/scaffold etc
 	
+	label 'ruby'
+	
 	publishDir "$params.outdir/SplitVCFs"
 	
 	input:
@@ -395,6 +438,8 @@ process calcDNMRate {
 
 	// Calculate de novo mutations using calc_denovo_mutation_rate
 	
+	label 'ruby'
+	
 	publishDir "$params.outdir/SplitCalcDNMLogs"
 	
 	input:
@@ -415,6 +460,8 @@ process summarizeDNM {
 
 	// Calculate genome-wide DNM rate using summarize_denovo
 	
+	label 'ruby'
+	
 	publishDir "$params.outdir/SummarizeDNMLogs"
 	
 	input:
@@ -434,13 +481,3 @@ process summarizeDNM {
 	"""
 
 }
-
-/*
-
-	cpus 1
-	executor 'sge'
-	queue 'sThC.q'
-	clusterOptions '-l mres=2G,h_data=2G,h_vmem=2G -S /bin/bash'
-	module 'bioinformatics/samtools/1.9'
-	
-*/

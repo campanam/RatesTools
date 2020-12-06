@@ -240,13 +240,14 @@ process genMap {
 	
 	input:
 	path refseq from params.refseq
+	val gm_threads from params.gm_threads
 	
 	output:
 	file "${refseq.simpleName}_genmap.1.0.bed" into genmap_ch
 	
 	"""
 	genmap index -F ${refseq} -I ${refseq.simpleName}_index
-	genmap map -K 30 -E 2 -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
+	genmap map -K 30 -E 2 -T ${gm_threads} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
 	filterGM.rb ${refseq.simpleName}_genmap.bed 1.0 exclude > ${refseq.simpleName}_genmap.1.0.bed
 	"""
 }

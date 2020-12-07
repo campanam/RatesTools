@@ -231,9 +231,28 @@ process genotypegVCFs {
 	"""
 }
 
-process genMap {
+process genMapIndex {
 
-	// Calculate mappability using genMap and filter using filterGM
+	// Generate GenMap index
+	
+	label 'genmap'
+	
+	input:
+	path refseq from params.refseq
+	
+	output:
+	path "${refseq.simpleName}_index" into genmap_index_ch
+	file "${refseq.simpleName}_index/*" into genmap_index_files_ch
+	
+	"""
+	genmap index -F ${refseq} -I ${refseq.simpleName}_index
+	"""
+
+}
+
+process genMapMap {
+
+	// Calculate mappability using GenMap and filter using filterGM
 	
 	label 'genmap'
 	label 'ruby'
@@ -241,12 +260,13 @@ process genMap {
 	input:
 	path refseq from params.refseq
 	val gm_threads from params.gm_threads
+	path genmap_index from genmap_index_ch
+	file '*' from genmap_index_files_ch
 	
 	output:
 	file "${refseq.simpleName}_genmap.1.0.bed" into genmap_ch
 	
 	"""
-	genmap index -F ${refseq} -I ${refseq.simpleName}_index
 	genmap map -K 30 -E 2 -T ${gm_threads} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
 	filterGM.rb ${refseq.simpleName}_genmap.bed 1.0 exclude > ${refseq.simpleName}_genmap.1.0.bed
 	"""

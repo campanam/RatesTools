@@ -156,8 +156,7 @@ process fixMate {
 	// Fix mate information using Picard
 	
 	label 'picard'
-	
-	publishDir "$params.outdir/FinalBAMs"
+	publishDir "$params.outdir/FinalBAMs", mode: 'copy'
 		
 	input:
 	path filt_bam from filt_bam_ch
@@ -179,8 +178,7 @@ process callVariants {
 	
 	label 'picard'
 	label 'gatk'
-	
-	publishDir "$params.outdir/gVCFs"
+	publishDir "$params.outdir/gVCFs", mode: 'copy'
 		
 	input:
 	path refseq from params.refseq
@@ -208,8 +206,7 @@ process genotypegVCFs {
 	// Uncompressed combined VCF because GATK 3.8-1 inflate/deflate is glitched for this tool
 	
 	label 'gatk'
-	
-	publishDir "$params.outdir/CombinedVCF"
+	publishDir "$params.outdir/CombinedVCF", mode: 'copy'
 	
 	input:
 	path refseq from params.refseq
@@ -236,15 +233,18 @@ process genMapIndex {
 	// Generate GenMap index
 	
 	label 'genmap'
+	errorStrategy 'finish'
 	
 	input:
 	path refseq from params.refseq
+	val gm_tmpdir from params.gm_tmpdir
 	
 	output:
 	path "${refseq.simpleName}_index" into genmap_index_ch
 	file "${refseq.simpleName}_index/*" into genmap_index_files_ch
 	
 	"""
+	export TMPDIR="${gm_tmpdir}"
 	genmap index -F ${refseq} -I ${refseq.simpleName}_index
 	"""
 
@@ -256,6 +256,7 @@ process genMapMap {
 	
 	label 'genmap'
 	label 'ruby'
+	errorStrategy 'finish'
 	
 	input:
 	path refseq from params.refseq
@@ -279,6 +280,7 @@ process repeatMask {
 	label 'repeatmasker'
 	label 'repeatmodeler'
 	label 'ruby'
+	errorStrategy 'finish'
 	
 	input:
 	path refseq from params.refseq
@@ -316,6 +318,7 @@ process maskIndels {
 	// Mask indel-affected regions using indels2bed
 	
 	label 'ruby'
+	errorStrategy 'finish'
 	
 	input:
 	file combo_vcf from combined_indels_ch
@@ -334,8 +337,8 @@ process simplifyBed {
 	// Reduce number of unique BED entries using simplify_bed
 	
 	label 'ruby'
-	
-	publishDir "$params.outdir/ExcludedRegions"
+	errorStrategy 'finish'
+	publishDir "$params.outdir/ExcludedRegions", mode: 'copy'
 	
 	input:
 	file indel_bed from indels_ch
@@ -360,8 +363,7 @@ process filterSites {
 	// Filter sites using VCFtools
 	
 	label 'vcftools'
-	
-	publishDir "$params.outdir/SiteFilteredVCFs"
+	publishDir "$params.outdir/SiteFilteredVCFs", mode: 'copy'
 	
 	input:
 	file "*" from combined_vcf_ch
@@ -386,8 +388,7 @@ process filterRegions {
 	// Filter regions using VCFtools
 	
 	label 'vcftools'
-	
-	publishDir "$params.outdir/RegionFilteredVCFs"
+	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
 	
 	input:
 	file site_vcf from sitefilt_vcf_ch
@@ -408,8 +409,7 @@ process filterChr {
 	// Optionally include only specific chromsomes
 	
 	label 'vcftools'
-	
-	publishDir "$params.outdir/FilterChrVCFs"
+	publishDir "$params.outdir/FilterChrVCFs", mode: 'copy'
 	
 	input:
 	file region_vcf from regionfilt_vcf_ch
@@ -437,8 +437,7 @@ process splitVCFs {
 	// Split VCFs by contig/chromosome/scaffold etc
 	
 	label 'ruby'
-	
-	publishDir "$params.outdir/SplitVCFs"
+	publishDir "$params.outdir/SplitVCFs", mode: 'copy'
 	
 	input:
 	file filtvcf from chrfilt_vcf_ch
@@ -460,8 +459,7 @@ process calcDNMRate {
 	// Calculate de novo mutations using calc_denovo_mutation_rate
 	
 	label 'ruby'
-	
-	publishDir "$params.outdir/SplitCalcDNMLogs"
+	publishDir "$params.outdir/SplitCalcDNMLogs", mode: 'copy'
 	
 	input:
 	file splitvcf from split_vcfs_ch
@@ -482,8 +480,7 @@ process summarizeDNM {
 	// Calculate genome-wide DNM rate using summarize_denovo
 	
 	label 'ruby'
-	
-	publishDir "$params.outdir/SummarizeDNMLogs"
+	publishDir "$params.outdir/SummarizeDNMLogs", mode: 'copy'
 	
 	input:
 	file "*" from split_logs_ch.collect()

@@ -1,2 +1,3 @@
 # RatesTools  
-Scripts to calculate de novo mutation rates
+Pipeline to calculate de novo mutation rates from trios  
+

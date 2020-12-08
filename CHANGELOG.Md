@@ -51,6 +51,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.7.1  
+Fixed 'homozogyous' typo in --parhom option description  
+
 ### Version 0.7.0  
 split_vcf moved to denovolib  
 

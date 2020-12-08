@@ -78,7 +78,7 @@ process markDuplicates {
 		"""
 	else
 		"""
-		java ${picard_java} -jar ${picard} MarkDuplicates I=${sorted_bam} O=${sorted_bam.simpleName}.markdup.bam M=${sorted_bam.simpleName}.markdup.txt
+		java ${picard_java} -jar ${picard} MarkDuplicates I=${sorted_bam} O=${sorted_bam.simpleName}.markdup.bam M=${sorted_bam.simpleName}.markdup.txt MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000
 		"""
 		
 }
@@ -485,7 +485,7 @@ process calcDNMRate {
 	file "${splitvcf.simpleName}.log" into split_logs_ch
 	
 	"""
-	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} > ${splitvcf.simpleName}.log
+	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} ${dnm_opts} > ${splitvcf.simpleName}.log
 	"""
 }
 

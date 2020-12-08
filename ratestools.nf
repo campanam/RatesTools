@@ -15,6 +15,7 @@ process prepareRef {
 	
 	label 'bwa'
 	label 'samtools'
+	errorStrategy 'finish'
 	
 	input:
 	path refseq from params.refseq
@@ -35,6 +36,7 @@ process alignSeqs {
 	// Align fastqs against reference sequence
 	
 	label 'bwa'
+	errorStrategy 'finish'
 	
 	input:
 	path refseq from params.refseq
@@ -58,6 +60,7 @@ process markDuplicates {
 	
 	label 'sambamba'
 	label 'picard'
+	errorStrategy 'finish'
 	
 	input:
 	file sorted_bam from sorted_bam_ch
@@ -85,6 +88,7 @@ process fixReadGroups {
 	// Fix read groups using picard
 	
 	label 'picard'
+	errorStrategy 'finish'
 	
 	input:
 	path markdup_bam from markdup_bam_ch
@@ -107,6 +111,7 @@ process realignIndels {
 	
 	label 'gatk'
 	label 'picard'
+	errorStrategy 'finish'
 	
 	input:
 	path rg_bam from rg_bam_ch
@@ -133,6 +138,7 @@ process filterBAMs {
 	// Filter BAMs using GATK
 	
 	label 'gatk'
+	errorStrategy 'finish'
 	
 	input:
 	path refseq from params.refseq
@@ -157,6 +163,7 @@ process fixMate {
 	
 	label 'picard'
 	publishDir "$params.outdir/FinalBAMs", mode: 'copy'
+	errorStrategy 'finish'
 		
 	input:
 	path filt_bam from filt_bam_ch
@@ -179,6 +186,7 @@ process callVariants {
 	label 'picard'
 	label 'gatk'
 	publishDir "$params.outdir/gVCFs", mode: 'copy'
+	errorStrategy 'finish'
 		
 	input:
 	path refseq from params.refseq
@@ -207,6 +215,7 @@ process genotypegVCFs {
 	
 	label 'gatk'
 	publishDir "$params.outdir/CombinedVCF", mode: 'copy'
+	errorStrategy 'finish'
 	
 	input:
 	path refseq from params.refseq
@@ -364,6 +373,7 @@ process filterSites {
 	
 	label 'vcftools'
 	publishDir "$params.outdir/SiteFilteredVCFs", mode: 'copy'
+	errorStrategy 'finish'
 	
 	input:
 	file "*" from combined_vcf_ch
@@ -389,6 +399,7 @@ process filterRegions {
 	
 	label 'vcftools'
 	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
+	errorStrategy 'finish'
 	
 	input:
 	file site_vcf from sitefilt_vcf_ch
@@ -410,6 +421,7 @@ process filterChr {
 	
 	label 'vcftools'
 	publishDir "$params.outdir/FilterChrVCFs", mode: 'copy'
+	errorStrategy 'finish'
 	
 	input:
 	file region_vcf from regionfilt_vcf_ch
@@ -438,6 +450,7 @@ process splitVCFs {
 	
 	label 'ruby'
 	publishDir "$params.outdir/SplitVCFs", mode: 'copy'
+	errorStrategy 'finish'
 	
 	input:
 	file filtvcf from chrfilt_vcf_ch
@@ -460,6 +473,7 @@ process calcDNMRate {
 	
 	label 'ruby'
 	publishDir "$params.outdir/SplitCalcDNMLogs", mode: 'copy'
+	errorStrategy 'finish'
 	
 	input:
 	file splitvcf from split_vcfs_ch
@@ -481,6 +495,7 @@ process summarizeDNM {
 	
 	label 'ruby'
 	publishDir "$params.outdir/SummarizeDNMLogs", mode: 'copy'
+	errorStrategy 'finish'
 	
 	input:
 	file "*" from split_logs_ch.collect()

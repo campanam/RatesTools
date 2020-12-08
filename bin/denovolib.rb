@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.7.0"
+DENOVOLIBVER = "0.7.1"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -144,7 +144,7 @@ class Parser
 			opts.on("-d", "--dam [NAME]", String, "Dam's name in VCF") do |dam|
 				args.dam = dam if dam != nil
 			end
-			opts.on("--parhom", "Require parents to be homozoygous at DNM sites") do |parhom|
+			opts.on("--parhom", "Require parents to be homozygous at DNM sites") do |parhom|
 				args.parhom = true
 			end
 			opts.on("--minAD1", "Discard DNMs if parents have DNM alleles even if not called") do |minAD1|

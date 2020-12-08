@@ -1,7 +1,10 @@
 ifndef INSTALL
-INSTALLDIR = $(realpath ${HOME}/ratestools)
-else
-INSTALLDIR =  $(realpath $(INSTALL))
+	INSTALLDIR = $(realpath ${HOME}/ratestools)
+else 
+	INSTALLDIR = $(realpath $(INSTALL))
+	ifeq ($(strip $(INSTALLDIR)),)
+		INSTALLDIR = ${PWD}/$(INSTALL)
+	endif
 endif
 
 BINDIR = bin
@@ -14,7 +17,10 @@ install:
 	if [ ! -d $(INSTALLDIR) ]; then mkdir $(INSTALLDIR); fi
 	chmod +x $(BINDIR)/*.rb
 	mv $(BINDIR)/*.rb $(INSTALLDIR)/
-
+	if [ ! -d ${HOME}/.profile ]; then mkfile -n 0 ${HOME}/.profile}; fi
+	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.profile; fi
+	source "${HOME}/.profile"
+	
 .PHONY: test install
 
 .SILENT: test install

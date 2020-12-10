@@ -36,6 +36,7 @@ process alignSeqs {
 	// Align fastqs against reference sequence
 	
 	label 'bwa'
+	label 'samtools'
 	errorStrategy 'finish'
 	
 	input:
@@ -48,8 +49,11 @@ process alignSeqs {
 	file "${pair_id}_${refseq.baseName}.srt.bam" into sorted_bam_ch
 	val pair_id into (sample_ch,filt_sample_ch) // sample name for downstream use
 	
+	
+	script:
+	samtools_extra_threads = bwa_threads - 1
 	"""
-	bwa mem -t ${bwa_threads} ${refseq} ${reads} | samtools view -bS - | samtools sort > ${pair_id}_${refseq.baseName}.srt.bam
+	bwa mem -t ${bwa_threads} ${refseq} ${reads} | samtools view -@ ${samtools_extra_threads} -bS - | samtools sort -@ ${samtools_extra_threads} > ${pair_id}_${refseq.baseName}.srt.bam
 	"""
 	
 }

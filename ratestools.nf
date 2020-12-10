@@ -46,14 +46,35 @@ process alignSeqs {
 	file "*" from bwa_index_ch
 	
 	output:
-	file "${pair_id}_${refseq.baseName}.srt.bam" into sorted_bam_ch
+	file "${pair_id}_${refseq.baseName}.bam" into raw_bam_ch
 	val pair_id into (sample_ch,filt_sample_ch) // sample name for downstream use
+	val samtools_extra_threads into samtools_threads_ch
 	
 	
 	script:
 	samtools_extra_threads = bwa_threads - 1
 	"""
-	bwa mem -t ${bwa_threads} ${refseq} ${reads} | samtools view -@ ${samtools_extra_threads} -bS - | samtools sort -@ ${samtools_extra_threads} > ${pair_id}_${refseq.baseName}.srt.bam
+	bwa mem -t ${bwa_threads} ${refseq} ${reads} | samtools view -@ ${samtools_extra_threads} -bS -o ${pair_id}_${refseq.baseName}.bam -  
+	"""
+	
+}
+
+process sortBAM {
+
+	// Sort aligned bams
+
+	label 'samtools'
+	errorStrategy 'finish'
+
+	input:
+	file raw_bam from raw_bam_ch
+	val samtools_extra_threads from samtools_threads_ch
+	
+	output:
+	file "${raw_bam.baseName}.srt.bam" into sorted_bam_ch
+	
+	"""
+	samtools sort -@ ${samtools_extra_threads} ${raw_bam} > ${raw_bam.baseName}.srt.bam
 	"""
 	
 }
@@ -288,12 +309,11 @@ process genMapMap {
 
 process repeatMask {
 
-	// Mask repeats using RepeatMasker and RepeatModeler
+	// Mask repeats using RepeatMasker and default RM libraries
 	
 	label 'repeatmasker'
-	label 'repeatmodeler'
-	label 'ruby'
 	errorStrategy 'finish'
+	publishDir "$params.outdir/RepeatMasking", mode: 'copy'
 	
 	input:
 	path refseq from params.refseq
@@ -301,30 +321,88 @@ process repeatMask {
 	val rm_pa from params.rm_pa
 	
 	output:
-	file "${refseq}.RM.bed" into rm_bed_ch
+	file "${refseq}.masked" into rm_ref_ch
+	file "${refseq}.out" into rm_out_ch
 	
 	"""
 	RepeatMasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
 	if ( ! test -f ${refseq}.masked); then # Handling for no repeats detected
 		cp ${refseq} ${refseq}.masked
 	fi
-	BuildDatabase -name ${refseq.baseName}-soft ${refseq}.masked
-	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
-	
-	# If no output, make dummy values
-	if ( ! test -f */consensi.fa.classified); then
-		cp ${refseq} ${refseq}.masked.masked
-		cp ${refseq}.out ${refseq}.masked.out
-	else
-		mv */consensi.fa* ./
-		RepeatMasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified ${refseq}.masked
-	fi
-	
-	# Convert out file into BED for downstream
-	RM2bed.rb ${refseq}.masked.out > ${refseq}.RM.bed
 	"""
 
 }
+
+process repeatModeler {
+
+	// RepeatModeler on soft-masked reference
+	
+	label 'repeatmodeler'
+	errorStrategy 'finish'
+	publishDir "$params.outdir/RepeatMasking", mode: 'copy'
+	
+	input:
+	path refseq from params.refseq
+	file refseq_masked from rm_ref_ch
+	val rm_pa from params.rm_pa
+	
+	output:
+	file "*/consensi.fa.classified" into rm_lib_ch
+	file refseq_masked into rm_ref_ch2
+	env RM_SUCCESS into rm_success_ch // Determine whether RepeatModeler yielded a RepeatModel library
+	
+	"""
+	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
+	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
+	if ( ! test -f */consensi.fa.classified); then 
+		RM_SUCCESS=0
+		mkdir dummy # For fake library
+		mkfile -n 0 dummy/consensi.fa.classified
+	else
+		RM_SUCCESS=1
+	fi
+	"""
+
+}
+
+process repeatMaskRM {
+
+	// RepeatMask using custom RepeatModeler repeat library
+	
+	label 'repeatmasker'
+	label 'ruby'
+	errorStrategy 'finish'
+	publishDir "$params.outdir/RepeatMasking", mode: 'copy'
+	
+	input:
+	path refseq from params.refseq
+	file rm_lib from rm_lib_ch
+	file rm_out from rm_out_ch
+	file refseq_masked from rm_ref_ch2
+	val rm_pa from params.rm_pa
+	val rm_success from rm_success_ch
+	
+	output:
+	file "${refseq}.masked.*" optional true
+	file "${refseq}.RM.bed" into rm_bed_ch
+	
+	script:
+	if (rm_success == "0")
+		"""
+		# If no output from RepeatModeler, use original RepeatMasker results
+		RM2bed.rb ${refseq}.out > ${refseq}.RM.bed
+		
+		"""
+	else
+		"""
+		# If RepeatModeler library, use that library
+		RepeatMasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified ${refseq_masked}
+		# Convert out file into BED for downstream
+		RM2bed.rb ${refseq_masked}.out > ${refseq}.RM.bed
+		"""
+
+}
+
 
 process maskIndels {
 

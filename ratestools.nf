@@ -278,7 +278,8 @@ process genMapIndex {
 	file "${refseq.simpleName}_index/*" into genmap_index_files_ch
 	
 	"""
-	export TMPDIR="${gm_tmpdir}"
+	export TMPDIR=${gm_tmpdir}
+	if ( ! -d ${gm_tmpdir} ); then mkdir ${gm_tmpdir}; fi
 	genmap index -F ${refseq} -I ${refseq.simpleName}_index
 	"""
 

@@ -149,6 +149,8 @@ process realignIndels {
 	
 	output:
 	file "${rg_bam.simpleName}.realn.bam" into realn_bam_ch
+	file "${rg_bam.simpleName}.realn.bai" into realn_bai_ch
+	file "${rg_bam.baseName}.bai"
 
 	"""
 	java ${picard_java} -jar ${picard} BuildBamIndex I=${rg_bam}
@@ -168,6 +170,7 @@ process filterBAMs {
 	input:
 	path refseq from params.refseq
 	path realn_bam from realn_bam_ch
+	path realn_bai from realn_bai_ch
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
 	val gatk_nct from params.gatk_nct
@@ -175,6 +178,7 @@ process filterBAMs {
 	
 	output:
 	file "${realn_bam.simpleName}.filt.bam" into filt_bam_ch
+	file "${realn_bam.simpleName}.filt.bai" into filt_bai_ch
 	
 	"""
 	java ${gatk_java} -jar ${gatk} -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${gatk_nct} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
@@ -192,11 +196,13 @@ process fixMate {
 		
 	input:
 	path filt_bam from filt_bam_ch
+	path filt_bai from filt_bai_ch
 	path picard from params.picard
 	val picard_java from params.picard_java
 	
 	output:
 	file "${filt_bam.simpleName}.fix.bam" into fix_bam_ch
+	file "${filt_bam.simpleName}.fix.bai" into fix_bai_ch
 	
 	"""
 	java ${picard_java} -jar ${picard} FixMateInformation I=${filt_bam} O=${filt_bam.simpleName}.fix.bam ADD_MATE_CIGAR=true
@@ -216,6 +222,7 @@ process callVariants {
 	input:
 	path refseq from params.refseq
 	path fix_bam from fix_bam_ch
+	path fix_bai from fix_bai_ch
 	path picard from params.picard
 	val picard_java from params.picard_java
 	val gatk from params.gatk

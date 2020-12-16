@@ -11,7 +11,9 @@ require 'ostruct'
 require 'optparse'
 require 'zlib'
 
-def split_vcf(gzip = false)
+# Library of methods accessed by other RatesTools ruby scripts
+
+def split_vcf(gzip = false) # Split an input VCF into chromosome pieces for parallelization using paralle_denovo.rb or nextflow_split.rb
 	@vcfs = [] # Array of VCF names. Exclude filepath from names
 	start = false
 	header = ""
@@ -63,7 +65,7 @@ def split_vcf(gzip = false)
 end
 #-----------------------------------------------------------------------------------------------
 # From BaitsTools 1.6.6: Campana 2018
-def gz_file_open(file)
+def gz_file_open(file) # Determine whether input file is gzipped or not and set method to open it
 	if file[-3..-1] == ".gz"
 		return Zlib::GzipReader
 	else
@@ -71,7 +73,7 @@ def gz_file_open(file)
 	end
 end
 #-----------------------------------------------------------------------------------------
-def format_splash(cmd, version, cmdline)
+def format_splash(cmd, version, cmdline) # Format output for basic script help screens
 	puts "\033[1m#{cmd} #{version}\033[0m"
 	puts "\nUsage: ruby #{cmd}.rb #{cmdline}"
 end
@@ -92,7 +94,7 @@ def print_results # Method to print basic results
 	end
 end
 #-----------------------------------------------------------------------------------------
-class Parser
+class Parser # Parse input for calc_denovo_mutation_rate.rb and parallel_denovo.rb
 	def self.parse(options, parallel = false)
 		# Set defaults
 		args = OpenStruct.new

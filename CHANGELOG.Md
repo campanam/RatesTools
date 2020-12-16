@@ -105,6 +105,9 @@ Script capitalization consistency correction
 Filters GenMap output by specified mappabilities  
 
 ## indels2bed  
+### Version 0.3.1  
+Code commented  
+
 ### Version 0.3.0  
 Can read gzipped input VCFs  
 Identifies deletions coded by * character  

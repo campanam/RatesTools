@@ -90,6 +90,9 @@ Redundant methods (Parser, gz_open_file) moved to denovolib
 gz_open_file improved to version in BaitsTools 1.6.6  
 
 ## filterGM  
+### Version 0.3.1  
+Code commented  
+
 ### Version 0.3.0  
 Can read gzipped files  
 Optional "exclude" parameter produces inverse BED file for exclusion  

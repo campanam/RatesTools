@@ -3,6 +3,9 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## calc_denovo_mutation_rate  
+### Version 0.10.2  
+Commented code  
+
 ### Version 0.10.1  
 conf95 uses ".." to separate CI values to permit negative exponents  
 

@@ -206,6 +206,7 @@ process fixMate {
 	
 	"""
 	java ${picard_java} -jar ${picard} FixMateInformation I=${filt_bam} O=${filt_bam.simpleName}.fix.bam ADD_MATE_CIGAR=true
+	java ${picard_java} -jar ${picard} BuildBamIndex I=${filt_bam.simpleName}.fix.bam
 	"""
 	
 }
@@ -286,7 +287,7 @@ process genMapIndex {
 	
 	"""
 	export TMPDIR=${gm_tmpdir}
-	if ( ! -d ${gm_tmpdir} ); then mkdir ${gm_tmpdir}; fi
+	if [ ! -d ${gm_tmpdir} ]; then mkdir ${gm_tmpdir}; fi
 	genmap index -F ${refseq} -I ${refseq.simpleName}_index
 	"""
 
@@ -315,6 +316,7 @@ process genMapMap {
 	"""
 }
 
+ 
 process repeatMask {
 
 	// Mask repeats using RepeatMasker and default RM libraries
@@ -334,7 +336,7 @@ process repeatMask {
 	
 	"""
 	RepeatMasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
-	if ( ! test -f ${refseq}.masked); then # Handling for no repeats detected
+	if [ ! -f ${refseq}.masked ]; then # Handling for no repeats detected
 		cp ${refseq} ${refseq}.masked
 	fi
 	"""
@@ -357,17 +359,13 @@ process repeatModeler {
 	output:
 	file "*/consensi.fa.classified" into rm_lib_ch
 	file refseq_masked into rm_ref_ch2
-	env RM_SUCCESS into rm_success_ch // Determine whether RepeatModeler yielded a RepeatModel library
 	
 	"""
 	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
 	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
-	if ( ! test -f */consensi.fa.classified); then 
-		RM_SUCCESS=0
+	if [ ! -f */consensi.fa.classified ]; then 
 		mkdir dummy # For fake library
 		mkfile -n 0 dummy/consensi.fa.classified
-	else
-		RM_SUCCESS=1
 	fi
 	"""
 
@@ -388,29 +386,23 @@ process repeatMaskRM {
 	file rm_out from rm_out_ch
 	file refseq_masked from rm_ref_ch2
 	val rm_pa from params.rm_pa
-	val rm_success from rm_success_ch
 	
 	output:
 	file "${refseq}.masked.*" optional true
 	file "${refseq}.RM.bed" into rm_bed_ch
 	
-	script:
-	if (rm_success == "0")
-		"""
-		# If no output from RepeatModeler, use original RepeatMasker results
+	"""
+	if [ "\$(wc -l < consensi.fa.classified)" -eq 0 ]; then
+	# If no output from RepeatModeler, use original RepeatMasker results
 		RM2bed.rb ${refseq}.out > ${refseq}.RM.bed
-		
-		"""
 	else
-		"""
-		# If RepeatModeler library, use that library
 		RepeatMasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified ${refseq_masked}
 		# Convert out file into BED for downstream
 		RM2bed.rb ${refseq_masked}.out > ${refseq}.RM.bed
-		"""
+	fi
+	"""
 
 }
-
 
 process maskIndels {
 
@@ -595,7 +587,7 @@ process summarizeDNM {
 	
 	"""
 	for file in *.log; do 
-		if ( ! \${file%_chr*.log} -d ); then
+		if [ ! -d \${file%_chr*.log} ]; then
 			mkdir \${file%_chr*.log}
 		fi
 		mv \$file \${file%_chr*.log}/

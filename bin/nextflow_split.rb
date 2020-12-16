@@ -1,16 +1,18 @@
 #!/usr/bin/env ruby
 
 #----------------------------------------------------------------------------------------
-# split_nextflow
-SPLITNFVCFVER = "0.1.1"
+# nextflow_split
+SPLITNFVCFVER = "0.1.2"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
+# Script to split VCFs for parallel nextflow, bypassing calculations in other Ruby scripts
+
 require_relative 'denovolib'
 
 #----------------------------------------------------------------------------------------
-class Nextflow_Parser
+class Nextflow_Parser # Reduced parser including only input/output and bypassing other Ruby scripts
 	def self.parse(options)
 		# Set defaults
 		args = OpenStruct.new

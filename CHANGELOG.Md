@@ -212,6 +212,9 @@ Code commented
 Initial script to combine overlapping BED entries for region inclusion/exclusion  
 
 ## summarize_denovo  
+### Version 0.5.5  
+Code commented  
+
 ### Version 0.5.4  
 Site denominator returned to previous value as bootstrapped estimates already multiplied by two  
 Resolved issue with mean_ci confidence interval splits using - as separator  

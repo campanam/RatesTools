@@ -2,19 +2,21 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "0.5.4"
+SUMMARIZEDENOVOVER = "0.5.5"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
+# Script to calculate genome-wide denovo mutation rates from a directory of previously split DNM logs
+
 require_relative 'denovolib'
 
-def mean_ci(mean, crit)
+def mean_ci(mean, crit) # Calculate mean and confidence interval for bootstrapped results and return formatted output line
 	bootdenom = $bootstrap_bp.to_f # bootdenom does NOT need to be multiplied by 2 (already done during previous bootstrapped calculation)
 	return (mean/bootdenom).to_s + "\t" + ((mean-crit)/bootdenom).to_s + ".." + ((mean+crit)/bootdenom).to_s
 end
 #----------------------------------------------------------------------------------------
-def print_summary
+def print_summary # Print results from unbootstrapped and then bootstrapped results
 	print_results
 	puts "\nBootstrapped Estimates:"
 	puts "Bootstrapped retained sites: " + $bootstrap_bp.to_s
@@ -26,8 +28,10 @@ def print_summary
 end
 #----------------------------------------------------------------------------------------
 if ARGV[0].nil?
+	# If no parameters passed, print help screen
 	format_splash('summarize_denovo', SUMMARIZEDENOVOVER, '<directory> > <out.txt>')
 else
+	# If input logs found, calculate the overall DNM rates
 	$total_sites = 0 # Total length of observed bp across all chromosomes
 	$bootstrap_bp = 0 # Total length of bootstrapped bp across all chromosomes
 	$total_denovo = {} # Total mutations across all chromosomes keyed by offspring

@@ -2,16 +2,20 @@
 
 #----------------------------------------------------------------------------------------
 # indels2bed
-INDELS2BEDVER = "0.3.0"
+INDELS2BEDVER = "0.3.1"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
+# Script to identify indel regions from a VCF, exclude a set number of bps around indels, and output BED for VCFtools exclusion
+
 require_relative 'denovolib'
 
 if ARGV[0].nil?
+	# If no parameters passed, print basic help screen
 	format_splash('indels2bed', INDELS2BEDVER, '<indels.vcf[.gz]> <bp_to_exclude_upstream/downstream> > <out.bed>')
 else
+	# If given VCF input, open file and look for indels (including those not annotated as indels) and generate exclusion BED
 	$contigs = {} # Hash of contig lengths
 	start = false
 	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|

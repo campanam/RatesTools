@@ -2,14 +2,16 @@
 
 #----------------------------------------------------------------------------------------
 # parallel_denovo
-PARDENOVOVER = "0.10.1"
+PARDENOVOVER = "0.10.2"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
+# Script to parallelize calc_denovo_mutation_rate on SI/HPC, bypassing nextflow pipeline
+
 require_relative 'denovolib'
 
-def get_vcfs
+def get_vcfs # Get list of previously split VCFs for submitting jobs
 	@vcfs = []
 	Dir.foreach($options.outdir + "/") do |f1|
 		@vcfs.push(f1[0..-5]) if f1[-3..-1] == "vcf"
@@ -17,11 +19,11 @@ def get_vcfs
 	return @vcfs
 end
 #-----------------------------------------------------------------------------------------
-def execute_qsub(file)
+def execute_qsub(file) # Execute previously generated qsub files
 	system("qsub -N #{file} -v SCAFFOLD=#{file} #{$options.outdir}/calc_denovo_mutation_rate.job")
 end
 #-----------------------------------------------------------------------------------------
-def summarize_vcfs(vcfs)
+def summarize_vcfs(vcfs) # Submit the job tosummarize the output of parallelized calc_denovo_mutation_rate
 	# Clean up job output
 	#for vcf in vcfs
 	#	system("rm #{vcf}.o*")
@@ -29,7 +31,7 @@ def summarize_vcfs(vcfs)
 	system("qsub -N summarize_mutation_rate -hold_jid #{vcfs.join(",")} #{$options.outdir}/summarize_mutation_rate.job")
 end
 #-----------------------------------------------------------------------------------------
-def write_qsub
+def write_qsub # Write qsub files for calc_denovo_mutation_rate and summarize_qsub
 	header = "#!/bin/sh\n#$ -S /bin/sh\n#$ -q #{$options.queue}\n#$ -l mres=#{$options.memory},h_data=#{$options.memory},h_vmem=#{$options.memory}"
 	header << ",himem" if $options.himem
 	header << ",lopri" if $options.lopri
@@ -52,7 +54,8 @@ def write_qsub
 	end
 end
 #-----------------------------------------------------------------------------------------
-ARGV[0] ||= "-h"
+ARGV[0] ||= "-h" # Print help if no parameters passed
+# Parse options and execute
 $options = Parser.parse(ARGV, true)
 Dir.mkdir($options.outdir) if !FileTest.directory?($options.outdir)
 $options.restart ? vcfs = get_vcfs : vcfs = split_vcf

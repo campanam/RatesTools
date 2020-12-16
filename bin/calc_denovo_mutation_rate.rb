@@ -2,10 +2,12 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.10.1"
+CALCDENOVOVER = "0.10.2"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
+
+# This script calculates the de novo mutation rate from trios from a provided filtered VCF
 
 require_relative 'denovolib'
 
@@ -19,6 +21,7 @@ $bootstraps = {} # Hash of bootstrap replicate summary values keyed by offspring
 $mutations = "\nIdentified de novo mutations:\n" # Reduced VCF of ided mutations
 #-----------------------------------------------------------------------------------------
 class Snp
+	# Class to define SNPs and classify them
 	attr_accessor :sire, :dam, :offspring, :alleles, :denovo
 	def initialize(sire = "", dam = "", offspring = {}, alleles = []) # Offspring is an array because multiple offspring
 		@alleles = alleles # Array of alleles sorted by allele ID (so allele 0 is in array slot 0, allele 1 in slot 1, etc)
@@ -111,6 +114,7 @@ class Snp
 end
 #-----------------------------------------------------------------------------------------
 class Bootstrap_Window
+	# Class to define windows for bootstrapping
 	attr_accessor :startbp, :endbp, :denovo # Window start, end coordinates. Hash of observed mutations
 	def initialize(startbp)
 		@startbp = startbp
@@ -231,11 +235,11 @@ def read_vcf # Method to read vcf
 	end
 end
 #-----------------------------------------------------------------------------------------
-def mean(values)
+def mean(values) # Calculate mean of an array of values
 	return values.sum.to_f/values.size.to_f
 end
 #-----------------------------------------------------------------------------------------
-def conf95(values)
+def conf95(values) # Calculate 95% confidence interval for an array of values
 	meanval = mean(values)
 	sdnum = values.map { |x| (x - meanval) * (x + meanval) }
 	stdev = Math.sqrt(sdnum.sum/(values.size.to_f - 1.0))
@@ -244,7 +248,7 @@ def conf95(values)
 	return finalstring
 end
 #-----------------------------------------------------------------------------------------
-def bootstrap_results
+def bootstrap_results # Calculate bootstrapped results using predefined bootstrap windows and print results
 	for offspr in $total_denovo.keys
 		$bootstraps[offspr] = [[],[]]
 	end
@@ -286,7 +290,7 @@ def bootstrap_results
 	end
 end
 #-----------------------------------------------------------------------------------------
-def print_options
+def print_options # Print options used at startup to output
 	puts "calc_denovo_mutation_rate " + CALCDENOVOVER + " started with parameters:"
 	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s
 	cmdline << " --parhom" if $options.parhom
@@ -297,12 +301,13 @@ def print_options
 	puts cmdline
 end
 #-----------------------------------------------------------------------------------------
-ARGV[0] ||= "-h"
+ARGV[0] ||= "-h" # If no parameters passed, print help screen
+# Parse options and run script below
 $options = Parser.parse(ARGV)
 $options.minbslen = $options.window if $options.minbslen > $options.window # Prevent nonsensical results
 srand($options.rng)
 print_options
 read_vcf
 print_results
-bootstrap_results if ($options.bootstrap > 0 && $windows.size >= $options.minwindows)
-puts $mutations
+bootstrap_results if ($options.bootstrap > 0 && $windows.size >= $options.minwindows) # Bootstrap results if possible
+puts $mutations # Print list of mutations extracted from VCF

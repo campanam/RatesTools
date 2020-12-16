@@ -118,11 +118,7 @@ Initial script to convert VCF of indels into BED file for variant site exclusion
 Requires denovolib rather than split_vcf  
 
 ### Version 0.1.0  
-Accessor script for split_vcf for nextflow  
-
-## ratestools.nf  
-### Version 0.1.0  
-Nextflow pipeline for de novo mutation discovery. Previously panthera_dnm.nf during construction    
+Accessor script for split_vcf for nextflow   
 
 ## parallel_denovo  
 ### Version 0.10.1
@@ -164,7 +160,14 @@ Can read gzipped input VCFs (Imported from BaitsTools 1.6.5)
 ### Version 0.1.0  
 Initial script to parallelize de novo mutation rate calcuations on Grid Engine HPC  
 
+## ratestools.nf  
+### Version 0.1.0  
+Nextflow pipeline for de novo mutation discovery. Previously panthera_dnm.nf during construction   
+
 ## RM2bed  
+### Version 0.4.1  
+Code commented  
+
 ### Version 0.4.0  
 Can read gzipped files  
 

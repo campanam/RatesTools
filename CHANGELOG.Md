@@ -136,7 +136,10 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## parallel_denovo  
-### Version 0.10.1
+### Version 0.10.2  
+Code commented  
+
+### Version 0.10.1  
 split_vcf.rb no longer required  
 
 ### Version 0.10.0  

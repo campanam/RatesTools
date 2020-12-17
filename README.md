@@ -1,6 +1,6 @@
 # RatesTools  
 
-**Michael G. Campana & Ellie E. Armstrong, 2019-2020**  
+__Michael G. Campana & Ellie E. Armstrong, 2019-2020__  
 Smithsonian Conservation Biology Institute  
 Stanford University  
 
@@ -21,3 +21,5 @@ Clone the repository: `git clone https://github.com/campanam/RatesTools`
 Install the scripts: `cd RatesTools; make install`  
 *By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
 
+## References  
+Di Tommaso, P., Chatzou, M., Floden, E.W., Prieto Barja, P., Palumbo, E., Notredame, C. (2017) Nextflow enables reproducible computational workflows. *Nat Biotechnol*, __35__, 316–319. DOI: [10.1038/nbt.3820](https://www.nature.com/articles/nbt.3820).  

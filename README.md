@@ -13,7 +13,7 @@ This software is available under
 ### Install Nextflow and Ruby  
 RatesTools requires [Nextflow](https://www.nextflow.io/) [1] and [Ruby](http://www.ruby-lang.org). Basic instructions for installing these languages are copied below. We recommend installing Ruby using the [Ruby Version Manager](https://rvm.io). See the official language documentation should you need help installing these languages.  
 
-Install Nextflow: `wget -qO- https://get.nextflow.io | bash`  
+Install Nextflow: `curl -s https://get.nextflow.io | bash`  
 Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.io | bash -s stable --ruby`  
 
 ### Install the RatesTools Package  

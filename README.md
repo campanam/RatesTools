@@ -18,8 +18,13 @@ Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.i
 
 ### Install the RatesTools Package  
 Clone the repository: `git clone https://github.com/campanam/RatesTools`  
-Install the scripts: `cd RatesTools; make install`  
+Install the scripts: `cd RatesTools; make install` 
+
 *By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
+
+### Configure the pipeline  
+
+## Running the Pipeline  
 
 ## References  
 1. Di Tommaso, P., Chatzou, M., Floden, E.W., Prieto Barja, P., Palumbo, E., Notredame, C. (2017) Nextflow enables reproducible computational workflows. *Nat Biotechnol*, __35__, 316–319. DOI: [10.1038/nbt.3820](https://www.nature.com/articles/nbt.3820).  

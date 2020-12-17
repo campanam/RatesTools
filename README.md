@@ -14,8 +14,10 @@ This software is available under
 RatesTools requires [Nextflow](https://www.nextflow.io/) and [Ruby](http://www.ruby-lang.org). Basic instructions for installing these languages are copied below. We recommend installing Ruby using the [Ruby Version Manager](https://rvm.io). See the official language documentation should you need help installing these languages.  
 
 Install Nextflow: `wget -qO- https://get.nextflow.io | bash`  
-Install Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.io | bash -s stable`  
+Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.io | bash -s stable --ruby`  
 
-### Installation of the RatesTools Package  
+### Install the RatesTools Package  
 Clone the repository: `git clone https://github.com/campanam/RatesTools`  
-Install the 
+Install the scripts: `cd RatesTools; make install`  
+*By default, ruby scripts will be installed into the ~/ratestools directory. If you wish to change the default directory specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
+

@@ -17,6 +17,7 @@ install:
 	if [ ! -d $(INSTALLDIR) ]; then mkdir $(INSTALLDIR); fi
 	chmod +x $(BINDIR)/*.rb
 	mv $(BINDIR)/*.rb $(INSTALLDIR)/
+	chmod +x ratestools.nf
 	mv ratestools.nf $(INSTALLDIR)/
 	if [ ! -d ${HOME}/.profile ]; then mkfile -n 0 ${HOME}/.profile}; fi
 	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.profile; fi

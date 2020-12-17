@@ -19,5 +19,5 @@ Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.i
 ### Install the RatesTools Package  
 Clone the repository: `git clone https://github.com/campanam/RatesTools`  
 Install the scripts: `cd RatesTools; make install`  
-*By default, ruby scripts will be installed into the ~/ratestools directory. If you wish to change the default directory specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
+*By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
 

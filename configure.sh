@@ -1,5 +1,15 @@
 #! /bin/bash
 
+# Function to remove invalid Y/N responses
+yes_no_answer () {
+	read answer
+	while [[ $answer != 'Y' && $answer != 'N' ]]; do
+			echo "Enter 'Y' or 'N'"
+			read answer
+	done
+}
+
+# Function to get the path or module of non-jar binaries
 get_path_module () {
 	local binpath=`command -v $1`
 	binmodule=''
@@ -7,44 +17,33 @@ get_path_module () {
 	if [ ! $binpath ]; then
 		echo "Executable '$1' not found in PATH."
 		echo "Use module file for $1? (Y/N)"
-		read answer
-		while [[ $answer != 'Y' && $answer != 'N' ]]; do
-			echo "Enter 'Y' or 'N'"
-			read answer
-		done
+		yes_no_answer
 		if [ $answer == 'Y' ]; then
 			echo "Enter $1 module."
 			read binmodule
 			while [[ ! `module is-avail $binmodule` && $answer == 'Y' ]]; do
 				echo "Module '$binmodule' not found. Re-enter? (Y/N)"
-				read answer
-				while [[ $answer != 'Y' && $answer != 'N' ]]; do
-					echo "Enter 'Y' or 'N'"
-					read answer
-				done
+				yes_no_answer
 				if [ $answer == 'Y' ]; then
 					echo "Enter $1 module."
 					read binmodule
 				fi
 			done
 			binmodule=${binmodule//\//\\\/} # Escape all backslashes in module name
-			sed -i '' "s/$1 = \"\"/$1 = $binmodule/" $filename 
+			sed -i '' "s/$1 = \"\"/$1 = \"$binmodule\"/" $filename 
 		fi
 	else
 		echo "$1 executable path: $binpath"
 	fi
 }
 
+# Function to get path of jar binaries
 get_jar_path () {
 	jar_path=`realpath $2`
 	answer='Y'
 	while [[ ! -f $jar_path && $answer == 'Y' ]]; do
 		echo "$1 jar file not found. Re-enter? (Y/N)."
-		read answer
-		while [[ $answer != 'Y' && $answer != 'N' ]]; do
-			echo "Enter 'Y' or 'N'"
-			read answer
-		done
+		yes_no_answer
 		if [ $answer == 'Y' ]; then
 			echo "Enter $1 jar path."
 			read jar_path
@@ -59,7 +58,7 @@ get_jar_path () {
 		elif [ $1 = 'GATK' ]; then
 			stem='gatk'
 		fi
-		sed -i '' "s/$stem = \"\$baseDir\/$2\"/$stem = $jar_path/" $filename
+		sed -i '' "s/$stem = \"\$baseDir\/$2\"/$stem = \"$jar_path\"/" $filename
 	fi
 }
 
@@ -94,8 +93,22 @@ echo 'awk configuration...'
 get_path_module awk
 echo 'Testing for Picard...'
 get_jar_path Picard picard.jar
+echo 'Use default Java options for Picard? (Y/N)'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	echo 'Enter options to pass to Java.'
+	read java_opts
+	sed -i '' "s/picard_java = \"\"/picard_java = \"$java_opts\"/" $filename
+fi
 echo 'Testing for GATK...'
 get_jar_path GATK GenomeAnalysisTK.jar
+echo 'Use default Java options for GATK? (Y/N)'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	echo 'Enter options to pass to Java.'
+	read java_opts
+	sed -i '' "s/gatk_java = \"\"/gatk_java = \"$java_opts\"/" $filename
+fi
 echo 'Java configuration...'
 get_path_module java
 if `command -v java 2>&1 >/dev/null`; then # If java found, identify version

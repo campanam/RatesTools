@@ -32,6 +32,7 @@ RatesTools requires the following external dependencies. See the documentation f
 * [Java](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html) v. 1.8  
 * [Picard](https://broadinstitute.github.io/picard/) [5] v. 2.23.8
 * [GenomeAnalysisToolKit](https://github.com/broadgsa/gatk) v. 3.8-1  
+* [VCFtools](https://vcftools.github.io/index.html) [6] v.1.1.16  
 
 ### Configure the Workflow    
 Semi-automatic configuration of the RatesTools workflow can be accomplished using the `configure.sh` bash script. The script copies and modifies the `nextflow.config` included with the repository for the target system. The `nextflow.config` file can also be manually edited using a text editor.  
@@ -45,3 +46,4 @@ Enter `ratestools.nf -c <config_file>` to run the pipeline. Append `-resume` to 
 3. Li, H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. *arXiv*, [1303.3997v2](https://arxiv.org/abs/1303.3997).  
 4. Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., 1000 Genome Project Data Processing Subgroup (2009) The Sequence Alignment/Map format and SAMtools. *Bioinformatics*, 25, 2078-2079. DOI: [10.1093/bioinformatics/btp352](https://academic.oup.com/bioinformatics/article/25/16/2078/204688).  
 5. Broad Institute (2020). Picard v. 2.23.8 (https://broadinstitute.github.io/picard/).  
+6. Danecek, P., Auton, A., Abecasis, G., Albers, C.A., Banks, E., DePristo, M.A., Handsaker, R.E., Lunter, G., Marth, G.T., Sherry, S.T., McVean, G., Durbin, R. (2011) The variant call format and VCFtools. *Bioinformatics*, __27__, 2156–2158. DOI: [10.1093/bioinformatics/btr330](https://academic.oup.com/bioinformatics/article/27/15/2156/402296).  

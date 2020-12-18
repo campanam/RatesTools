@@ -70,6 +70,13 @@ if [ ! -f nextflow.config ]; then
 	read config_path
 fi
 cp $config_path/nextflow.config $filename
+echo 'Output directory name?'
+read outdir
+outdir=${outdir//\//\\\/} # Excape backslashes
+sed -i '' "s/outdir = \"test_results\"/outdir = \"$outdir\"/" $filename
+echo "Output prefix?"
+read prefix
+sed -i '' "s/prefix = \"test\"/prefix = \"$prefix\"/" $filename
 
 echo 'SAMtools configuration...'
 get_path_module samtools
@@ -81,6 +88,17 @@ echo 'gzip configuration...'
 get_path_module gzip
 echo 'GenMap configuration...'
 get_path_module genmap
+echo 'Use defaults for GenMap (8 threads, Temporary directory: /tmp)?'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	echo 'Enter number of GenMap threads.'
+	read gm_threads
+	sed -i '' "s/gm_threads = 8/gm_threads = $gm_threads/" $filename
+	echo 'Enter path for GenMap temporary files.'
+	read gm_tmpdir
+	gm_tmpdir=${gm_tmpdir//\//\\\/} # Excape backslashes
+	sed -i '' "s/gm_tmpdir = \'\/tmp\'/gm_tmpdir = \"$gm_tmpdir\"/" $filename
+fi
 echo 'Ruby configuration...'
 get_path_module ruby
 echo 'RepeatMasker configuration...'

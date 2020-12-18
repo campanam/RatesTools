@@ -37,15 +37,17 @@ get_path_module () {
 	fi
 }
 
-# Function to get path of jar binaries
+# Function to get path of jar binaries and single files
 get_jar_path () {
 	jar_path=`realpath $2`
+	echo $jar_path
+	default_file=$2
 	answer='Y'
 	while [[ ! -f $jar_path && $answer == 'Y' ]]; do
-		echo "$1 jar file not found. Re-enter? (Y/N)."
+		echo "$1 file not found. Re-enter? (Y/N)."
 		yes_no_answer
 		if [ $answer == 'Y' ]; then
-			echo "Enter $1 jar path."
+			echo "Enter $1 path."
 			read jar_path
 			jar_path=`realpath $jar_path`
 		fi
@@ -57,8 +59,14 @@ get_jar_path () {
 			stem='picard'
 		elif [ $1 = 'GATK' ]; then
 			stem='gatk'
+		elif [ $1 = 'Refseq' ]; then
+			stem='refseq'
+			default_file=ref.fa
+		elif [ $1 = 'Chromosome' ]; then
+			stem='chr_file'
+			default_file=chr.txt
 		fi
-		sed -i '' "s/$stem = \"\$baseDir\/$2\"/$stem = \"$jar_path\"/" $filename
+		sed -i '' "s/$stem = \"\$baseDir\/$default_file\"/$stem = \"$jar_path\"/" $filename
 	fi
 }
 
@@ -77,7 +85,18 @@ sed -i '' "s/outdir = \"test_results\"/outdir = \"$outdir\"/" $filename
 echo "Output prefix?"
 read prefix
 sed -i '' "s/prefix = \"test\"/prefix = \"$prefix\"/" $filename
-
+echo 'Reference sequence?'
+read refseq
+get_jar_path Refseq $refseq
+echo 'Remove variants not assigned to specified chromsomes? (Y/N)'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	sed -i '' "s/chr_file = \"\$baseDir\/chr.txt\"/chr_file = \"NULL\"/" $filename
+else
+	echo "Enter list of retained chromosomes."
+	read chr_file
+	get_jar_path Chromosome $chr_file
+fi
 echo 'SAMtools configuration...'
 get_path_module samtools
 echo 'BWA configuration...'

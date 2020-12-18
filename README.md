@@ -4,7 +4,7 @@ __Michael G. Campana & Ellie E. Armstrong, 2019-2020__
 Smithsonian Conservation Biology Institute  
 Stanford University  
 
-Pipeline to calculate de novo mutation rates from parent-offspring trios  
+Workflow to calculate de novo mutation rates from parent-offspring trios  
 
 ## License  
 This software is available under  
@@ -22,9 +22,10 @@ Install the scripts: `cd RatesTools; make install`
 
 *By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory, specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
 
-### Configure the Pipeline  
+### Configure the Workflow    
+Semi-automatic configuration of the 
 
-## Running the Pipeline  
+## Running the Workflow  
 Enter `ratestools.nf -c <config_file>` to run the pipeline. Append `-resume` to restart a previous run or `-bg` to run RatesTools in the background. If you developed platform-specific configuration profiles, you can specify this using the `-profile <PROFILE>` option. See the Nextflow documentation for details.  
 
 ## References  

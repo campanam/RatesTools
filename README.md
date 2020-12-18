@@ -32,7 +32,7 @@ RatesTools requires the following external dependencies. See the documentation f
 * [Java](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html) v. 1.8  
 * [Picard](https://broadinstitute.github.io/picard/) [5] v. 2.23.8  
 * [Sambamba](https://lomereiter.github.io/sambamba/) [6] v. 0.7.1  
-* [GenomeAnalysisToolKit](https://github.com/broadgsa/gatk) v. 3.8-1  
+* [Genome Analysis Toolkit](https://github.com/broadgsa/gatk) v. 3.8-1  
 * [VCFtools](https://vcftools.github.io/index.html) [7] v.1.1.16  
 * [GenMap](https://github.com/cpockrandt/genmap) [8] v.1.2.0 with [SeqAn](https://github.com/seqan/seqan/tree/f548b50705be3f824a65a696943ea90a390564ce) [9] v. 2.4.1  
 * [RepeatMasker](http://www.repeatmasker.org/) [10] v. 4.0.9  

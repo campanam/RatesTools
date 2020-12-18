@@ -40,7 +40,6 @@ get_path_module () {
 # Function to get path of jar binaries and single files
 get_jar_path () {
 	jar_path=`realpath $2`
-	echo $jar_path
 	default_file=$2
 	answer='Y'
 	while [[ ! -f $jar_path && $answer == 'Y' ]]; do
@@ -88,7 +87,7 @@ sed -i '' "s/prefix = \"test\"/prefix = \"$prefix\"/" $filename
 echo 'Reference sequence?'
 read refseq
 get_jar_path Refseq $refseq
-echo 'Remove variants not assigned to specified chromsomes? (Y/N)'
+echo 'Remove variants not assigned to specified chromosomes? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
 	sed -i '' "s/chr_file = \"\$baseDir\/chr.txt\"/chr_file = \"NULL\"/" $filename
@@ -119,6 +118,13 @@ if [ $answer == 'N' ]; then
 fi
 echo 'Sambamba configuration...'
 get_path_module sambamba
+echo 'Specify software for marking duplicates (sambamba or picard).'
+read mkdup
+while [[ $mkdup != 'sambamba' && $mkdup != 'picard' ]]; do
+	echo 'Unknown software. Re-enter mark duplicates selection (sambamba or picard).'
+	read mkdup
+done
+sed -i '' "s/markDuplicates = \"picard\"/markDuplicates = \"$mkdup\"/" $filename
 echo 'gzip configuration...'
 get_path_module gzip
 echo 'GenMap configuration...'

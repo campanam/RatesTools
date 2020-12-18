@@ -101,6 +101,22 @@ echo 'SAMtools configuration...'
 get_path_module samtools
 echo 'BWA configuration...'
 get_path_module bwa
+echo 'Use default BWA and SAMtools options? (20 threads, BWA auto-infers index algorithm)?'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	echo 'Enter number of BWA/SAMtools threads.'
+	read bwa_threads
+	sed -i '' "s/bwa_threads = 20/bwa_threads = $bwa_threads/" $filename
+	echo 'Enter BWA index algorithm (bwtsw, is, rb2, auto-infer).'
+	read bwa_alg
+	while [[ $bwa_alg != 'bwtsw' && $bwa_alg != 'is' && $bwa_alg != 'rb2' && $bwa_alg != 'auto-infer' ]]; do
+		echo 'Unknown algorithm. Re-enter BWA index algorithm (bwtsw, is, rb2, auto-infer).'
+		read bwa_alg
+	done
+	if [ $bwa_alg != 'auto-infer' ]; then
+		sed -i '' "s/bwa_alg = \"\"/bwa_alg = $bwa_alg/" $filename
+	fi
+fi
 echo 'Sambamba configuration...'
 get_path_module sambamba
 echo 'gzip configuration...'

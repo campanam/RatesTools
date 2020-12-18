@@ -33,6 +33,8 @@ RatesTools requires the following external dependencies. See the documentation f
 * [Picard](https://broadinstitute.github.io/picard/) [5] v. 2.23.8
 * [GenomeAnalysisToolKit](https://github.com/broadgsa/gatk) v. 3.8-1  
 * [VCFtools](https://vcftools.github.io/index.html) [6] v.1.1.16  
+* [GenMap](https://github.com/cpockrandt/genmap) [7] v.1.2.0 with [SeqAn](https://github.com/seqan/seqan/tree/f548b50705be3f824a65a696943ea90a390564ce) [8] v. 2.4.1  
+
 
 ### Configure the Workflow    
 Semi-automatic configuration of the RatesTools workflow can be accomplished using the `configure.sh` bash script. The script copies and modifies the `nextflow.config` included with the repository for the target system. The `nextflow.config` file can also be manually edited using a text editor.  
@@ -47,3 +49,5 @@ Enter `ratestools.nf -c <config_file>` to run the pipeline. Append `-resume` to 
 4. Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., 1000 Genome Project Data Processing Subgroup (2009) The Sequence Alignment/Map format and SAMtools. *Bioinformatics*, 25, 2078-2079. DOI: [10.1093/bioinformatics/btp352](https://academic.oup.com/bioinformatics/article/25/16/2078/204688).  
 5. Broad Institute (2020). Picard v. 2.23.8 (https://broadinstitute.github.io/picard/).  
 6. Danecek, P., Auton, A., Abecasis, G., Albers, C.A., Banks, E., DePristo, M.A., Handsaker, R.E., Lunter, G., Marth, G.T., Sherry, S.T., McVean, G., Durbin, R. (2011) The variant call format and VCFtools. *Bioinformatics*, __27__, 2156–2158. DOI: [10.1093/bioinformatics/btr330](https://academic.oup.com/bioinformatics/article/27/15/2156/402296).  
+7. Pockrandt, C., Alzamel, M., Iliopoulos, C.S., Reinert, K. (2020) GenMap: ultra-fast computation of genome mappability. *Bioinformatics*, __36__, 3687–3692, doi: [10.1093/bioinformatics/btaa222](https://academic.oup.com/bioinformatics/article/36/12/3687/5815974?login=true).  
+8. Reinert, K., Dadi, T.H., Ehrhardt, M., Hauswedell, H., Mehringer, S., Rahn, R., Kim. J., Pockrandt, C., Winkler, J., Siragusa, E., Urgese, G., Weese, D. (2017) The SeqAn C++ template library for efficient sequence analysis: A resource for programmers. *J Biotechnol*, __261__, 157-168. DOI: [10.1016/j.jbiotec.2017.07.017](https://www.sciencedirect.com/science/article/pii/S0168165617315420?via%3Dihub).  

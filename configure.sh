@@ -77,6 +77,12 @@ if [ ! -f nextflow.config ]; then
 	read config_path
 fi
 cp $config_path/nextflow.config $filename
+echo 'Sire name?'
+read sire
+sed -i '' "s/sire = \"SRR2\"/sire = \"$sire\"/" $filename
+echo 'Dam name?'
+read dam
+sed -i '' "s/dam = \"SRR\"/dam = \"$dam\"/" $filename
 echo 'Output directory name?'
 read outdir
 outdir=${outdir//\//\\\/} # Excape backslashes
@@ -100,7 +106,7 @@ echo 'SAMtools configuration...'
 get_path_module samtools
 echo 'BWA configuration...'
 get_path_module bwa
-echo 'Use default BWA and SAMtools options? (20 threads, BWA auto-infers index algorithm)?'
+echo 'Use default BWA and SAMtools options? (20 threads, BWA auto-infers index algorithm)? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
 	echo 'Enter number of BWA/SAMtools threads.'
@@ -129,7 +135,7 @@ echo 'gzip configuration...'
 get_path_module gzip
 echo 'GenMap configuration...'
 get_path_module genmap
-echo 'Use defaults for GenMap (8 threads, Temporary directory: /tmp)?'
+echo 'Use defaults for GenMap (8 threads, Temporary directory: /tmp)? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
 	echo 'Enter number of GenMap threads.'
@@ -140,14 +146,34 @@ if [ $answer == 'N' ]; then
 	gm_tmpdir=${gm_tmpdir//\//\\\/} # Excape backslashes
 	sed -i '' "s/gm_tmpdir = \'\/tmp\'/gm_tmpdir = \"$gm_tmpdir\"/" $filename
 fi
-echo 'Ruby configuration...'
-get_path_module ruby
 echo 'RepeatMasker configuration...'
 get_path_module RepeatMasker
+echo 'Specify RepeatMasker species.'
+read species
+sed -i '' "s/species = \"Felidae\"/species = \"$species\"/" $filename
 echo 'RepeatModeler configuration...'
 get_path_module RepeatModeler
+echo 'Enter number of threads for RepeatMasker/RepeatModeler.'
+read rm_pa
+sed -i '' "s/rm_pa = 24/rm_pa = $rm_pa/" $filename
 echo 'VCFtools configuration...'
 get_path_module vcftools
+echo 'Use default VCFtools filters (--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2)? (Y/N)'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	echo 'Enter filters to pass to VCFtools.'
+	read site_filters
+	sed -i '' "s/site_filters = \"--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2\"/site_filters = \"$site_filters\"/" $filename
+fi
+echo 'Ruby configuration...'
+get_path_module ruby
+echo 'Use default calc_denovo_mutation_rate options (-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom)? (Y/N)'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	echo 'Enter parameters to pass to calc_denovo_mutation_rate.'
+	read dnm_opts
+	sed -i '' "s/dnm_opts = \"-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom\"/dnm_opts = \"$dnm_opts\"/" $filename
+fi
 echo 'awk configuration...'
 get_path_module awk
 echo 'Testing for Picard...'
@@ -168,6 +194,9 @@ if [ $answer == 'N' ]; then
 	read java_opts
 	sed -i '' "s/gatk_java = \"\"/gatk_java = \"$java_opts\"/" $filename
 fi
+echo 'Enter number of nct threads for GATK.'
+read gatk_nct
+sed -i '' "s/gatk_nct = 16/gatk_nct = $gatk_nct/" $filename
 echo 'Java configuration...'
 get_path_module java
 if `command -v java 2>&1 >/dev/null`; then # If java found, identify version

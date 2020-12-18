@@ -29,7 +29,7 @@ get_path_module () {
 					read binmodule
 				fi
 			done
-			binmodule=${binmodule//\//\\\/} # Escape all backslashes in module name
+			binmodule=${binmodule//\//\\\/} # Escape all slashes in module name
 			sed -i '' "s/$1 = \"\"/$1 = \"$binmodule\"/" $filename 
 		fi
 	else
@@ -53,7 +53,7 @@ get_jar_path () {
 	done
 	if [ -f $jar_path ]; then
 	echo "$1 path: $jar_path"
-		jar_path=${jar_path//\//\\\/} # Escape all backslashes
+		jar_path=${jar_path//\//\\\/} # Escape all slashes
 		if [ $1 == 'Picard' ]; then
 			stem='picard'
 		elif [ $1 = 'GATK' ]; then
@@ -77,6 +77,11 @@ if [ ! -f nextflow.config ]; then
 	read config_path
 fi
 cp $config_path/nextflow.config $filename
+echo 'Enter path and file pattern for reads (See documentation).'
+read reads
+reads=${reads//\//\\\/} # Escape slashes
+reads=${reads//\*/\\*} # Escape asterisks
+sed -i '' "s/reads = \"\$baseDir\/\*{R1,R2}_001.fastq\*/reads = \"$reads/" $filename
 echo 'Sire name?'
 read sire
 sed -i '' "s/sire = \"SRR2\"/sire = \"$sire\"/" $filename
@@ -85,7 +90,7 @@ read dam
 sed -i '' "s/dam = \"SRR\"/dam = \"$dam\"/" $filename
 echo 'Output directory name?'
 read outdir
-outdir=${outdir//\//\\\/} # Excape backslashes
+outdir=${outdir//\//\\\/} # Escape slashes
 sed -i '' "s/outdir = \"test_results\"/outdir = \"$outdir\"/" $filename
 echo "Output prefix?"
 read prefix
@@ -143,7 +148,7 @@ if [ $answer == 'N' ]; then
 	sed -i '' "s/gm_threads = 8/gm_threads = $gm_threads/" $filename
 	echo 'Enter path for GenMap temporary files.'
 	read gm_tmpdir
-	gm_tmpdir=${gm_tmpdir//\//\\\/} # Excape backslashes
+	gm_tmpdir=${gm_tmpdir//\//\\\/} # Escape slashes
 	sed -i '' "s/gm_tmpdir = \'\/tmp\'/gm_tmpdir = \"$gm_tmpdir\"/" $filename
 fi
 echo 'RepeatMasker configuration...'

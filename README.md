@@ -16,13 +16,13 @@ RatesTools requires [Nextflow](https://www.nextflow.io/) [1] and [Ruby](http://w
 Install Nextflow: `curl -s https://get.nextflow.io | bash`  
 Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.io | bash -s stable --ruby`  
 
-### Install the RatesTools Package  
+### Install the RatesTools Scripts  
 Clone the repository: `git clone https://github.com/campanam/RatesTools`  
 Install the scripts: `cd RatesTools; make install` 
 
 *By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory, specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
 
-### Configure the pipeline  
+### Configure the Pipeline  
 
 ## Running the Pipeline  
 Enter `ratestools.nf -c <config_file>` to run the pipeline. Append `-resume` to restart a previous run or `-bg` to run RatesTools in the background. If you developed platform-specific configuration profiles, you can specify this using the `-profile <PROFILE>` option. See the Nextflow documentation for details.  

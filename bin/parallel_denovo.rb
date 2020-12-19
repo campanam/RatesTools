@@ -23,7 +23,7 @@ def execute_qsub(file) # Execute previously generated qsub files
 	system("qsub -N #{file} -v SCAFFOLD=#{file} #{$options.outdir}/calc_denovo_mutation_rate.job")
 end
 #-----------------------------------------------------------------------------------------
-def summarize_vcfs(vcfs) # Submit the job tosummarize the output of parallelized calc_denovo_mutation_rate
+def summarize_vcfs(vcfs) # Submit the job to summarize the output of parallelized calc_denovo_mutation_rate
 	# Clean up job output
 	#for vcf in vcfs
 	#	system("rm #{vcf}.o*")

@@ -80,7 +80,7 @@ cp $config_path/nextflow.config $filename
 echo 'Enter path and file pattern for reads (See documentation).'
 read reads
 reads=${reads//\//\\\/} # Escape slashes
-reads=${reads//\*/\\*} # Escape asterisks
+reads=${reads//\*/\\\*} # Escape asterisks
 sed -i '' "s/reads = \"\$baseDir\/\*{R1,R2}_001.fastq\*/reads = \"$reads/" $filename
 echo 'Sire name?'
 read sire

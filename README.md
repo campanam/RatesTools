@@ -44,7 +44,7 @@ Assisted configuration of the RatesTools workflow can be accomplished using the 
 
 Please note that RatesTools automatically detects read pairs using globbing and the Nextflow Channel.fromFilePairs() method (https://www.nextflow.io/docs/latest/channel.html#fromfilepairs). The user will need to specify a globbing pattern corresponding to the data. RatesTools also assumes that the sample name (e.g. for the sire and dam) is the shared portion of the read pair file name, excluding text after the first difference. It may be ideal to rename your reads to minimize the extraneous information in the read name (e.g. lane information). For instance, using a typical Illumina naming scheme:
 
-Using the globbing pattern `*{R1,R2}_001.fastq.gz`:
+Using the globbing pattern `*{R1,R2}_001.fastq.gz`:  
 Read pairs `LION1_S01_L001_R1_001.fastq.gz` and `LION1_S01_L001_R2_001.fastq.gz` will be matched and have the sample name `LION1_S01_L001_`.  
 Renaming the files to `LION1R1_001.fastq.gz` and `LION1R2_001.fastq.gz` will match these reads with the cleaner name `LION1`.  
 

@@ -40,7 +40,7 @@ RatesTools requires the following external dependencies. See the documentation f
 
 
 ### Configure the Workflow    
-Assisted configuration of the RatesTools workflow can be accomplished using the `configure.sh` bash script. The script copies and modifies the `nextflow.config` included with the repository for the target system. The `configure.sh` script detects software installed on the local system and prompts the user to provide module files, paths to undetected files, and program options. The `nextflow.config` file can also be manually edited using a text editor.  
+Assisted configuration of the RatesTools workflow can be accomplished using the `configure.sh` bash script. The script copies the `nextflow.config` included with the repository and modifies the copy for the target system. The `configure.sh` script detects software installed on the local system and prompts the user to provide module files, paths to undetected files, and program options. The configuration file can also be manually edited using a text editor. However, please note that the `configure.sh` script requires an *unmodified* `nextflow.config` file to work.  
 
 Please note that RatesTools automatically detects read pairs using globbing and the Nextflow Channel.fromFilePairs() method (https://www.nextflow.io/docs/latest/channel.html#fromfilepairs). The user will need to specify a globbing pattern corresponding to the data. RatesTools also assumes that the sample name (e.g. for the sire and dam) is the shared portion of the read pair file name, excluding text after the first difference. It may be ideal to rename your reads to minimize the extraneous information in the read name (e.g. lane information). For instance, using a typical Illumina naming scheme:
 

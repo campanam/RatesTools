@@ -4,7 +4,7 @@ __Michael G. Campana & Ellie E. Armstrong, 2019-2020__
 Smithsonian Conservation Biology Institute  
 Stanford University  
 
-Workflow to calculate de novo mutation rates from parent-offspring trios  
+Pipeline to calculate de novo mutation rates from parent-offspring trios  
 
 ## License  
 This software is available under  

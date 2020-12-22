@@ -6,7 +6,7 @@ Stanford University
 
 Pipeline to calculate de novo mutation rates from parent-offspring trios  
 
-This README provides basic details for installing, configuring and running the pipeline. Detailed documentation is available for the [Ruby scripts](blob/master/doc/ruby_scripts) included in this package and for [pipeline's operation](blob/master/doc/pipeline_details).  
+This README provides basic details for installing, configuring and running the pipeline. Detailed documentation is available for the [Ruby scripts](doc/ruby_scripts) included in this package and for [pipeline's operation](doc/pipeline_details).  
 
 ## License  
 This software is available under  

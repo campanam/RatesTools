@@ -441,7 +441,10 @@ process simplifyBed {
 	file "${prefix}_excluded_reduced.bed" into exclude_bed_ch
 	
 	"""
-	cat ${indel_bed} ${rm_bed} ${gm_bed} > ${prefix}_excluded.bed
+	simplify_sorted_bed.rb ${indel_bed} > ${indel_bed.baseName}_sorted.bed
+	simplify_sorted_bed.rb ${rm_bed} > ${rm_bed.baseName}_sorted.bed
+	simplify_sorted_bed.rb ${gm_bed} > ${gm_bed.baseName}_sorted.bed
+	cat ${indel_bed.baseName}_sorted.bed ${rm_bed.baseName}_sorted.bed ${gm_bed.baseName}_sorted.bed > ${prefix}_excluded.bed
 	simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
 	"""
 

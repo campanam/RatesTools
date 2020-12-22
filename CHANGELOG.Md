@@ -211,6 +211,10 @@ Code commented
 ### Version 0.1.0  
 Initial script to combine overlapping BED entries for region inclusion/exclusion  
 
+## simplify_sorted_bed  
+### Version 0.1.0  
+Script to merge adjacent BED regions in a coordinate-sorted BED file to reduce simplify_bed memory use and compute time  
+
 ## summarize_denovo  
 ### Version 0.5.5  
 Code commented  

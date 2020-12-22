@@ -50,6 +50,9 @@ Using the globbing pattern `*{R1,R2}_001.fastq.gz`:
 Read pairs `LION1_S01_L001_R1_001.fastq.gz` and `LION1_S01_L001_R2_001.fastq.gz` will be matched and have the sample name `LION1_S01_L001_`.  
 Renaming the files to `LION1R1_001.fastq.gz` and `LION1R2_001.fastq.gz` will match these reads with the cleaner name `LION1`.  
 
+### Platform-Specific Configuration  
+Given the wide-variety of computing architectures and configurations, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes two example [configuration profiles](https://www.nextflow.io/docs/latest/config.html#config-profiles): a default 'standard' profile for a local installation and a 'hydra' profile optimized for the SI/HPC Univa Grid Engine (UGE) computing cluster 'Hydra-5'. Please consult your computing staff to optimize the profile settings for your hardware. Additionally, by default, RatesTools stores process output in a directory named 'chkpnt' and limits the number of concurrent process forks to 1000. These settings can be changed by modifying the lines `process.storeDir = 'chkpnt'` and `process.maxForks = 1000` in the config file.  
+
 ## Running the Pipeline  
 Enter `ratestools.nf -c <config_file>` to run the pipeline. Append `-resume` to restart a previous run or `-bg` to run RatesTools in the background. If you developed platform-specific configuration profiles, you can specify this using the `-profile <PROFILE>` option. See the Nextflow documentation for details.  
 

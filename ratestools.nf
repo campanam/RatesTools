@@ -469,11 +469,11 @@ process filterSites {
 	val pair_id from filt_sample_ch2
 	
 	output:
-	file "${prefix}_offspring*.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
+	file "${prefix}_offspring${pair_id}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
 	
 	"""
 	vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}.sitefilt ${site_filters} --indv ${dam} --indv ${sire} --indv ${pair_id}
-	gzip ${prefix}_offspring*.sitefilt.recode.vcf
+	gzip ${prefix}_offspring${pair_id}.sitefilt.recode.vcf
 	"""
 
 }

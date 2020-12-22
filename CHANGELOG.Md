@@ -205,6 +205,9 @@ Outputs usage if no parameters specified
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
 ## simplify_bed  
+### Version 0.2.0  
+Complete rewrite of sorting/merging algorithm to use intervals (~8x faster)  
+
 ### Version 0.1.2  
 Status output to stderr  
 Redundant sites not added to array to hopefully improve performance  

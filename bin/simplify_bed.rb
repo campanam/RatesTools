@@ -2,12 +2,12 @@
 
 #----------------------------------------------------------------------------------------
 # simplify_bed
-SIMBEDVER = "0.1.1"
+SIMBEDVER = "0.1.2"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
 
-# Script to detect and combine overlapping entries in a BED file
+# Script to sort, detect and combine overlapping entries in an unsorted BED file
 
 require_relative 'denovolib'
 
@@ -16,6 +16,7 @@ if ARGV[0].nil?
 	format_splash('simplify_bed', SIMBEDVER, '<in.bed[.gz]> > <out.bed>')
 else
 	# Detect and combine overlapping BED entries
+	$stderr.puts 'Reading BED'
 	$contig_hash = {} # Hash of contigs and annotated BED regions
 	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|
 		while line = f1.gets
@@ -27,11 +28,13 @@ else
 			end
 		end
 	end
+	$stderr.puts 'Simplifying BED'
 	for hash in $contig_hash.keys
+		$stderr.puts "Simplifying #{hash}"
 		bed_sites = [] # Array of output bed values
 		for val in $contig_hash[hash]
 			for site in val[0] .. val[1]
-				bed_sites.push(site)
+				bed_sites.push(site) unless bed_sites.include?(site)
 			end
 		end
 		bed_sites = bed_sites.sort!.uniq

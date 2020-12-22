@@ -205,6 +205,10 @@ Outputs usage if no parameters specified
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
 ## simplify_bed  
+### Version 0.1.2  
+Status output to stderr  
+Redundant sites not added to array to hopefully improve performance  
+
 ### Version 0.1.1  
 Code commented  
 

@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # simplify_bed
-SIMBEDVER = "0.1.2"
+SIMBEDVER = "0.2.0"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -31,28 +31,23 @@ else
 	$stderr.puts 'Simplifying BED'
 	for hash in $contig_hash.keys
 		$stderr.puts "Simplifying #{hash}"
-		bed_sites = [] # Array of output bed values
-		for val in $contig_hash[hash]
-			for site in val[0] .. val[1]
-				bed_sites.push(site) unless bed_sites.include?(site)
-			end
-		end
-		bed_sites = bed_sites.sort!.uniq
-		start_site = nil
-		end_site = nil
-		unless bed_sites.empty?
-			for i in 0 ... bed_sites.size
-				start_site ||= bed_sites[i]
-				end_site ||= start_site + 1
-				if bed_sites[i] > end_site
-					puts hash + "\t" + start_site.to_s + "\t" + (end_site).to_s
-					start_site = bed_sites[i]
-					end_site = start_site + 1
-				elsif bed_sites[i] == end_site # Accounting for bizarre semi-open BED format
-					end_site += 1
+		# Sort the contig by coordinates
+		$contig_hash[hash].sort_by! { |val| val[1] } # Sort by end coordinate
+		$contig_hash[hash].sort_by! { |val| val[0] } # Sort end-sorted results by first coordinate
+		bed_sites = $contig_hash[hash][0] # Initialize array of output bed values
+		$contig_hash[hash].shift
+		if $contig_hash[hash].empty? # Write out results if only one entry for contig
+			puts hash + "\t" + bed_sites[0].to_s + "\t" + (bed_sites[1]+1).to_s # Adjust end-site for BED semi-open format
+		else
+			for val in $contig_hash[hash]
+				if val[0] > bed_sites[1] + 1 # Write out results if not overlapping or adjacent (hence +1) ; Reset current region
+					puts hash + "\t" + bed_sites[0].to_s + "\t" + (bed_sites[1]+1).to_s # Adjust end-site for BED semi-open format
+					bed_sites = val
+				elsif val[1] > bed_sites[1] # Extend overlapping region
+					bed_sites[1] = val[1]
 				end
 			end
-			puts hash + "\t" + start_site.to_s + "\t" + (end_site).to_s # Puts last entry
+			puts hash + "\t" + bed_sites[0].to_s + "\t" + (bed_sites[1]+1).to_s # Puts last entry for contig
 		end
 	end
 end

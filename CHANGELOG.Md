@@ -3,18 +3,18 @@ Michael G. Campana, 2019-2020
 Smithsonian Conservation Biology Institute  
 
 ## Table of Contents
-1. [calc_denovo_mutation_rate](calc_denovo_mutation_rate)
-2. [denovolib](denovolib)
-3. [filterGM](filterGM)
-4. [indels2bed](indels2bed)
-5. [nextflow_split](nextflow_split)
-6. [parallel_denovo](parallel_denovo)
-7. [ratestools](ratestools)
-8. [RM2bed](RM2bed)
-9. [simplify_bed](simplify_bed)
-10. [simplify_sorted_bed](simplify_sorted_bed)
-11. [summarize_denovo](summarize_denovo)
-12. [Deprecated](Deprecated)
+1. [calc_denovo_mutation_rate](#calc_denovo_mutation_rate)
+2. [denovolib](#denovolib)
+3. [filterGM](#filterGM)
+4. [indels2bed](#indels2bed)
+5. [nextflow_split](#nextflow_split)
+6. [parallel_denovo](#parallel_denovo)
+7. [ratestools](#ratestools)
+8. [RM2bed](#rm2bed)
+9. [simplify_bed](#simplify_bed)
+10. [simplify_sorted_bed](#simplify_sorted_bed)
+11. [summarize_denovo](#summarize_denovo)
+12. [Deprecated](#deprecated)
 
 
 ## calc_denovo_mutation_rate  

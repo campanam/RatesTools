@@ -457,7 +457,7 @@ process simplifyBed {
 		cp ${gm_bed} ${gm_bed.baseName}_sorted.bed
 	fi
 	cat ${indel_bed.baseName}_sorted.bed ${rm_bed.baseName}_sorted.bed ${gm_bed.baseName}_sorted.bed > ${prefix}_excluded.bed
-	if if [ ! "\$(wc -l < ${prefix}_excluded.bed)" -eq 0 ]; then
+	if [ ! "\$(wc -l < ${prefix}_excluded.bed)" -eq 0 ]; then
 		simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
 	else
 		cp ${prefix}_excluded.bed ${prefix}_excluded_reduced.bed

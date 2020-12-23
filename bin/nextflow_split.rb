@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # nextflow_split
-SPLITNFVCFVER = "0.1.2"
+SPLITNFVCFVER = "0.1.3"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -24,6 +24,10 @@ class Nextflow_Parser # Reduced parser including only input/output and bypassing
 			end
 			opts.on("-o","--output [DIRECTORY]", String, "Output Directory (Default is current directory)") do |outdir|
 				args.outdir = File.expand_path(outdir) if outdir != nil
+			end
+			opts.on("-W", "--writecycles [VALUE]", Integer, "Number of variants to read before writing to disk (Default = 1000000)") do |wrt|
+				args.writecycles = wrt if wrt != nil
+				args.writecycles = 1 if args.writecycles < 1
 			end
 		end
 		opt_parser.parse!(options)

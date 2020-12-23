@@ -40,13 +40,13 @@ The following document provides detailed descriptions of the steps included in t
 
 ## simplifyBed  
 
-## filterSites  
-
-## filterRegions  
-
 ## filterChr  
 
 ## splitVCFs  
+
+## filterSites  
+
+## filterRegions  
 
 ## calcDNMRate 
 

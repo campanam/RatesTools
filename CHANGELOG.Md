@@ -279,7 +279,3 @@ Now option to gzip output for file saving
 
 ### Version 0.1.0  
 split_vcf moved to split_vcf.rb for separate access by nextflow  
-
-## References
-Campana, MG. 2018. BaitsTools: software for hybridization capture bait design. *Molecular Ecology Resources* __18__, 356-361. ( https://doi.org/10.1111/1755-0998.12721)  
-Smit, AFA, Hubley, R & Green, P. RepeatMasker Open-4.0. 2013-2015 (http://www.repeatmasker.org).  

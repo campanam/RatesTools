@@ -29,12 +29,17 @@ class Nextflow_Parser # Reduced parser including only input/output and bypassing
 				args.writecycles = wrt if wrt != nil
 				args.writecycles = 1 if args.writecycles < 1
 			end
+			opts.on_tail("-h","--help", "Show help") do
+				puts opts
+				exit
+			end
 		end
 		opt_parser.parse!(options)
 		return args
 	end
 end
 #----------------------------------------------------------------------------------------
+ARGV[0] ||= "-h" # Print help if no parameters passed
 $options = Nextflow_Parser.parse(ARGV)
 Dir.mkdir($options.outdir) if !FileTest.directory?($options.outdir)
 split_vcf(true)

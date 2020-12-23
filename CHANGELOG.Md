@@ -141,6 +141,9 @@ Output BED header line starts with # as appropriate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## nextflow_split  
+### Version 0.1.3  
+Fixed bug where $options.writecycles was not defined  
+
 ### Version 0.1.2  
 Code commented  
 

@@ -468,6 +468,64 @@ process simplifyBed {
 
 filt_sample_ch2 = filt_sample_ch.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
 
+process filterChr {
+	
+	// Optionally include only specific chromsomes
+	
+	label 'vcftools'
+	publishDir "$params.outdir/FilterChrVCFs", mode: 'copy'
+	errorStrategy 'finish'
+	
+	input:
+	file "*" from combined_vcf_ch
+	val dam from params.dam
+	val sire from params.sire
+	val prefix from params.prefix
+	val pair_id from filt_sample_ch2
+	file chrs from chr_file
+	
+	output:
+	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch
+	
+	script:
+	if (chrs.name == "NULL")
+		"""
+		vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id}
+		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
+		
+		"""
+	else
+		"""
+		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
+		vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id} \$chr_line
+		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
+		"""
+	
+}
+
+process splitVCFs {
+
+	// Split VCFs by contig/chromosome/scaffold etc
+	
+	label 'ruby'
+	publishDir "$params.outdir/SplitVCFs", mode: 'copy'
+	errorStrategy 'finish'
+	
+	input:
+	file chr_vcf from chrfilt_vcf_ch
+	
+	output:
+	file "${chr_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten
+	
+	"""
+	nextflow_split.rb -i ${chr_vcf} -o ${chr_vcf.simpleName}_split
+	cd ${chr_vcf.simpleName}_split
+	for file in *vcf.gz; do mv \$file ${chr_vcf.simpleName}_\${file}; done
+	cd ..
+	"""
+	
+}
+
 process filterSites {
 
 	// Filter sites using VCFtools
@@ -477,19 +535,15 @@ process filterSites {
 	errorStrategy 'finish'
 	
 	input:
-	file "*" from combined_vcf_ch
+	file split_vcf from split_vcfs_ch
 	val site_filters from params.site_filters
-	val dam from params.dam
-	val sire from params.sire
-	val prefix from params.prefix
-	val pair_id from filt_sample_ch2
 	
 	output:
-	file "${prefix}_offspring${pair_id}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
+	file "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
 	
 	"""
-	vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}.sitefilt ${site_filters} --indv ${dam} --indv ${sire} --indv ${pair_id}
-	gzip ${prefix}_offspring${pair_id}.sitefilt.recode.vcf
+	vcftools --gzvcf ${split_vcf} --recode --out ${split_vcf.simpleName}.sitefilt ${site_filters}
+	gzip ${split_vcf.simpleName}.sitefilt.recode.vcf
 	"""
 
 }
@@ -516,58 +570,6 @@ process filterRegions {
 
 }
 
-process filterChr {
-	
-	// Optionally include only specific chromsomes
-	
-	label 'vcftools'
-	publishDir "$params.outdir/FilterChrVCFs", mode: 'copy'
-	errorStrategy 'finish'
-	
-	input:
-	file region_vcf from regionfilt_vcf_ch
-	file chrs from chr_file
-	
-	output:
-	file "${region_vcf.simpleName}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch
-	
-	script:
-	if (chrs.name == "NULL")
-		"""
-		cp $region_vcf ${region_vcf.simpleName}.chrfilt.recode.vcf.gz
-		"""
-	else
-		"""
-		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
-		vcftools --gzvcf $region_vcf --recode --out ${region_vcf.simpleName}.chrfilt \$chr_line
-		gzip ${region_vcf.simpleName}.chrfilt.recode.vcf
-		"""
-	
-}
-
-process splitVCFs {
-
-	// Split VCFs by contig/chromosome/scaffold etc
-	
-	label 'ruby'
-	publishDir "$params.outdir/SplitVCFs", mode: 'copy'
-	errorStrategy 'finish'
-	
-	input:
-	file filtvcf from chrfilt_vcf_ch
-	
-	output:
-	file "${filtvcf.simpleName}_split/*vcf.gz" into split_vcfs_ch
-	
-	"""
-	nextflow_split.rb -i ${filtvcf} -o ${filtvcf.simpleName}_split
-	cd ${filtvcf.simpleName}_split
-	for file in *vcf.gz; do mv \$file ${filtvcf.simpleName}_\${file}; done
-	cd ..
-	"""
-	
-}
-
 process calcDNMRate {
 
 	// Calculate de novo mutations using calc_denovo_mutation_rate
@@ -577,7 +579,7 @@ process calcDNMRate {
 	errorStrategy 'finish'
 	
 	input:
-	file splitvcf from split_vcfs_ch
+	file splitvcf from regionfilt_vcf_ch
 	val sire from params.sire
 	val dam from params.dam
 	val dnm_opts from params.dnm_opts

@@ -4,7 +4,7 @@ __Michael G. Campana & Ellie E. Armstrong, 2019-2020__
 Smithsonian Conservation Biology Institute  
 Stanford University  
 
-The following document provides detailed descriptions of the steps included in the RatesTools pipeline. Please note that the commands shown below omit basic input/output required for their operation and only list non-standard options for clarity. See the documentation for these programs for operation details.  
+The following document provides detailed descriptions of the steps included in the RatesTools pipeline. Please note that the commands shown below only list non-standard options for clarity. We omit basic input/output required for these commands. See the documentation for these programs for operation details.  
 
 ## prepareRef  
 The prepareRef process indexes the reference sequence using `bwa index` (and optionally the specified indexing algorithm) and `samtools faidx`. It also generates a sequence dictionary using `samtools dict`.

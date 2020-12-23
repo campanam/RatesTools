@@ -18,6 +18,7 @@ class Nextflow_Parser # Reduced parser including only input/output and bypassing
 		args = OpenStruct.new
 		args.infile = "" # Input file
 		args.outdir = "./" # Output directory
+		args.writecycles = 1000000 # number of cycles before writing to disk
 		opt_parser = OptionParser.new do |opts|
 			opts.on("-i","--input [FILE]", String, "Input VCF") do |infile|
 				args.infile = File.expand_path(infile) if infile != nil

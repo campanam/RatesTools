@@ -179,6 +179,9 @@ Can read gzipped input VCFs (Imported from BaitsTools 1.6.5)
 Initial script to parallelize de novo mutation rate calcuations on Grid Engine HPC  
 
 ## ratestools.nf  
+### Version 0.2.0  
+Reordered vcf filtration so that split_vcf occurs first to maximize parallelization.  
+
 ### Version 0.1.0  
 Nextflow pipeline for de novo mutation discovery. Previously panthera_dnm.nf during construction   
 

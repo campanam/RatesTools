@@ -357,7 +357,7 @@ process repeatModeler {
 	val rm_pa from params.rm_pa
 	
 	output:
-	file "*/consensi.fa.classified" into rm_lib_ch
+	file "**consensi.fa.classified" into rm_lib_ch
 	file refseq_masked into rm_ref_ch2
 	
 	"""

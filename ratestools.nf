@@ -441,11 +441,27 @@ process simplifyBed {
 	file "${prefix}_excluded_reduced.bed" into exclude_bed_ch
 	
 	"""
-	simplify_sorted_bed.rb ${indel_bed} > ${indel_bed.baseName}_sorted.bed
-	simplify_sorted_bed.rb ${rm_bed} > ${rm_bed.baseName}_sorted.bed
-	simplify_sorted_bed.rb ${gm_bed} > ${gm_bed.baseName}_sorted.bed
+	if [ ! "\$(wc -l < ${indel_bed})" -eq 0 ]; then
+		simplify_sorted_bed.rb ${indel_bed} > ${indel_bed.baseName}_sorted.bed
+	else
+		cp ${indel_bed} ${indel_bed.baseName}_sorted.bed
+	fi
+	if [ ! "\$(wc -l < ${rm_bed})" -eq 0 ]; then
+		simplify_sorted_bed.rb ${rm_bed} > ${rm_bed.baseName}_sorted.bed
+	else
+		cp ${rm_bed} ${rm_bed.baseName}_sorted.bed
+	fi
+	if [ ! "\$(wc -l < ${gm_bed})" -eq 0 ]; then
+		simplify_sorted_bed.rb ${gm_bed} > ${gm_bed.baseName}_sorted.bed
+	else
+		cp ${gm_bed} ${gm_bed.baseName}_sorted.bed
+	fi
 	cat ${indel_bed.baseName}_sorted.bed ${rm_bed.baseName}_sorted.bed ${gm_bed.baseName}_sorted.bed > ${prefix}_excluded.bed
-	simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
+	if if [ ! "\$(wc -l < ${prefix}_excluded.bed)" -eq 0 ]; then
+		simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
+	else
+		cp ${prefix}_excluded.bed ${prefix}_excluded_reduced.bed
+	fi
 	"""
 
 }

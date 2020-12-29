@@ -47,7 +47,7 @@ process alignSeqs {
 	
 	output:
 	file "${pair_id}_${refseq.baseName}.bam" into raw_bam_ch
-	val pair_id into (sample_ch,filt_sample_ch) // sample name for downstream use
+	val pair_id into filt_sample_ch // sample name for downstream use
 	val samtools_extra_threads into samtools_threads_ch
 	
 	
@@ -119,11 +119,13 @@ process fixReadGroups {
 	path markdup_bam from markdup_bam_ch
 	path picard from params.picard
 	val picard_java from params.picard_java
-	val pair_id from sample_ch
+	path refseq from params.refseq
 	
 	output:
 	file "${markdup_bam.simpleName}.rg.bam" into rg_bam_ch
 	
+	script:
+	pair_id = "${markdup_bam.simpleName}".minus("_${refseq.baseName}")
 	"""
 	java ${picard_java} -jar ${picard} AddOrReplaceReadGroups I=${markdup_bam} O=${markdup_bam.simpleName}.rg.bam RGID=$pair_id RGLB=$pair_id RGPL=illumina RGPU=$pair_id RGSM=$pair_id
 	"""

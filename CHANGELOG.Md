@@ -199,7 +199,8 @@ Initial script to parallelize de novo mutation rate calcuations on Grid Engine H
 
 ## ratestools  
 ### Version 0.2.0  
-Reordered vcf filtration so that split_vcf occurs first to maximize parallelization.  
+Reordered vcf filtration so that split_vcf occurs first to maximize parallelization  
+Fixed major bug in fixReadGroups that assigned read groups to the incorrect BAM file  
 
 ### Version 0.1.0  
 Nextflow pipeline for de novo mutation discovery. Previously panthera_dnm.nf during construction   

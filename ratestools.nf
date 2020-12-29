@@ -46,7 +46,7 @@ process alignSeqs {
 	file "*" from bwa_index_ch
 	
 	output:
-	file "${pair_id}_${refseq.baseName}.bam" into raw_bam_ch
+	file "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
 	val pair_id into filt_sample_ch // sample name for downstream use
 	val samtools_extra_threads into samtools_threads_ch
 	
@@ -54,7 +54,7 @@ process alignSeqs {
 	script:
 	samtools_extra_threads = bwa_threads - 1
 	"""
-	bwa mem -t ${bwa_threads} ${refseq} ${reads} | samtools view -@ ${samtools_extra_threads} -bS -o ${pair_id}_${refseq.baseName}.bam -  
+	bwa mem -t ${bwa_threads} ${refseq} ${reads} | samtools view -@ ${samtools_extra_threads} -bS -o ${pair_id}_${refseq.simpleName}.bam -  
 	"""
 	
 }
@@ -71,10 +71,10 @@ process sortBAM {
 	val samtools_extra_threads from samtools_threads_ch
 	
 	output:
-	file "${raw_bam.baseName}.srt.bam" into sorted_bam_ch
+	file "${raw_bam.simpleName}.srt.bam" into sorted_bam_ch
 	
 	"""
-	samtools sort -@ ${samtools_extra_threads} ${raw_bam} > ${raw_bam.baseName}.srt.bam
+	samtools sort -@ ${samtools_extra_threads} ${raw_bam} > ${raw_bam.simpleName}.srt.bam
 	"""
 	
 }
@@ -125,7 +125,7 @@ process fixReadGroups {
 	file "${markdup_bam.simpleName}.rg.bam" into rg_bam_ch
 	
 	script:
-	pair_id = "${markdup_bam.simpleName}".minus("_${refseq.baseName}")
+	pair_id = "${markdup_bam.simpleName}".minus("_${refseq.simpleName}")
 	"""
 	java ${picard_java} -jar ${picard} AddOrReplaceReadGroups I=${markdup_bam} O=${markdup_bam.simpleName}.rg.bam RGID=$pair_id RGLB=$pair_id RGPL=illumina RGPU=$pair_id RGSM=$pair_id
 	"""

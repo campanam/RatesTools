@@ -237,7 +237,6 @@ process callVariants {
 	file "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch 
 	
 	"""
-	java ${picard_java} -jar ${picard} BuildBamIndex I=${fix_bam}
 	java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${gatk_nct} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
 	"""
 

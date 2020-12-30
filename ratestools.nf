@@ -217,7 +217,6 @@ process callVariants {
 
 	// Index final bam and call variants using GATK
 	
-	label 'picard'
 	label 'gatk'
 	publishDir "$params.outdir/gVCFs", mode: 'copy'
 	errorStrategy 'finish'

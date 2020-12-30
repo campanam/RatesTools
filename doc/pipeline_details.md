@@ -61,5 +61,5 @@ The fixMate process corrects sequence mate pair tags using Picard FixMateInforma
 ## summarizeDNM  
 
 ## References  
-1. Besenbacher, S., Hvilsom, C., Marques-Bonet, T., Mailund, T., Schierup, M.H. (2019) Direct estimation of mutations in great apes reconciles phylogenetic dating. *Nat Ecol Evol*, __3__, 286-292. DOI:[10.1038/s41559-018-0778-x](https://www.nature.com/articles/s41559-018-0778-x).  
+1. Besenbacher, S., Hvilsom, C., Marques-Bonet, T., Mailund, T., Schierup, M.H. (2019) Direct estimation of mutations in great apes reconciles phylogenetic dating. *Nat Ecol Evol*, __3__, 286-292. DOI: [10.1038/s41559-018-0778-x](https://www.nature.com/articles/s41559-018-0778-x).  
 

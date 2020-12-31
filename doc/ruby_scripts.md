@@ -7,24 +7,24 @@ Stanford University
 Here we document the usage and functions of the Ruby scripts included in the RatesTools package.  
 
 ## calc_denovo_mutation_rate.rb  
-calc_denovo_mutation_rate.rb
+The calc_denovo_mutation_rate.rb script calculates the genomic de novo mutation (DNM) rate from a multi-individual all-sites VCF. The script can optionally perform block bootstrapping to estimate the confidence interval for the estimated DNM rates. All individuals that are not specified as either the 'sire' or 'dam' are assumed to be offspring of the specified individuals.  
 
 Basic usage is: `calc_denovo_mutation_rate.rb [options]`. Help is available using `calc_denovo_mutation_rate.rb -h`.  
 
-calc_denovo_mutation_rate options:
-    -i, --input [FILE]               Input VCF
-    -s, --sire [NAME]                Sire's name in VCF
-    -d, --dam [NAME]                 Dam's name in VCF
-        --parhom                     Require parents to be homozygous at DNM sites
-        --minAD1                     Discard DNMs if parents have DNM alleles even if not called
-        --minAF [VALUE]              Filter alleles by minimum frequency
-    -w, --window [VALUE]             Sequence window length (bp) for bootstrapping (Default = 1000000)
-    -S, --step [VALUE]               Window step (bp) for bootstrapping (Default = 1000000)
-    -b, --bootstrap [VALUE]          Number of bootstrap replicates (Default = 0)
-    -l, --minbootstraplength [VALUE] Minimum bootstrap window length (bp) to retain (Default = 1000000)
-    -M, --minwindows [VALUE]         Minimum number of bootstrap windows to retain contig (Default = 10)
-    -g, --gvcf                       Input is a gVCF (Default = false)
-        --rng [VALUE]                Random number seed
+The following calc_denovo_mutation_rate.rb options are available:  
+`-i, --input [FILE]`: Input VCF (Required).  
+`-s, --sire [NAME]`: Sire's name in VCF (Required).  
+`-d, --dam [NAME]`: Dam's name in VCF (Required).  
+`--parhom`: Require parents to be homozygous at candidate DNM sites. Parental heterozygosity forces the candidate site(s) to be discarded.  
+`--minAD1`: Discard candidate DNMs if parents have DNM alleles present (even if the parents' alleles are not called). Requires the 'AD' tag to be specified in the VCF.  
+`--minAF [VALUE]`: Filter alleles by minimum frequency.  
+`-w, --window [VALUE]`: Sequence window length (bp) for bootstrapping (Default = 1000000).  
+`-S, --step [VALUE]`: Window step (bp) for bootstrapping (Default = 1000000).  
+`-b, --bootstrap [VALUE]`: Number of bootstrap replicates (Default = 0).  
+`-l, --minbootstraplength [VALUE]`: Minimum bootstrap window length (bp) to retain (Default = 1000000).  
+`-M, --minwindows [VALUE]`: Minimum number of bootstrap windows to retain chromosome/contig (Default = 10).  
+ `-g, --gvcf`: Input is a gVCF (Default = false).  
+`--rng [VALUE]`: Random number seed.  
 
 ## denovolib.rb  
 This script provides a library of methods and classes used by the remaining Ruby scripts in the RatesTools pipeline.  
@@ -45,17 +45,17 @@ Basic usage is: `parallel_denovo.rb [options]`. Help is available using `paralle
 All calc_denovo_mutation_rate.rb options are available in parallel_denovo.rb. See [calc_denovo_mutation_rate.rb](#calc_denovo_mutation_raterb) for details. Additionally, the following parallel_denovo.rb-specific options are available:  
 
 parallel_denovo.rb Options:  
-`-o, --output [DIRECTORY]`: Output Directory (Default is current directory)  
-`-W, --writecycles [VALUE]`: Number of variants to read before writing to disk (Default = 1000000)  
+`-o, --output [DIRECTORY]`: Output Directory (Default is current directory).  
+`-W, --writecycles [VALUE]`: Number of variants to read before writing to disk (Default = 1000000).  
  `--nosubmit`: Generate split VCFs and job files, but do not submit them. This allows the splitting to be performed as a job (rather than on the head node), even in systems that do not permit subjobs.  
  `-r, --restart`: Restart from previously split VCFs (Default = false). This permits revision of the calc_denovo_mutation_rate parameters without having to re-split the starting VCF file.  
 `--submit`: Submit previously generated jobs and split VCFs (Implies -r).  
 
 SI/HPC Options:  
-`-q, --queue [VALUE]`: Qsub queue to use (Default = sThC.q)  
-`-m, --memory [VALUE]`: Reserved memory (Default = 1G)
-`-H, --himem`: Use high-memory queue (Default is false)  
- `-L, --lopri`: Use low priority queue (Default is false)  
+`-q, --queue [VALUE]`: Qsub queue to use (Default = sThC.q).  
+`-m, --memory [VALUE]`: Reserved memory (Default = 1G).
+`-H, --himem`: Use high-memory queue (Default is false).  
+ `-L, --lopri`: Use low priority queue (Default is false).  
  `-e, --email [VALUE]`: E-mail address to notify. 
 
 ## RM2bed.rb  

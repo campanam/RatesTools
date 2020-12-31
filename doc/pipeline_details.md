@@ -7,7 +7,7 @@ Stanford University
 The following document provides detailed descriptions of the steps included in the RatesTools pipeline. Please note that the commands shown below only list non-standard options for clarity. We omit basic input/output required for these commands. See the documentation for these programs for operation details.  
 
 ## prepareRef  
-The prepareRef process indexes the reference sequence using `bwa index` (and optionally the specified indexing algorithm) and `samtools faidx`. It also generates a sequence dictionary using `samtools dict`.
+The prepareRef process indexes the reference sequence using `bwa index` [1] (and optionally the specified indexing algorithm) and `samtools faidx` [2]. It also generates a sequence dictionary using `samtools dict`.
 
 ## alignSeqs  
 The alignSeqs process aligns read pairs (in two separate fastq format files) against the indexed reference sequencing using `bwa mem` and converts to bam format using `samtools view` to conserve disk space.  
@@ -16,16 +16,16 @@ The alignSeqs process aligns read pairs (in two separate fastq format files) aga
 The sortBAM process sorts the bam files from alignSeqs using `samtools sort`. This process was separated from the alignSeqs step to minimize redundant calculations should there be an error necessitating pipeline resumption.  
 
 ## markDuplicates  
-The markDuplicates process marks PCR duplicates using either `sambamba markdup` or Picard MarkDuplicates (`java -jar picard.jar MarkDuplicates MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000`).  
+The markDuplicates process marks PCR duplicates using either `sambamba markdup` [3] or Picard [4] MarkDuplicates (`java -jar picard.jar MarkDuplicates MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000`).  
 
 ## fixReadGroups  
 The fixReadGroups process adds sample read group information to the bam files using Picard AddOrReplaceReadGroups (`java -jar picard.jar AddOrReplaceReadGroups`).  
 
 ## realignIndels  
-The realignIndels process first builds a bam index (.bai) for the fixReadGroups output bam using Picard BuildBamIndex (`java -jar picard.jar BuildBamIndex`). It then identifies intervals for indel realignment using GATK RealignerTargetCreator (`java -jar GenomeAnalysisTK.jar -T RealignerTargetCreator`) and realigns indels using GATK IndelRealigner (`java -jar GenomeAnalysisTk.jar -T IndelRealigner --filter_bases_not_stored`).  
+The realignIndels process first builds a bam index (.bai) for the fixReadGroups output bam using Picard BuildBamIndex (`java -jar picard.jar BuildBamIndex`). It then identifies intervals for indel realignment using Genome Analysis Toolkit (GATK) [5] RealignerTargetCreator (`java -jar GenomeAnalysisTK.jar -T RealignerTargetCreator`) and realigns indels using GATK IndelRealigner (`java -jar GenomeAnalysisTk.jar -T IndelRealigner --filter_bases_not_stored`).  
 
 ## filterBAMs  
-The filterBAM process strictly filters aligned reads using GATK PrintReads following [1] (`java -jar GenomeAnalaysisTK.jar -T PrintReads --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals`).  
+The filterBAM process strictly filters aligned reads using GATK PrintReads following [6] (`java -jar GenomeAnalaysisTK.jar -T PrintReads --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals`).  
 
 ## fixMate  
 The fixMate process corrects sequence mate pair tags using Picard FixMateInformation (`java -jar picard.jar FixMateInformation ADD_MATE_CIGAR=true`). It then builds a bam index (.bai) for the output bam file using Picard BuildBamIndex (`java -jar picard.jar BuildBamIndex`).  
@@ -37,16 +37,16 @@ The callVariants process calls individual sequence variants (gVCF format) using 
 The genotypegVCFs process performs joint-genotyping and generates an all-sites VCF for all samples using GATK GenotypeGVCFs (`java -jar GenomeAnalaysisTK.jar -T GenotypeGVCFs --includeNonVariantSites`).  It then compresses the resulting multi-sample VCF using `gzip`.  
 
 ## genMapIndex  
-The genMapIndex process generates the GenMap index for the reference sequence for downstream mappability calculations (`genmap index`).  
+The genMapIndex process generates the GenMap [7] index for the reference sequence for downstream mappability calculations (`genmap index`).  
 
 ## genMapMap  
 The genMapMap process calculates the mappability for the reference sequence using GenMap (`genmap map -K 30 -E 2 -b`). It then filters the GenMap results using [`filterGM.rb`](ruby_scripts.md#filterGMrb) to exclude any sequences with mappability < 1.0 (`filterGM.rb <raw_genmap.bed> 1.0 exclude > <genmap.1.0.bed>`).  
 
 ## repeatMask  
-The repeatMask process uses RepeatMasker to soft-mask repeat regions in the reference sequence based on a pre-defined target species (`RepeatMasker -gccalc -nolow -species <specified species>`). The soft-masked reference sequence is passed to the repeatModeler process.  
+The repeatMask process uses RepeatMasker [8] to soft-mask repeat regions in the reference sequence based on a pre-defined target species (`RepeatMasker -gccalc -nolow -species <specified species>`). The soft-masked reference sequence is passed to the repeatModeler process.  
 
 ## repeatModeler  
-The repeatModeler process uses RepeatModeler and the RepeatMasker soft-masked reference sequence to generate a species-specific repeat library for the reference sequence. First, a database is built using `BuildDatabase`, then the library is built using `RepeatModeler`. The resulting library (`consensi.fa.classified`) RepeatMasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified is passed to the repeatMaskRM process.  
+The repeatModeler process uses RepeatModeler [9] and the RepeatMasker soft-masked reference sequence to generate a species-specific repeat library for the reference sequence. First, a database is built using `BuildDatabase`, then the library is built using `RepeatModeler`. The resulting library (`consensi.fa.classified`) RepeatMasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified is passed to the repeatMaskRM process.  
 
 ## repeatMaskRM  
 The repeatMaskRM process uses RepeatMasker and the RepeatModeler custom repeat library to soft mask the reference sequence (`RepeatMasker -gccalc -nolow -lib consensi.fa.classified`). The RepeatMasker out file (.out) is then converted to bed using [`RM2bed.rb`](ruby_scripts.md#RM2bedrb).  
@@ -58,7 +58,7 @@ Using [`indels2bed.rb`](ruby_scripts.md#indels2bedrb), the maskIndels process sc
 The simplifyBed process identifies and merges overlapping bed entries in the bed results from the repeatMaskRM, genMapMap and maskIndels processes. First, overlapping bed entries are merged for each of the three chromosome-sorted and coordinate-sorted bed files using [`simplify_sorted_bed.rb`](ruby_scripts.md#simplify_sorted_bedrb). The three merged bed files are then concatenated using `cat`. Overlapping entries in the resulting, unsorted bed file are merged using [`simplify_bed.rb`](ruby_scripts.md#simplify_bedrb).  
 
 ## filterChr  
-Using VCFtools, the filterChr process generates all-sites VCFs for each offspring and its parents (`vcftools --recode --indv <sire> --indv <dam> --indv <offspring>`). The number of resulting VCFs will thus equal the number of offspring in the dataset. If a list of target chromosomes was provided, this process also filters the output VCFs to include only the specified target regions using the `--chr` option. The resulting VCFs are compressed using `gzip`.  
+Using VCFtools [10], the filterChr process generates all-sites VCFs for each offspring and its parents (`vcftools --recode --indv <sire> --indv <dam> --indv <offspring>`). The number of resulting VCFs will thus equal the number of offspring in the dataset. If a list of target chromosomes was provided, this process also filters the output VCFs to include only the specified target regions using the `--chr` option. The resulting VCFs are compressed using `gzip`.  
 
 ## splitVCFs  
 The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [`nextflow_split.rb`](ruby_scripts.md#nextflow_splitrb). The resulting VCFs are compressed using `gzip`.  
@@ -76,5 +76,13 @@ Using the region-filtered VCFs output from the filterRegions process, the calcDN
 Using [`summarize_denovo.rb`](ruby_scripts.md#summarize_denovorb), the summarizeDNM process combines the per-chromosome mutation rate results from the calcDNMRate process to obtain the genomic mutation rate.  
 
 ## References  
-1. Besenbacher, S., Hvilsom, C., Marques-Bonet, T., Mailund, T., Schierup, M.H. (2019) Direct estimation of mutations in great apes reconciles phylogenetic dating. *Nat Ecol Evol*, __3__, 286-292. DOI: [10.1038/s41559-018-0778-x](https://www.nature.com/articles/s41559-018-0778-x).  
-
+1. Li, H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. *arXiv*, [1303.3997v2](https://arxiv.org/abs/1303.3997).  
+2. Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., 1000 Genome Project Data Processing Subgroup (2009) The Sequence Alignment/Map format and SAMtools. *Bioinformatics*, 25, 2078-2079. DOI: [10.1093/bioinformatics/btp352](https://academic.oup.com/bioinformatics/article/25/16/2078/204688).  
+3. Tarasov, A., Vilella, A.J., Cuppen, E., Nijman, I.J., Prins, P. (2015) Sambamba: fast processing of NGS alignment formats. *Bioinformatics*, __31__, 2032–2034. DOI: [10.1093/bioinformatics/btv098](https://academic.oup.com/bioinformatics/article/31/12/2032/214758).  
+4. Broad Institute (2020). Picard v. 2.23.8 (https://broadinstitute.github.io/picard/).  
+5. McKenna, A., Hanna, M., Banks, E., Sivachenko, A., Cibulskis, K., Kernytsky, A., Garimella, K., Altshuler, D., Gabriel, S., Daly, M., DePristo, M.A. (2010) The Genome Analysis Toolkit: a MapReduce framework for analyzing next-generation DNA sequencing data. *Genome Res*, __20__, 1297-1303. DOI: [10.1101/gr.107524.110](https://genome.cshlp.org/content/20/9/1297.abstract).  
+6. Besenbacher, S., Hvilsom, C., Marques-Bonet, T., Mailund, T., Schierup, M.H. (2019) Direct estimation of mutations in great apes reconciles phylogenetic dating. *Nat Ecol Evol*, __3__, 286-292. DOI: [10.1038/s41559-018-0778-x](https://www.nature.com/articles/s41559-018-0778-x).  
+7. Pockrandt, C., Alzamel, M., Iliopoulos, C.S., Reinert, K. (2020) GenMap: ultra-fast computation of genome mappability. *Bioinformatics*, __36__, 3687–3692, doi: [10.1093/bioinformatics/btaa222](https://academic.oup.com/bioinformatics/article/36/12/3687/5815974?login=true).  
+8. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  
+9. Flynn, J.M., Hubley, R., Goubert, C., Rosen, J. Clark,. A.G., Feschotte, C., Smit, A.F. (2020) RepeatModeler2 for automated genomic discovery of transposable element families. *Proc Natl Acad Sci U S A*, __117__, 9451-9457. DOI: [10.1073/pnas.1921046117](https://www.pnas.org/content/117/17/9451.short).  
+10. Danecek, P., Auton, A., Abecasis, G., Albers, C.A., Banks, E., DePristo, M.A., Handsaker, R.E., Lunter, G., Marth, G.T., Sherry, S.T., McVean, G., Durbin, R. (2011) The variant call format and VCFtools. *Bioinformatics*, __27__, 2156–2158. DOI: [10.1093/bioinformatics/btr330](https://academic.oup.com/bioinformatics/article/27/15/2156/402296).  

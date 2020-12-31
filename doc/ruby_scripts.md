@@ -24,21 +24,19 @@ parallel_denovo splits a previously filtered, all-sites VCF by chromosome, paral
 
 All calc_denovo_mutation_rate options are available in parallel_denovo. See [calc_denovo_mutation_rate.rb](#calc_denovo_mutation_raterb) for details. Additionally, the following parallel_denovo options are available:  
 
-parallel_denovo Options:
-    -o, --output [DIRECTORY]         Output Directory (Default is current directory)
-    -W, --writecycles [VALUE]        Number of variants to read before writing to disk (Default = 1000000)
-        --nosubmit                   Generate split VCFs and jobs, but do not submit them
-    -r, --restart                    Restart from previously split VCFs (Default = false)
-        --submit                     Submit previously generated jobs and split VCFs (Implies -r)
+parallel_denovo Options:  
+`-o, --output [DIRECTORY]`: Output Directory (Default is current directory)  
+`-W, --writecycles [VALUE]`: Number of variants to read before writing to disk (Default = 1000000)  
+ `--nosubmit`: Generate split VCFs and job files, but do not submit them. This allows the splitting to be performed as a job (rather than on the head node), even in systems that do not permit subjobs.  
+ `-r, --restart`: Restart from previously split VCFs (Default = false). This permits revision of the calc_denovo_mutation_rate parameters without having to re-split the starting VCF file.  
+`--submit`: Submit previously generated jobs and split VCFs (Implies -r).  
 
-SI/HPC Options:
-    -q, --queue [VALUE]              Qsub queue to use (Default = sThC.q
-    -m, --memory [VALUE]             Reserved memory (Default = 1G)
-    -H, --himem                      Use high-memory queue (Default is false)
-    -L, --lopri                      Use low priority queue (Default is false)
-    -e, --email [VALUE]              E-mail address to notify
-
-
+SI/HPC Options:  
+`-q, --queue [VALUE]`: Qsub queue to use (Default = sThC.q)  
+`-m, --memory [VALUE]`: Reserved memory (Default = 1G)
+`-H, --himem`: Use high-memory queue (Default is false)  
+ `-L, --lopri`: Use low priority queue (Default is false)  
+ `-e, --email [VALUE]`: E-mail address to notify. 
 
 ## RM2bed.rb  
 

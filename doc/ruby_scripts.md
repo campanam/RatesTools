@@ -34,7 +34,7 @@ Program information options (Do not use other options with the following):
 This script provides a library of methods and classes used by the remaining Ruby scripts in the RatesTools pipeline.  
 
 ## filterGM.rb  
-The filterGM.rb script filters a GenMap mappability bed file. The user specifies a mappability cut-off above which to retain (default behavior). Optionally, the user can output regions below the cut-off (e.g. for subsequent removal) by appending 'exclude' to the command line. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
+The filterGM.rb script filters a GenMap [1] mappability bed file. The user specifies a mappability cut-off above which to retain sites (default behavior). Optionally, the user can output regions below the cut-off (e.g. for subsequent removal) by appending 'exclude' to the command line. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
 
 Usage is: `filterGM.rb <in_GenMap.bed[.gz]> <cutoff> [exclude] > <out.bed>`.  
 
@@ -57,7 +57,7 @@ Options available:
 ## parallel_denovo.rb  
 *WARNING: parallel_denovo.rb is deprecated in favor of ratestools.nf and nextflow_split.rb. It is included for reference.*  
 
-parallel_denovo.rb splits a previously filtered, all-sites VCF by chromosome, parallelizes the calculation of the per-chromosome mutation rate using calc_denovo_mutation_rate, and the calculates the genomic mutation rate from the per-chromosome rates. It is written for the Univa Grid Engine (UGE)-based Smithsonian Institution High Performance Computing (SI/HPC) cluster 'Hydra' and will require manual revision for deployment on other systems.  
+parallel_denovo.rb splits a previously filtered, all-sites VCF by chromosome, parallelizes the calculation of the per-chromosome mutation rate using calc_denovo_mutation_rate, and then calculates the genomic mutation rate from the per-chromosome rates. It is written for the Univa Grid Engine (UGE)-based Smithsonian Institution High Performance Computing (SI/HPC) cluster 'Hydra' and will require manual code revision for deployment on other systems.  
 
 Basic usage is: `parallel_denovo.rb [options]`. Help is available using `parallel_denovo.rb -h`.  
 
@@ -78,7 +78,7 @@ SI/HPC options:
  `-e, --email [VALUE]`: E-mail address to notify. 
 
 ## RM2bed.rb  
-RM2bed.rb converts a RepeatMasker out file into a bed for later exclusion of repeat regions. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
+RM2bed.rb converts a RepeatMasker [2] out file into a bed for later exclusion of repeat regions. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
 
 Usage: `RM2bed.rb <in_RM.txt[.gz]> > <out.bed>`.  
 
@@ -96,3 +96,7 @@ Usage: `simplify_sorted_bed.rb <in.bed[.gz]> > <out.bed>`.
 summarize_denovo.rb calculates the genomic DNM rate from a directory of per-chromosome calc_denovo_mutation_rate.rb logs.  
 
 Usage: `summarize_denovo.rb <directory> > <out.txt>`.  
+
+## References  
+1. Pockrandt, C., Alzamel, M., Iliopoulos, C.S., Reinert, K. (2020) GenMap: ultra-fast computation of genome mappability. *Bioinformatics*, __36__, 3687–3692, doi: [10.1093/bioinformatics/btaa222](https://academic.oup.com/bioinformatics/article/36/12/3687/5815974?login=true).  
+2. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  

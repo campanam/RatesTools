@@ -7,12 +7,12 @@ Stanford University
 Here we document the usage and functions of the Ruby scripts included in the RatesTools package.  
 
 ## calc_denovo_mutation_rate.rb  
-The calc_denovo_mutation_rate.rb script calculates the genomic de novo mutation (DNM) rate from a multi-individual all-sites VCF. The script can optionally perform block bootstrapping to estimate the confidence interval for the estimated DNM rates. All individuals that are not specified as either the 'sire' or 'dam' are assumed to be offspring of the specified individuals.  
+The calc_denovo_mutation_rate.rb script calculates the genomic de novo mutation (DNM) rate from a multi-individual all-sites VCF. The script can optionally perform block bootstrapping to estimate the confidence interval for the estimated DNM rates. All individuals that are not specified as either the 'sire' or 'dam' are assumed to be offspring of the specified individuals. Results are printed to STDOUT.  
 
 Basic usage is: `calc_denovo_mutation_rate.rb [options]`. Help is available using `calc_denovo_mutation_rate.rb -h`.  
 
 The following calc_denovo_mutation_rate.rb options are available:  
-`-i, --input [FILE]`: Input VCF (Required).  
+`-i, --input [FILE]`: Input VCF (Required). Files with the final extension '.gz' are assumed to be gzip-compressed.  
 `-s, --sire [NAME]`: Sire's name in VCF (Required).  
 `-d, --dam [NAME]`: Dam's name in VCF (Required).  
 `--parhom`: Require parents to be homozygous at candidate DNM sites. Parental heterozygosity forces the candidate site(s) to be discarded.  
@@ -26,14 +26,33 @@ The following calc_denovo_mutation_rate.rb options are available:
  `-g, --gvcf`: Input is a gVCF (Default = false).  
 `--rng [VALUE]`: Random number seed.  
 
+Program information options (Do not use other options with the following):  
+`-v, --version`: Show program version.  
+`-h, --help`: Show help.  
+
 ## denovolib.rb  
 This script provides a library of methods and classes used by the remaining Ruby scripts in the RatesTools pipeline.  
 
 ## filterGM.rb  
+The filterGM.rb script filters a GenMap mappability bed file. The user specifies a mappability cut-off above which to retain (default behavior). Optionally, the user can output regions below the cut-off (e.g. for subsequent removal) by appending 'exclude' to the command line. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
+
+Usage is: `filterGM.rb <in_GenMap.bed[.gz]> <cutoff> [exclude] > <out.bed>`.  
 
 ## indels2bed.rb  
+The indels2bed.rb script identifies indels in the unfiltered all-sites, multi-sample VCF. It then generates a bed file that specifies a set window upstream/downstream around the indel for later exclusion in the pipeline. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
+
+Usage is: `indels2bed.rb <indels.vcf[.gz]> <bp_to_exclude_upstream/downstream> > <out.bed>`.  
 
 ## nextflow_split.rb  
+The nextflow_split.rb script splits an all-sites VCF by chromosomes/contigs for parallelization of filtering and de novo mutation rate calculations using the RatesTools pipeline.
+
+Basic usage is: `nextflow_split.rb -i <in.VCF> -o <outdir>`. Help is available using `nextflow_split.rb -h`.  
+
+Options available:  
+`-i, --input [FILE]`: Input VCF.  
+`-o, --output [DIRECTORY]`: Output Directory (Default is current directory).  
+`-W, --writecycles [VALUE]`: Number of variants to read before writing to disk (Default = 1000000).  
+`-h, --help`: Show help (Do not use with other options).  
 
 ## parallel_denovo.rb  
 *WARNING: parallel_denovo.rb is deprecated in favor of ratestools.nf and nextflow_split.rb. It is included for reference.*  

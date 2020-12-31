@@ -199,7 +199,7 @@ class Parser # Parse input for calc_denovo_mutation_rate.rb and parallel_denovo.
 				end
 				opts.separator ""
 				opts.separator "SI/HPC Options:"
-				opts.on("-q", "--queue [VALUE]", String, "Qsub queue to use (Default = sThC.q") do |queue|
+				opts.on("-q", "--queue [VALUE]", String, "Qsub queue to use (Default = sThC.q)") do |queue|
 					args.queue = queue if queue != nil
 				end
 				opts.on("-m", "--memory [VALUE]", String, "Reserved memory (Default = 1G)") do |memory|

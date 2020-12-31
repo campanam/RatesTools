@@ -63,14 +63,14 @@ Basic usage is: `parallel_denovo.rb [options]`. Help is available using `paralle
 
 All calc_denovo_mutation_rate.rb options are available in parallel_denovo.rb. See [calc_denovo_mutation_rate.rb](#calc_denovo_mutation_raterb) for details. Additionally, the following parallel_denovo.rb-specific options are available:  
 
-parallel_denovo.rb Options:  
+parallel_denovo.rb options:  
 `-o, --output [DIRECTORY]`: Output Directory (Default is current directory).  
 `-W, --writecycles [VALUE]`: Number of variants to read before writing to disk (Default = 1000000).  
  `--nosubmit`: Generate split VCFs and job files, but do not submit them. This allows the splitting to be performed as a job (rather than on the head node), even in systems that do not permit subjobs.  
  `-r, --restart`: Restart from previously split VCFs (Default = false). This permits revision of the calc_denovo_mutation_rate parameters without having to re-split the starting VCF file.  
 `--submit`: Submit previously generated jobs and split VCFs (Implies -r).  
 
-SI/HPC Options:  
+SI/HPC options:  
 `-q, --queue [VALUE]`: Qsub queue to use (Default = sThC.q).  
 `-m, --memory [VALUE]`: Reserved memory (Default = 1G).
 `-H, --himem`: Use high-memory queue (Default is false).  

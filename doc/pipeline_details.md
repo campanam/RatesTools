@@ -40,7 +40,7 @@ The genotypegVCFs process performs joint-genotyping and generates an all-sites V
 The genMapIndex process generates the GenMap index for the reference sequence for downstream mappability calculations (`genmap index`).  
 
 ## genMapMap  
-The genMapMap process calculates the mappability for the reference sequence using GenMap (`genmap map -K 30 -E 2 -b`). It then filters the GenMap results using [filterGM](ruby_scripts.md#filterGM.rb) to exclude any sequences with mappability < 1.0 (`filterGM.rb <raw_genmap.bed> 1.0 exclude > <genmap.1.0.bed>`).  
+The genMapMap process calculates the mappability for the reference sequence using GenMap (`genmap map -K 30 -E 2 -b`). It then filters the GenMap results using [filterGM](ruby_scripts.md#filterGMrb) to exclude any sequences with mappability < 1.0 (`filterGM.rb <raw_genmap.bed> 1.0 exclude > <genmap.1.0.bed>`).  
 
 ## repeatMask  
 The repeatMask process uses RepeatMasker to soft-mask repeat regions in the reference sequence based on a pre-defined target species (`RepeatMasker -gccalc -nolow -species <specified species>`). The soft-masked reference sequence is passed to the repeatModeler process.  

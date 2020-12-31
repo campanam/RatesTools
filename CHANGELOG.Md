@@ -71,6 +71,7 @@ Initial script to calculate point estimate de novo mutation rate
 ## denovolib  
 ### Version 0.7.2  
 Commented code  
+Fixed missing ')' in help for -q option  
 
 ### Version 0.7.1  
 Fixed 'homozogyous' typo in --parhom option description  

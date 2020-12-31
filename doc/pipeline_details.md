@@ -61,7 +61,7 @@ The simplifyBed process identifies and merges overlapping bed entries in the bed
 Using VCFtools, the filterChr process generates all-sites VCFs for each offspring and its parents (`vcftools --recode --indv <sire> --indv <dam> --indv <offspring>`). The number of resulting VCFs will thus equal the number of offspring in the dataset. If a list of target chromosomes was provided, this process also filters the output VCFs to include only the specified target regions using the `--chr` option. The resulting VCFs are compressed using `gzip`.  
 
 ## splitVCFs  
-The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using nextflow_split (`nextflow_split.rb -i <in.vcf> -o <out_split_vcfs_dir>`. The resulting VCFs are compressed using `gzip`.  
+The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [nextflow_split](ruby_scripts.md#nextflow_splitrb) (`nextflow_split.rb -i <in.vcf> -o <out_split_vcfs_dir>`. The resulting VCFs are compressed using `gzip`.  
 
 ## filterSites  
 The filterSites process filters the split VCF files from the splitVCFs process using VCFtools and the site filters provided in the config file (`vcftools --recode <site_filters>`). The resulting VCFs are compressed using `gzip`.  
@@ -70,10 +70,10 @@ The filterSites process filters the split VCF files from the splitVCFs process u
 Using VCFtools, the filterRegions process removes low-reliability regions (repeat regions, indel-affected sites, and regions of non-unique mappability) from the site-filtered VCFs from the filterSites process. The low-reliability regions are specified in the output merged bed from the simplifyBed process (`vcftools --recode --exclude-bed <out_cat.bed>`). The resulting VCFs are compressed using `gzip`.  
 
 ## calcDNMRate 
-Using the region-filtered VCFs output from the filterRegions process, the calcDNMRate process calculates the per-chromosome mutation rate using calc_denovo_mutation_rate and the options specified in the config file (`calc_denovo_mutation_rate.rb -i <chr.vcf> -s <sire> -d <dam> <denovo_mutation_options> > chr.log)`).  
+Using the region-filtered VCFs output from the filterRegions process, the calcDNMRate process calculates the per-chromosome mutation rate using [calc_denovo_mutation_rate](ruby_scripts.md#calc_denovo_mutation_raterb) and the options specified in the config file (`calc_denovo_mutation_rate.rb -i <chr.vcf> -s <sire> -d <dam> <denovo_mutation_options> > chr.log)`).  
 
 ## summarizeDNM  
-Using [`summarize_denovo.rb`](ruby_scripts.rb#summarize_denovo.rb), the summarizeDNM process combines the per-chromosome mutation rate results from the calcDNMRate process to obtain the genomic mutation rate.  
+Using [`summarize_denovo.rb`](ruby_scripts.md#summarize_denovorb), the summarizeDNM process combines the per-chromosome mutation rate results from the calcDNMRate process to obtain the genomic mutation rate.  
 
 ## References  
 1. Besenbacher, S., Hvilsom, C., Marques-Bonet, T., Mailund, T., Schierup, M.H. (2019) Direct estimation of mutations in great apes reconciles phylogenetic dating. *Nat Ecol Evol*, __3__, 286-292. DOI: [10.1038/s41559-018-0778-x](https://www.nature.com/articles/s41559-018-0778-x).  

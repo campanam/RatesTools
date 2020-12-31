@@ -93,3 +93,6 @@ simplify_sorted_bed.rb merges overlapping entries in a chromosome/contig- and co
 Usage: `simplify_sorted_bed.rb <in.bed[.gz]> > <out.bed>`.  
 
 ## summarize_denovo.rb  
+summarize_denovo.rb calculates the genomic DNM rate from a directory of per-chromosome calc_denovo_mutation_rate.rb logs.  
+
+Usage: `summarize_denovo.rb <directory> > <out.txt>`.  

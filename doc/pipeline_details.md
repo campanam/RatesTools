@@ -61,7 +61,7 @@ The simplifyBed process identifies and merges overlapping bed entries in the bed
 Using VCFtools, the filterChr process generates all-sites VCFs for each offspring and its parents (`vcftools --recode --indv <sire> --indv <dam> --indv <offspring>`). The number of resulting VCFs will thus equal the number of offspring in the dataset. If a list of target chromosomes was provided, this process also filters the output VCFs to include only the specified target regions using the `--chr` option. The resulting VCFs are compressed using `gzip`.  
 
 ## splitVCFs  
-The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [nextflow_split](ruby_scripts.md#nextflow_splitrb) (`nextflow_split.rb -i <in.vcf> -o <out_split_vcfs_dir>`. The resulting VCFs are compressed using `gzip`.  
+The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [`nextflow_split.rb`](ruby_scripts.md#nextflow_splitrb). The resulting VCFs are compressed using `gzip`.  
 
 ## filterSites  
 The filterSites process filters the split VCF files from the splitVCFs process using VCFtools and the site filters provided in the config file (`vcftools --recode <site_filters>`). The resulting VCFs are compressed using `gzip`.  

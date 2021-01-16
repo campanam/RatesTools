@@ -18,6 +18,9 @@ Smithsonian Conservation Biology Institute
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.10.3  
+Improved gz_file_open using yield  
+
 ### Version 0.10.2  
 Commented code  
 
@@ -69,6 +72,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.7.3  
+Improved gz_file_open using yield  
+
 ### Version 0.7.2  
 Commented code  
 Fixed missing ')' in help for -q option  
@@ -106,6 +112,9 @@ Redundant methods (Parser, gz_open_file) moved to denovolib
 gz_open_file improved to version in BaitsTools 1.6.6  
 
 ## filterGM  
+### Version 0.3.2  
+Improved gz_file_open using yield  
+
 ### Version 0.3.1  
 Code commented  
 
@@ -121,6 +130,9 @@ Script capitalization consistency correction
 Filters GenMap output by specified mappabilities  
 
 ## indels2bed  
+### Version 0.3.2  
+Improved gz_file_open using yield  
+
 ### Version 0.3.1  
 Code commented  
 
@@ -209,6 +221,9 @@ Removed duplicate BuildBamIndex step in callVariants
 Nextflow pipeline for de novo mutation discovery. Previously panthera_dnm.nf during construction   
 
 ## RM2bed  
+### Version 0.4.2  
+Improved gz_file_open using yield  
+
 ### Version 0.4.1  
 Code commented  
 
@@ -231,6 +246,9 @@ Outputs usage if no parameters specified
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
 ## simplify_bed  
+### Version 0.2.1  
+Improved gz_file_open using yield  
+
 ### Version 0.2.0  
 Complete rewrite of sorting/merging algorithm to use intervals (~8x faster)  
 
@@ -245,6 +263,9 @@ Code commented
 Initial script to combine overlapping BED entries for region inclusion/exclusion  
 
 ## simplify_sorted_bed  
+### Version 0.1.1  
+Improved gz_file_open using yield  
+
 ### Version 0.1.0  
 Script to merge adjacent BED regions in a coordinate-sorted BED file to reduce simplify_bed memory use and compute time  
 

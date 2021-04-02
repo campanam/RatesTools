@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # simplify_bed
-SIMBEDVER = "0.2.0"
+SIMBEDVER = "0.2.1"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ else
 	# Detect and combine overlapping BED entries
 	$stderr.puts 'Reading BED'
 	$contig_hash = {} # Hash of contigs and annotated BED regions
-	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|
+	gz_file_open(ARGV[0]) do |f1|
 		while line = f1.gets
 			line_arr = line.split
 			if $contig_hash.keys.include?(line_arr[0])

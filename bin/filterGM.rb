@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # filterGM
-FILTERGMVER = "0.3.1"
+FILTERGMVER = "0.3.2"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ if ARGV[0].nil?
 	# If no parameters passed, print help screen
 	format_splash('filterGM', FILTERGMVER, '<in_GenMap.bed[.gz]> <cutoff> [exclude] > <out.bed>')
 else
-	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|
+	gz_file_open(ARGV[0]) do |f1|
 		while line = f1.gets
 			line_arr = line.split
 			if ARGV[2] == "exclude"

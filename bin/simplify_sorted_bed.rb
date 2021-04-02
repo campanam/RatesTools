@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # simplify_sorted_bed
-SIMSORTBEDVER = "0.1.0"
+SIMSORTBEDVER = "0.1.1"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ else
 	@current_contig = nil # Current contig for co-ordinates
 	@startsite = nil # Set start site
 	@endsite = nil  # Set end site
-	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|
+	gz_file_open(ARGV[0]) do |f1|
 		while line = f1.gets
 			line_arr = line.split
 			if @current_contig != line_arr[0] # Write output if contig changes

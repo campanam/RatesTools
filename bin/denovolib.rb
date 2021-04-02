@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.7.2"
+DENOVOLIBVER = "0.7.3"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ def split_vcf(gzip = false) # Split an input VCF into chromosome pieces for para
 	outfile = ""
 	outlines = "" # Lines to store until writing to disk
 	writecycles = 0 # Number of write cycles passed
-	gz_file_open($options.infile).open($options.infile) do |f1|
+	gz_file_open($options.infile) do |f1|
 		while line = f1.gets
 			if start
 				contig = line.split("\t")[0]
@@ -64,12 +64,12 @@ def split_vcf(gzip = false) # Split an input VCF into chromosome pieces for para
 	return @vcfs
 end
 #-----------------------------------------------------------------------------------------------
-# From BaitsTools 1.6.6: Campana 2018
+# From BaitsTools 1.6.8: Campana 2018
 def gz_file_open(file) # Determine whether input file is gzipped or not and set method to open it
 	if file[-3..-1] == ".gz"
-		return Zlib::GzipReader
+		yield Zlib::GzipReader.open(file)
 	else
-		return File
+		yield File.open(file)
 	end
 end
 #-----------------------------------------------------------------------------------------

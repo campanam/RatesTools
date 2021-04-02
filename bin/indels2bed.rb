@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # indels2bed
-INDELS2BEDVER = "0.3.1"
+INDELS2BEDVER = "0.3.2"
 # Michael G. Campana, 2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ else
 	# If given VCF input, open file and look for indels (including those not annotated as indels) and generate exclusion BED
 	$contigs = {} # Hash of contig lengths
 	start = false
-	gz_file_open(ARGV[0]).open(ARGV[0]) do |f1|
+	gz_file_open(ARGV[0]) do |f1|
 		while line = f1.gets
 			if line[0..5] == "#CHROM"
 				start = true

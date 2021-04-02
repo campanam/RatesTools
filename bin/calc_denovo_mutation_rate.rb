@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.10.2"
+CALCDENOVOVER = "0.10.3"
 # Michael G. Campana, 2019-2020
 # Smithsonian Conservation Biology Institute
 #----------------------------------------------------------------------------------------
@@ -147,7 +147,7 @@ def read_vcf # Method to read vcf
 	collect_data = false # Flag to start collecting data
 	next_window_site = 1 # Site to start new window
 	next_window_close_site = next_window_site + $options.window - 1 # Site to close window and calculate rate
-	gz_file_open($options.infile).open($options.infile) do |f1|
+	gz_file_open($options.infile) do |f1|
 		while line = f1.gets
 			if line[0..5] == "#CHROM"
 				$mutations << line

@@ -1,6 +1,6 @@
 # RatesTools  
 
-__Michael G. Campana & Ellie E. Armstrong, 2019-2020__  
+__Michael G. Campana & Ellie E. Armstrong, 2019-2021__  
 Smithsonian Conservation Biology Institute  
 Stanford University  
 

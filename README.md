@@ -1,7 +1,7 @@
 # RatesTools  
 
-__Michael G. Campana & Ellie E. Armstrong, 2019-2021__  
-Smithsonian Conservation Biology Institute  
+__Michael G. Campana and Ellie E. Armstrong, 2019-2021__  
+Smithsonian Institution  
 Stanford University  
 
 Pipeline to calculate de novo mutation rates from parent-offspring trios  

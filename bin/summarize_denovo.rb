@@ -3,8 +3,19 @@
 #----------------------------------------------------------------------------------------
 # summarize_denovo
 SUMMARIZEDENOVOVER = "0.5.5"
-# Michael G. Campana, 2020
-# Smithsonian Conservation Biology Institute
+# Michael G. Campana and Ellie E. Armstrong, 2020
+# Smithsonian Institution and Stanford University
+
+# CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
+# University have waived all copyright and related or neighboring rights to RatesTools;
+# this work is published from the United States. You should have received a copy of the
+# CC0 legal code along with this work. If not, see 
+# <http://creativecommons.org/publicdomain/zero/1.0/>.
+ 
+# We politely request that this work be cited as:
+# Campana, M.G. & E.E. Armstrong. 2020. RatesTools: Pipeline to calculate de novo
+# mutation rates from parent-offspring trios. Smithsonian Institution and Stanford
+# University. <https://github.com/campanam/RatesTools>.
 #----------------------------------------------------------------------------------------
 
 # Script to calculate genome-wide denovo mutation rates from a directory of previously split DNM logs

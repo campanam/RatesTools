@@ -34,6 +34,7 @@ RatesTools requires the following external dependencies. See the documentation f
 
 * gzip  
 * awk  
+* sed  
 * [BWA](http://bio-bwa.sourceforge.net/) [3] v. 0.7.17  
 * [SAMtools](http://www.htslib.org/) [4] v. 1.9  
 * [Java](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html) v. 1.8  

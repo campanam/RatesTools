@@ -8,8 +8,12 @@ Pipeline to calculate de novo mutation rates from parent-offspring trios
 
 This README provides basic details for installing, configuring and running the pipeline. Detailed documentation is available for the [Ruby scripts](doc/ruby_scripts.md) included in this package and for the [pipeline's operation](doc/pipeline_details.md).  
 
-## License  
-This software is available under  
+## Citation  
+We politely request that this work be cited as:  
+Campana, M.G. & E.E. Armstrong. 2020. RatesTools: Pipeline to calculate de novo mutation rates from parent-offspring trios. Smithsonian Institution and Stanford University. https://github.com/campanam/RatesTools.  
+
+## Creative Commons 0 Waiver  
+CC0; To the extent possible under law, the Smithsonian Institution and Stanford University have waived all copyright and related or neighboring rights to RatesTools; this work is published from the United States.  
 
 ## Installation and Configuration  
 ### Install Nextflow and Ruby  

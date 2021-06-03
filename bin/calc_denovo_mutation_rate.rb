@@ -33,13 +33,16 @@ $mutations = "\nIdentified de novo mutations:\n" # Reduced VCF of ided mutations
 #-----------------------------------------------------------------------------------------
 class Snp
 	# Class to define SNPs and classify them
-	attr_accessor :sire, :dam, :offspring, :alleles, :denovo
-	def initialize(sire = "", dam = "", offspring = {}, alleles = []) # Offspring is an array because multiple offspring
+	attr_accessor :sire, :dam, :offspring, :alleles, :denovo, :sire_pl, :dam_pl, :offspring_pl
+	def initialize(sire = "", dam = "", offspring = {}, alleles = [], sire_pl = [], dam_pl = [], offspring_pl = {}) # Offspring is an array because multiple offspring
 		@alleles = alleles # Array of alleles sorted by allele ID (so allele 0 is in array slot 0, allele 1 in slot 1, etc)
 		@sire = sire # Sire genotype, Maintenance of phasing information as string
 		@dam = dam # Dam genotype, Maintenance of phasing information as string
 		@offspring = offspring # Hash of offspring genotypes, Maintenance of phasing information as string
 		@denovo = {} # Hash of denovo mutation presence statuses and types sorted by offspring
+		@sire_pl = sire_pl # Array of PL values for sire. Used for Koch DNp.
+		@dam_pl = dam_pl # Array of PL values for dam. Used for Koch DNp.
+		@offspring_pl = offspring_pl # Hash of arrays of PL values for offspring. Used for Koch DNp.
 	end
 	#-------------------------------------------------------------------------------------
 	def split_alleles(alleles)
@@ -115,8 +118,12 @@ class Snp
 			denovo_status = [false,""] # Default status is no de novo mutation
 			unless parhom_filter # Do not classify as denovo if parents heterozyogous and options parhom
 				unless genopool.include?(offspr_alleles)
-					mutation_class = classify_denovo(sire_alleles, dam_alleles, offspr_alleles, offspr)
-					denovo_status = [true,mutation_class]
+					retain_snp = true # Remove SNPs that do not pass Koch DNp filter if option is used
+					retain_snp = filter_candidate(offspring_pl, dam_pl, sire_pl, cutoff) if $options.kochDNp
+					if retain_snp # Classify SNPs that passed Koch DNp filter (or all SNPs if Koch DNp filter not used)
+						mutation_class = classify_denovo(sire_alleles, dam_alleles, offspr_alleles, offspr)
+						denovo_status = [true,mutation_class]
+					end
 				end
 			end
 			@denovo[offspr] = denovo_status
@@ -189,21 +196,22 @@ def read_vcf # Method to read vcf
 					snp = Snp.new
 					snp.alleles = alleles
 					tags = snp_array[8].split(":") # Get indexes of AD and GT tags
-					ad = gt = nil # Reset from previous cycle
+					ad = gt = pl = nil # Reset from previous cycle
 					ad = tags.index("AD") if tags.include?("AD")
+					pl = tags.index("PL") if tags.include?("PL")
 					gt = tags.index("GT")
 					for i in 9...snp_array.size
 						genotype = snp_array[i].split(":")[gt]
 						if $options.minAD1
 							if ad.nil?
-								filter_exit("AD tag required for minAD1 filter. Exiting.\nError found here:")
+								filter_exit("AD tag required for minAD1 filter. Exiting.\nError found here:", line)
 							else
 								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
 								genotype = depth_to_alleles(adepth, 1.0)
 							end
 						elsif !$options.minAF.nil?
 							if ad.nil?
-								filter_exit("AD tag required for minAF filter. Exiting.\nError found here:")
+								filter_exit("AD tag required for minAF filter. Exiting.\nError found here:", line)
 							else
 								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
 								adepth.map! { |x| x.to_f }
@@ -212,12 +220,24 @@ def read_vcf # Method to read vcf
 								genotype = depth_to_alleles(adepth, $options.minAF)
 							end
 						end
+						pl_array = []
+						if $options.kochDNp
+							if pl.nil?
+								filter_exit("PL tag required for Koch_DNp filter. Exiting.\nError found here:", line)
+							else
+								pl_array = snp_array[i].split(":")[pl].split(',')
+								filter_exit("Biallelic SNPs required for Koch_DNp filter. Exiting.\nError found here:", snp_record) if pl_array.size != 3
+							end
+						end
 						if i == sire_index
 							snp.sire = genotype
+							snp.sire_pl = pl_array
 						elsif i == dam_index
 							snp.dam = genotype
+							snp.dam_pl = pl_array
 						else
 							snp.offspring[$sample_index[i]] = genotype
+							snp.offspring_pl[$sample_index[i]] = pl_array
 						end
 					end
 					snp.identify_denovo
@@ -298,6 +318,7 @@ end
 def print_options # Print options used at startup to output
 	puts "calc_denovo_mutation_rate " + CALCDENOVOVER + " started with parameters:"
 	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s
+	cmdline << " -k -m " + $options.mu.to_s + " -t " + $options.theta.to_s + " -c " + $options.cutoff.to_s if $options.kochDNp
 	cmdline << " --parhom" if $options.parhom
 	cmdline << " --minAD1" if $options.minAD1
 	cmdline << " --minAF " + $options.minAF.to_s unless $options.minAF.nil?
@@ -314,5 +335,6 @@ srand($options.rng)
 print_options
 read_vcf
 print_results
+setup_kochDNp($options.mu, $options.theta) if $options.kochDNp # Precalculate probabilities if using DNp filter
 bootstrap_results if ($options.bootstrap > 0 && $windows.size >= $options.minwindows) # Bootstrap results if possible
 puts $mutations # Print list of mutations extracted from VCF

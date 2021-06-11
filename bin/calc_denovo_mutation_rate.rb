@@ -81,9 +81,10 @@ class Snp
 	end
 	#-------------------------------------------------------------------------------------
 	def update_denovo_counts(offspr, type)
-		$total_denovo[offspr][type] += 1
+		type == 1 ? count = 2 : count = 1 # Add two mutations if a double-forward, one mutation is otherwise
+		$total_denovo[offspr][type] += count
 		for window in $current_windows
-			window.denovo[offspr][type] += 1
+			window.denovo[offspr][type] += count
 		end
 	end
 	#-------------------------------------------------------------------------------------

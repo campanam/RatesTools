@@ -22,6 +22,7 @@ Stanford University
 ### Version 0.11.0  
 Added handling for Koch DNp statistic filter  
 Generalized ad_exit for all filtering errors (method filter_exit) and moved to denovolib  
+Fixed double-forward mutation count bug  
 
 ### Version 0.10.3  
 Improved gz_file_open using yield  

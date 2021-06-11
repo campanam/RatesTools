@@ -82,6 +82,7 @@ Initial script to calculate point estimate de novo mutation rate
 Added handling for Koch DNp statistic filter  
 Generalized ad_exit from calc_denovo_mutation_rate as denovolib method filter_exit  
 Removed parsing options for deprecated parallel_denovo  
+Fixed double-forward mutation count bug  
 
 ### Version 0.7.3  
 Improved gz_file_open using yield  

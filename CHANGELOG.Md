@@ -3,19 +3,20 @@ Michael G. Campana & Ellie E. Armstrong, 2019-2021
 Smithsonian Institution  
 Stanford University  
 
-## Table of Contents
-1. [calc_denovo_mutation_rate](#calc_denovo_mutation_rate)
-2. [denovolib](#denovolib)
-3. [filterGM](#filterGM)
-4. [indels2bed](#indels2bed)
-5. [kochDNp](#kochDNP)
-6. [nextflow_split](#nextflow_split)
-8. [ratestools](#ratestools)
-9. [RM2bed](#rm2bed)
-10. [simplify_bed](#simplify_bed)
-11. [simplify_sorted_bed](#simplify_sorted_bed)
-12. [summarize_denovo](#summarize_denovo)
-13. [Deprecated](#deprecated)
+## Table of Contents  
+1. [calc_denovo_mutation_rate](#calc_denovo_mutation_rate)  
+2. [denovolib](#denovolib)  
+3. [filterGM](#filtergm)  
+4. [indels2bed](#indels2bed)  
+5. [kochDNp](#kochdnp)  
+6. [nextflow_split](#nextflow_split)  
+7. [nextflow.config](#nextflowconfig)  
+8. [ratestools](#ratestools)  
+9. [RM2bed](#rm2bed)  
+10. [simplify_bed](#simplify_bed)  
+11. [simplify_sorted_bed](#simplify_sorted_bed)  
+12. [summarize_denovo](#summarize_denovo)  
+13. [Deprecated](#deprecated)  
 
 
 ## calc_denovo_mutation_rate  
@@ -182,6 +183,10 @@ Requires denovolib rather than split_vcf
 
 ### Version 0.1.0  
 Accessor script for split_vcf for nextflow   
+
+## nextflow.config  
+### Version 0.3.0  
+Fixed RepeatModeler additional thread glitch  
 
 ## ratestools  
 ### Version 0.2.0  

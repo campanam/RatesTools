@@ -189,6 +189,10 @@ Accessor script for split_vcf for nextflow
 Fixed RepeatModeler additional thread glitch  
 
 ## ratestools  
+### Version 0.3.0  
+Region filtration now uses BEDTools intersect  
+Moved region filtration before split_vcf to maintain vcf header information needed for BEDTools  
+
 ### Version 0.2.0  
 Reordered vcf filtration so that split_vcf occurs first to maximize parallelization  
 Fixed major bug in fixReadGroups that assigned read groups to the incorrect BAM file  

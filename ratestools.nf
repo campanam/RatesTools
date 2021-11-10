@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.2
-Michael G. Campana and Ellie E. Armstrong, 2020
+/* RatesTools version 0.3
+Michael G. Campana and Ellie E. Armstrong, 2020-2021
 Smithsonian Institution and Stanford University
 
 CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -518,6 +518,28 @@ process filterChr {
 	
 }
 
+process filterRegions {
+
+	// Filter regions using BEDtools
+	
+	label 'bedtools'
+	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
+	errorStrategy 'finish'
+	
+	input:
+	file chr_vcf from chrfilt_vcf_ch
+	file exclude_bed from exclude_bed_ch
+	
+	output:
+	file "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
+	
+	"""
+	bedtools intersect -a ${chr_vcf} -b ${exclude_bed} -v -header >${site_vcf.simpleName}.regionfilt.vcf
+	gzip ${site_vcf.simpleName}.regionfilt.vcf
+	"""
+
+}
+
 process splitVCFs {
 
 	// Split VCFs by contig/chromosome/scaffold etc
@@ -563,28 +585,6 @@ process filterSites {
 
 }
 
-process filterRegions {
-
-	// Filter regions using VCFtools
-	
-	label 'vcftools'
-	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
-	errorStrategy 'finish'
-	
-	input:
-	file site_vcf from sitefilt_vcf_ch
-	file exclude_bed from exclude_bed_ch
-	
-	output:
-	file "${site_vcf.simpleName}.regionfilt.recode.vcf.gz" into regionfilt_vcf_ch
-	
-	"""
-	vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed ${exclude_bed}
-	gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
-	"""
-
-}
-
 process calcDNMRate {
 
 	// Calculate de novo mutations using calc_denovo_mutation_rate
@@ -594,7 +594,7 @@ process calcDNMRate {
 	errorStrategy 'finish'
 	
 	input:
-	file splitvcf from regionfilt_vcf_ch
+	file site_vcf from sitefilt_vcf_ch
 	val sire from params.sire
 	val dam from params.dam
 	val dnm_opts from params.dnm_opts
@@ -605,6 +605,7 @@ process calcDNMRate {
 	"""
 	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} ${dnm_opts} > ${splitvcf.simpleName}.log
 	"""
+
 }
 
 process summarizeDNM {

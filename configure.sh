@@ -1,7 +1,7 @@
 #! /bin/bash
 
 #----------------------------------------------------------------------------------------
-# Michael G. Campana and Ellie E. Armstrong, 2020
+# Michael G. Campana and Ellie E. Armstrong, 2020-2021
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -177,6 +177,8 @@ get_path_module RepeatModeler
 echo 'Enter number of threads for RepeatMasker/RepeatModeler.'
 read rm_pa
 sed -i '' "s/rm_pa = 24/rm_pa = $rm_pa/" $filename
+echo 'BEDTools configuration...'
+get_path_module bedtools
 echo 'VCFtools configuration...'
 get_path_module vcftools
 echo 'Use default VCFtools filters (--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2)? (Y/N)'

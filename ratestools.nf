@@ -518,28 +518,6 @@ process filterChr {
 	
 }
 
-process filterRegions {
-
-	// Filter regions using BEDtools
-	
-	label 'bedtools'
-	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
-	errorStrategy 'finish'
-	
-	input:
-	file chr_vcf from chrfilt_vcf_ch
-	file exclude_bed from exclude_bed_ch
-	
-	output:
-	file "${chr_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
-	
-	"""
-	bedtools intersect -a ${chr_vcf} -b ${exclude_bed} -v -header >${chr_vcf.simpleName}.regionfilt.vcf
-	gzip ${chr_vcf.simpleName}.regionfilt.vcf
-	"""
-
-}
-
 process splitVCFs {
 
 	// Split VCFs by contig/chromosome/scaffold etc
@@ -549,15 +527,15 @@ process splitVCFs {
 	errorStrategy 'finish'
 	
 	input:
-	file reg_vcf from regionfilt_vcf_ch
+	file chr_vcf from chrfilt_vcf_ch
 	
 	output:
-	file "${reg_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten
+	file "${chr_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten
 	
 	"""
-	nextflow_split.rb -i ${reg_vcf} -o ${reg_vcf.simpleName}_split
-	cd ${reg_vcf.simpleName}_split
-	for file in *vcf.gz; do mv \$file ${reg_vcf.simpleName}_\${file}; done
+	nextflow_split.rb -i ${chr_vcf} -o ${chr_vcf.simpleName}_split
+	cd ${chr_vcf.simpleName}_split
+	for file in *vcf.gz; do mv \$file ${chr_vcf.simpleName}_\${file}; done
 	cd ..
 	"""
 	
@@ -585,6 +563,28 @@ process filterSites {
 
 }
 
+process filterRegions {
+
+	// Filter regions using VCFtools
+	
+	label 'bedtools'
+	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
+	errorStrategy 'finish'
+	
+	input:
+	file site_vcf from sitefilt_vcf_ch
+	file exclude_bed from exclude_bed_ch
+	
+	output:
+	file "${site_vcf.simpleName}.regionfilt.recode.vcf.gz" into regionfilt_vcf_ch
+	
+	"""
+	bedtools intersect -a ${chr_vcf} -b ${exclude_bed} -v -header > ${chr_vcf.simpleName}.regionfilt.vcf
+	gzip ${site_vcf.simpleName}.regionfilt.vcf
+	"""
+
+}
+
 process calcDNMRate {
 
 	// Calculate de novo mutations using calc_denovo_mutation_rate
@@ -594,16 +594,16 @@ process calcDNMRate {
 	errorStrategy 'finish'
 	
 	input:
-	file site_vcf from sitefilt_vcf_ch
+	file splitvcf from regionfilt_vcf_ch
 	val sire from params.sire
 	val dam from params.dam
 	val dnm_opts from params.dnm_opts
 	
 	output:
-	file "${site_vcf.simpleName}.log" into split_logs_ch
+	file "${splitvcf.simpleName}.log" into split_logs_ch
 	
 	"""
-	calc_denovo_mutation_rate.rb -i ${site_vcf} -s ${sire} -d ${dam} ${dnm_opts} > ${site_vcf.simpleName}.log
+	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} ${dnm_opts} > ${splitvcf.simpleName}.log
 	"""
 
 }

@@ -339,6 +339,5 @@ print_options
 setup_kochDNp($options.mu, $options.theta) if $options.kochDNp # Precalculate probabilities if using DNp filter
 read_vcf
 print_results
-setup_kochDNp($options.mu, $options.theta) if $options.kochDNp # Precalculate probabilities if using DNp filter
 bootstrap_results if ($options.bootstrap > 0 && $windows.size >= $options.minwindows) # Bootstrap results if possible
 puts $mutations # Print list of mutations extracted from VCF

@@ -2,8 +2,8 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.7.3"
-# Michael G. Campana and Ellie E. Armstrong, 2020
+DENOVOLIBVER = "0.8.0"
+# Michael G. Campana and Ellie E. Armstrong, 2021
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -84,6 +84,12 @@ def gz_file_open(file) # Determine whether input file is gzipped or not and set 
 	end
 end
 #-----------------------------------------------------------------------------------------
+def filter_exit(message, snp_record) # Method to exit program if tag missing or data unsuited to specified filter
+	$stderr.puts message
+	$stderr.puts snp_record
+	exit
+end
+#-----------------------------------------------------------------------------------------
 def format_splash(cmd, version, cmdline) # Format output for basic script help screens
 	puts "\033[1m#{cmd} #{version}\033[0m"
 	puts "\nUsage: ruby #{cmd}.rb #{cmdline}"
@@ -101,53 +107,50 @@ def print_results # Method to print basic results
 	puts "Offspring\tAllsites\tSingle-ForwardOnly"
 	for offspr in $total_denovo.keys
 		sitedenom = 2 * $total_sites.to_f
-		puts offspr + "\t" + ($total_denovo[offspr].sum.to_f/sitedenom).to_s + "\t" + ($total_denovo[offspr][0].to_f/sitedenom).to_s
+		# Get sum of de novo mutations. Double-forward mutations (index 1) count as two mutations.
+		dnm_sum = ($total_denovo[offspr][0] + 2 * $total_denovo[offspr][1] + $total_denovo[offspr][2]).to_f
+		puts offspr + "\t" + (dnm_sum/sitedenom).to_s + "\t" + ($total_denovo[offspr][0].to_f/sitedenom).to_s
 	end
 end
 #-----------------------------------------------------------------------------------------
-class Parser # Parse input for calc_denovo_mutation_rate.rb and parallel_denovo.rb
-	def self.parse(options, parallel = false)
+class Parser # Parse input for calc_denovo_mutation_rate.rb and post-hoc kochDNP.rb
+	def self.parse(options, kochDNp = false)
 		# Set defaults
 		args = OpenStruct.new
 		args.infile = "" # Input file
 		args.outdir = "./" # Output directory
 		args.sire = "" # Sire name 
 		args.dam = "" # Dam name
-		args.window = 1000000 # Window length for bootstrapping
-		args.minbslen = 1000000 # Minimum window length for bootstrapping
-		args.minwindows = 10 # Minimum number of bootstrap windows
-		args.step = 1000000 # Window step for bootrapping
-		args.bootstrap = 0 # Number of bootstrap replicates
-		args.gvcf = false # Whether input VCF is a gVCF
-		args.rng = srand # Random number seed
-		args.parhom = false # Flag to require homozygous for sire/dam DNMs
-		args.minAD1 = false # Flag for exclusion of DNMs that parents have any alleles for
-		args.minAF = nil # Value for minimum frequency to include allele. Nil = off
-		if parallel
-			args.writecycles = 1000000 # Number of variants to read before writing to disk
-			args.memory = "1G" # Memory reserved
-			args.himem = false # High memory flag
-			args.lopri = false # Low priority falg
-			args.queue = "sThC.q" # Qsub queue
-			args.email = "" # Email address to notify
-			args.restart = false # Restart if partitioned VCFs already exit
-			args.submit = false # Submit previously generated jobs
-			args.nosubmit = false # Generate split VCFs and jobs, but do not submit
+		args.mu = 1e-6
+		args.theta = 0.008
+		args.cutoff = 0.3
+		unless kochDNp
+			args.window = 1000000 # Window length for bootstrapping
+			args.minbslen = 1000000 # Minimum window length for bootstrapping
+			args.minwindows = 10 # Minimum number of bootstrap windows
+			args.step = 1000000 # Window step for bootrapping
+			args.bootstrap = 0 # Number of bootstrap replicates
+			args.gvcf = false # Whether input VCF is a gVCF
+			args.rng = srand # Random number seed
+			args.parhom = false # Flag to require homozygous for sire/dam DNMs
+			args.minAD1 = false # Flag for exclusion of DNMs that parents have any alleles for candidate DNMs
+			args.minAF = nil # Value for minimum frequency to include allele. Nil = off
+			args.kochDNp = false # Flag to use Koch DNp filter
 		end
 		opt_parser = OptionParser.new do |opts|
-			if parallel
-				opts.banner = "\033[1mparallel_denovo " + PARDENOVOVER + "\033[0m"
+			if kochDNp
+				opts.banner = opts.banner = "\033[1mkochDNp " + KOCHDNPVER + "\033[0m"
+				opts.separator ""
+				opts.separator "Command-line usage: ruby kochDNp.rb [options] > <outfile>"
+				opts.separator ""
+				opts.separator "kochDNp options:"
 			else
 				opts.banner = "\033[1mcalc_denovo_mutation_rate " + CALCDENOVOVER + "\033[0m"
-			end
-			opts.separator ""
-			if parallel
-				opts.separator "Command-line usage: ruby parallel_denovo.rb [options]"
-			else
-				opts.separator "Command-line usage: ruby calc_denovo_mutation_rate.rb [options]"
-			end
-			opts.separator ""
-			opts.separator "calc_denovo_mutation_rate options:"
+				opts.separator ""
+				opts.separator "Command-line usage: ruby calc_denovo_mutation_rate.rb [options] > <outfile>"
+				opts.separator ""
+				opts.separator "calc_denovo_mutation_rate options:"
+			end			
 			opts.on("-i","--input [FILE]", String, "Input VCF") do |infile|
 				args.infile = File.expand_path(infile) if infile != nil
 			end
@@ -157,82 +160,60 @@ class Parser # Parse input for calc_denovo_mutation_rate.rb and parallel_denovo.
 			opts.on("-d", "--dam [NAME]", String, "Dam's name in VCF") do |dam|
 				args.dam = dam if dam != nil
 			end
-			opts.on("--parhom", "Require parents to be homozygous at DNM sites") do |parhom|
-				args.parhom = true
-			end
-			opts.on("--minAD1", "Discard DNMs if parents have DNM alleles even if not called") do |minAD1|
-				args.minAD1 = true
-			end
-			opts.on("--minAF [VALUE]", Float, "Filter alleles by minimum frequency") do |minAF|
-				args.minAF = minAF
-			end
-			opts.on("-w", "--window [VALUE]", Integer, "Sequence window length (bp) for bootstrapping (Default = 1000000)") do |window|
-				args.window = window if window != nil
-			end
-			opts.on("-S", "--step [VALUE]", Integer, "Window step (bp) for bootstrapping (Default = 1000000)") do |step|
-				args.step = step if step != nil
-			end
-			opts.on("-b", "--bootstrap [VALUE]", Integer, "Number of bootstrap replicates (Default = 0)") do |bs|
-				args.bootstrap = bs if bs != nil
-			end
-			opts.on("-l", "--minbootstraplength [VALUE]", Integer, "Minimum bootstrap window length (bp) to retain (Default = 1000000)") do |minbslen|
-				args.minbslen = minbslen if minbslen != nil
-			end
-			opts.on("-M", "--minwindows [VALUE]", Integer, "Minimum number of bootstrap windows to retain contig (Default = 10)") do |minwindows|
-				args.minwindows = minwindows if minwindows != nil
-				args.minwindows = 1 if args.minwindows < 1
-			end
-			opts.on("-g", "--gvcf", "Input is a gVCF (Default = false)") do |gvcf|
-				args.gvcf = true
-			end
-			opts.on("--rng [VALUE]", Integer, "Random number seed") do |rng|
-				args.rng = rng if rng != nil
-			end
-			if parallel
-				opts.separator ""
-				opts.separator "parallel_denovo Options:"
-				opts.on("-o","--output [DIRECTORY]", String, "Output Directory (Default is current directory)") do |outdir|
-					args.outdir = File.expand_path(outdir) if outdir != nil
+			unless kochDNp
+				opts.on("-k", "--kochDNp", "Use Koch DNp statistic to filter DNM sites") do |kochDNP|
+					args.kochDNp = true
 				end
-				opts.on("-W", "--writecycles [VALUE]", Integer, "Number of variants to read before writing to disk (Default = 1000000)") do |wrt|
-					args.writecycles = wrt if wrt != nil
-					args.writecycles = 1 if args.writecycles < 1
+			end
+			opts.on("-m", "--mu [VALUE]", Float, "Mutation rate (mu) for Koch DNp (Default = 1e-6)") do |mu|
+				args.mu = mu if mu != nil
+			end
+			opts.on("-t", "--theta [VALUE]", Float, "Heterozygosity (theta) for Koch DNp (Default = 0.008)") do |theta|
+				args.theta = theta if theta != nil
+			end
+			opts.on("-c", "--cutoff [VALUE]", Float, "Koch DNp cutoff (Default = 0.3)") do |cutoff|
+				args.cutoff = cutoff if cutoff != nil
+			end
+			unless kochDNp
+				opts.on("--parhom", "Require parents to be homozygous at DNM sites") do |parhom|
+					args.parhom = true
 				end
-				opts.on("--nosubmit", "Generate split VCFs and jobs, but do not submit them") do |nosubmit|
-					args.nosubmit = true
+				opts.on("--minAD1", "Discard DNMs if parents have DNM alleles even if not called") do |minAD1|
+					args.minAD1 = true
 				end
-				opts.on("-r", "--restart", "Restart from previously split VCFs (Default = false)") do |restart|
-					args.restart = true
+				opts.on("--minAF [VALUE]", Float, "Filter alleles by minimum frequency") do |minAF|
+					args.minAF = minAF
 				end
-				opts.on("--submit", "Submit previously generated jobs and split VCFs (Implies -r)") do |submit|
-					args.submit = true
-					args.restart = true
+				opts.on("-w", "--window [VALUE]", Integer, "Sequence window length (bp) for bootstrapping (Default = 1000000)") do |window|
+					args.window = window if window != nil
 				end
-				opts.separator ""
-				opts.separator "SI/HPC Options:"
-				opts.on("-q", "--queue [VALUE]", String, "Qsub queue to use (Default = sThC.q)") do |queue|
-					args.queue = queue if queue != nil
+				opts.on("-S", "--step [VALUE]", Integer, "Window step (bp) for bootstrapping (Default = 1000000)") do |step|
+					args.step = step if step != nil
 				end
-				opts.on("-m", "--memory [VALUE]", String, "Reserved memory (Default = 1G)") do |memory|
-					args.memory = memory if memory != nil
+				opts.on("-b", "--bootstrap [VALUE]", Integer, "Number of bootstrap replicates (Default = 0)") do |bs|
+					args.bootstrap = bs if bs != nil
 				end
-				opts.on("-H", "--himem", "Use high-memory queue (Default is false)") do |himem|
-					args.himem = true
+				opts.on("-l", "--minbootstraplength [VALUE]", Integer, "Minimum bootstrap window length (bp) to retain (Default = 1000000)") do |minbslen|
+					args.minbslen = minbslen if minbslen != nil
 				end
-				opts.on("-L", "--lopri", "Use low priority queue (Default is false)") do |lopri|
-					args.lopri = true
+				opts.on("-M", "--minwindows [VALUE]", Integer, "Minimum number of bootstrap windows to retain contig (Default = 10)") do |minwindows|
+					args.minwindows = minwindows if minwindows != nil
+					args.minwindows = 1 if args.minwindows < 1
 				end
-				opts.on("-e", "--email [VALUE]", String, "E-mail address to notify") do |email|
-					args.email = email if email != nil
+				opts.on("-g", "--gvcf", "Input is a gVCF (Default = false)") do |gvcf|
+					args.gvcf = true
+				end
+				opts.on("--rng [VALUE]", Integer, "Random number seed") do |rng|
+					args.rng = rng if rng != nil
 				end
 			end
 			opts.separator ""
 			opts.separator "Program information:"
 			opts.on("-v", "--version", "Show program version") do
-				if parallel
-					puts "parallel_denovo version " + PARDENOVOVER
+				if kochDNp
+					puts "kochDNp version " + KOCHDNPVER
 				else 
-					puts "calc_denovo_mutation rate version " + CALCDENOVOVER
+					puts "calc_denovo_mutation_rate version " + CALCDENOVOVER
 				end
 				exit
 			end

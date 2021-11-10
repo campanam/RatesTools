@@ -304,7 +304,9 @@ def bootstrap_results # Calculate bootstrapped results using predefined bootstra
 		puts "Offspring\tAllsites\tSingle-ForwardOnly"
 		for offspr in bootstrap_denovo.keys
 			bootdenom = 2 * current_bootstrap_length.to_f
-			puts offspr + "\t" + (bootstrap_denovo[offspr].sum.to_f/bootdenom).to_s + "\t" + (bootstrap_denovo[offspr][0].to_f/bootdenom).to_s
+			# Get sum of de novo mutations. Double-forward mutations (index 1) count as two mutations.
+			boot_dnm_sum = (bootstrap_denovo[offspr][0] + 2 * bootstrap_denovo[offspr][1] + bootstrap_denovo[offspr][2]).to_f
+			puts offspr + "\t" + (boot_dnm_sum/bootdenom).to_s + "\t" + (bootstrap_denovo[offspr][0].to_f/bootdenom).to_s
 			$bootstraps[offspr][0].push(bootstrap_denovo[offspr].sum.to_f/bootdenom)
 			$bootstraps[offspr][1].push(bootstrap_denovo[offspr][0].to_f/bootdenom)
 		end
@@ -334,6 +336,7 @@ $options = Parser.parse(ARGV)
 $options.minbslen = $options.window if $options.minbslen > $options.window # Prevent nonsensical results
 srand($options.rng)
 print_options
+setup_kochDNp($options.mu, $options.theta) if $options.kochDNp # Precalculate probabilities if using DNp filter
 read_vcf
 print_results
 setup_kochDNp($options.mu, $options.theta) if $options.kochDNp # Precalculate probabilities if using DNp filter

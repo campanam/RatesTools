@@ -1,6 +1,6 @@
 # RatesTools Ruby Scripts  
 
-__Michael G. Campana & Ellie E. Armstrong, 2019-2020__  
+__Michael G. Campana & Ellie E. Armstrong, 2019-2021__  
 Smithsonian Conservation Biology Institute  
 Stanford University  
 
@@ -15,6 +15,10 @@ The following calc_denovo_mutation_rate.rb options are available:
 `-i, --input [FILE]`: Input VCF (Required). Files with the final extension '.gz' are assumed to be gzip-compressed.  
 `-s, --sire [NAME]`: Sire's name in VCF (Required).  
 `-d, --dam [NAME]`: Dam's name in VCF (Required).  
+`-k, --kochDNp`: Use Koch et al. DNp statistic [1] to filter candidate DNM sites.  
+`-m, --mu [VALUE]`: Mutation rate (mu) for Koch DNp (Default = 1e-6)  
+`-t, --theta [VALUE]`: Heterozygosity (theta) for Koch DNp (Default = 0.008)  
+`-c, --cutoff [VALUE]`: Koch DNp cutoff (Default = 0.3)  
 `--parhom`: Require parents to be homozygous at candidate DNM sites. Parental heterozygosity forces the candidate site(s) to be discarded.  
 `--minAD1`: Discard candidate DNMs if parents have DNM alleles present (even if the parents' alleles are not called). Requires the 'AD' tag to be specified in the VCF.  
 `--minAF [VALUE]`: Filter alleles by minimum frequency.  
@@ -34,7 +38,7 @@ Program information options (Do not use other options with the following):
 This script provides a library of methods and classes used by the remaining Ruby scripts in the RatesTools pipeline.  
 
 ## filterGM.rb  
-The filterGM.rb script filters a GenMap [1] mappability bed file. The user specifies a mappability cut-off above which to retain sites (default behavior). Optionally, the user can output regions below the cut-off (e.g. for subsequent removal) by appending 'exclude' to the command line. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
+The filterGM.rb script filters a GenMap [2] mappability bed file. The user specifies a mappability cut-off above which to retain sites (default behavior). Optionally, the user can output regions below the cut-off (e.g. for subsequent removal) by appending 'exclude' to the command line. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
 
 Usage is: `filterGM.rb <in_GenMap.bed[.gz]> <cutoff> [exclude] > <out.bed>`.  
 
@@ -43,42 +47,43 @@ The indels2bed.rb script identifies indels in the unfiltered all-sites, multi-sa
 
 Usage is: `indels2bed.rb <indels.vcf[.gz]> <bp_to_exclude_upstream/downstream> > <out.bed>`.  
 
+Basic usage is: `calc_denovo_mutation_rate.rb [options] > <outfile>`. Help is available using `calc_denovo_mutation_rate.rb -h`.  
+
+The following calc_denovo_mutation_rate.rb options are available:  
+`-i, --input [FILE]`: Input VCF (Required). Files with the final extension '.gz' are assumed to be gzip-compressed.  
+`-s, --sire [NAME]`: Sire's name in VCF (Required).  
+`-d, --dam [NAME]`: Dam's name in VCF (Required).  
+
+## kochDNp.rb  
+The kochDNp.rb script calculates the Koch et al. DNp statistic [1] for candidate de novo mutations and filters them by a specified cutoff value. The methods in this script are accessed by calc_denovo_mutation_rate if the DNp filter is turned on. Alternatively, the kochDNp script can be executed directly for post-hoc analysis of previously identified candidate de novo mutations. Results are printed to STDOUT.  
+
+Basic usage is: `kochDNp.rb [options]`. Help is available using `kochDNp.rb -h`.  
+
+The following kochDNp.rb options are available:  
+`-i, --input [FILE]`: Input file of candidate denovo mutations (Required). Input file can either be a VCF or a log previously generated using calc_denovo-mutation_rate or summarize_denovo. Files with the final extension '.gz' are assumed to be gzip-compressed.  
+`-s, --sire [NAME]`: Sire's name in VCF (Required).  
+`-d, --dam [NAME]`: Dam's name in VCF (Required).  
+`-m, --mu [VALUE]`: Mutation rate (mu) for Koch DNp (Default = 1e-6)  
+`-t, --theta [VALUE]`: Heterozygosity (theta) for Koch DNp (Default = 0.008)  
+`-c, --cutoff [VALUE]`: Koch DNp cutoff (Default = 0.3)  
+
+Program information options (Do not use other options with the following):  
+`-v, --version`: Show program version.  
+`-h, --help`: Show help.  
+
 ## nextflow_split.rb  
 The nextflow_split.rb script splits an all-sites VCF by chromosomes/contigs for parallelization of filtering and de novo mutation rate calculations using the RatesTools pipeline.
 
 Basic usage is: `nextflow_split.rb -i <in.VCF> -o <outdir>`. Help is available using `nextflow_split.rb -h`.  
 
 Options available:  
-`-i, --input [FILE]`: Input VCF.  
+`-i, --input [FILE]`: Input VCF (Required). Files with the final extension '.gz' are assumed to be gzip-compressed.  
 `-o, --output [DIRECTORY]`: Output Directory (Default is current directory).  
 `-W, --writecycles [VALUE]`: Number of variants to read before writing to disk (Default = 1000000).  
 `-h, --help`: Show help (Do not use with other options).  
 
-## parallel_denovo.rb  
-*WARNING: parallel_denovo.rb is deprecated in favor of ratestools.nf and nextflow_split.rb. It is included for reference.*  
-
-parallel_denovo.rb splits a previously filtered, all-sites VCF by chromosome, parallelizes the calculation of the per-chromosome mutation rate using calc_denovo_mutation_rate, and then calculates the genomic mutation rate from the per-chromosome rates. It is written for the Univa Grid Engine (UGE)-based Smithsonian Institution High Performance Computing (SI/HPC) cluster 'Hydra' and will require manual code revision for deployment on other systems.  
-
-Basic usage is: `parallel_denovo.rb [options]`. Help is available using `parallel_denovo.rb -h`.  
-
-All calc_denovo_mutation_rate.rb options are available in parallel_denovo.rb. See [calc_denovo_mutation_rate.rb](#calc_denovo_mutation_raterb) for details. Additionally, the following parallel_denovo.rb-specific options are available:  
-
-parallel_denovo.rb options:  
-`-o, --output [DIRECTORY]`: Output Directory (Default is current directory).  
-`-W, --writecycles [VALUE]`: Number of variants to read before writing to disk (Default = 1000000).  
- `--nosubmit`: Generate split VCFs and job files, but do not submit them. This allows the splitting to be performed as a job (rather than on the head node), even in systems that do not permit subjobs.  
- `-r, --restart`: Restart from previously split VCFs (Default = false). This permits revision of the calc_denovo_mutation_rate parameters without having to re-split the starting VCF file.  
-`--submit`: Submit previously generated jobs and split VCFs (Implies -r).  
-
-SI/HPC options:  
-`-q, --queue [VALUE]`: Qsub queue to use (Default = sThC.q).  
-`-m, --memory [VALUE]`: Reserved memory (Default = 1G).
-`-H, --himem`: Use high-memory queue (Default is false).  
- `-L, --lopri`: Use low priority queue (Default is false).  
- `-e, --email [VALUE]`: E-mail address to notify. 
-
 ## RM2bed.rb  
-RM2bed.rb converts a RepeatMasker [2] out file into a bed for later exclusion of repeat regions. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
+RM2bed.rb converts a RepeatMasker [3] out file into a bed for later exclusion of repeat regions. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
 
 Usage: `RM2bed.rb <in_RM.txt[.gz]> > <out.bed>`.  
 
@@ -98,5 +103,6 @@ summarize_denovo.rb calculates the genomic DNM rate from a directory of per-chro
 Usage: `summarize_denovo.rb <directory> > <out.txt>`.  
 
 ## References  
-1. Pockrandt, C., Alzamel, M., Iliopoulos, C.S., Reinert, K. (2020) GenMap: ultra-fast computation of genome mappability. *Bioinformatics*, __36__, 3687–3692, doi: [10.1093/bioinformatics/btaa222](https://academic.oup.com/bioinformatics/article/36/12/3687/5815974?login=true).  
-2. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  
+1. Koch, E.M., Schweizer, R.M., Schweizer, T.M., Stahler, D.R., Smith, D.W., Wayne, R.K., Novembre, J. (2019). De novo mutation rate estimation in wolves of known pedigree. *Mol Biol Evol*, __36__, 2536-2547, doi: [10.1093/molbev/msz159](https://academic.oup.com/mbe/article/36/11/2536/5531468?login=true).  
+2. Pockrandt, C., Alzamel, M., Iliopoulos, C.S., Reinert, K. (2020) GenMap: ultra-fast computation of genome mappability. *Bioinformatics*, __36__, 3687–3692, doi: [10.1093/bioinformatics/btaa222](https://academic.oup.com/bioinformatics/article/36/12/3687/5815974?login=true).  
+3. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  

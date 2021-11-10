@@ -1,23 +1,30 @@
 # CHANGE LOG  
-Michael G. Campana, 2019-2020  
-Smithsonian Conservation Biology Institute  
+Michael G. Campana & Ellie E. Armstrong, 2019-2021  
+Smithsonian Institution  
+Stanford University  
 
-## Table of Contents
-1. [calc_denovo_mutation_rate](#calc_denovo_mutation_rate)
-2. [denovolib](#denovolib)
-3. [filterGM](#filterGM)
-4. [indels2bed](#indels2bed)
-5. [nextflow_split](#nextflow_split)
-6. [parallel_denovo](#parallel_denovo)
-7. [ratestools](#ratestools)
-8. [RM2bed](#rm2bed)
-9. [simplify_bed](#simplify_bed)
-10. [simplify_sorted_bed](#simplify_sorted_bed)
-11. [summarize_denovo](#summarize_denovo)
-12. [Deprecated](#deprecated)
+## Table of Contents  
+1. [calc_denovo_mutation_rate](#calc_denovo_mutation_rate)  
+2. [denovolib](#denovolib)  
+3. [filterGM](#filtergm)  
+4. [indels2bed](#indels2bed)  
+5. [kochDNp](#kochdnp)  
+6. [nextflow_split](#nextflow_split)  
+7. [nextflow.config](#nextflowconfig)  
+8. [ratestools](#ratestools)  
+9. [RM2bed](#rm2bed)  
+10. [simplify_bed](#simplify_bed)  
+11. [simplify_sorted_bed](#simplify_sorted_bed)  
+12. [summarize_denovo](#summarize_denovo)  
+13. [Deprecated](#deprecated)  
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.11.0  
+Added handling for Koch DNp statistic filter  
+Generalized ad_exit for all filtering errors (method filter_exit) and moved to denovolib  
+Fixed double-forward mutation count bug  
+
 ### Version 0.10.3  
 Improved gz_file_open using yield  
 
@@ -72,6 +79,12 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.8.0  
+Added handling for Koch DNp statistic filter  
+Generalized ad_exit from calc_denovo_mutation_rate as denovolib method filter_exit  
+Removed parsing options for deprecated parallel_denovo  
+Fixed double-forward mutation count bug  
+
 ### Version 0.7.3  
 Improved gz_file_open using yield  
 
@@ -153,6 +166,10 @@ Output BED header line starts with # as appropriate
 ### Version 0.1.0  
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
+## kochDNp  
+### Version 0.1.0  
+Calculates and filters by Koch DNp statistic  
+
 ## nextflow_split  
 ### Version 0.1.3  
 Fixed bug where $options.writecycles was not defined  
@@ -167,48 +184,9 @@ Requires denovolib rather than split_vcf
 ### Version 0.1.0  
 Accessor script for split_vcf for nextflow   
 
-## parallel_denovo  
-### Version 0.10.2  
-Code commented  
-
-### Version 0.10.1  
-split_vcf.rb no longer required  
-
-### Version 0.10.0  
-split_vcf moved to split_vcf.rb for separate access by nextflow  
-
-### Version 0.9.0  
---minAF filter  
-
-### Version 0.8.0  
---parhom and --minAD1 options added to write_qsub  
-
-### Version 0.7.1  
-'write_qsub' calc_denovo_mutation_rate.job file now gzips analyzed split VCFs  
-
-### Version 0.7.0  
-Option '--nosubmit' splits VCFs and writes jobs, but does not submit them  
-Option '--submit' submits previously generated jobs and split VCFs  
-
-### Version 0.6.0  
-Redundant methods (Parser, gz_open_file) moved to denovolib  
-summarize_denovo automatically called upon completion of all split jobs  on cluster  
-
-### Version 0.5.0  
-Template qsub written once and arguments passed to it  
-Can restart processing from a previously split VCF  
-
-### Version 0.4.0  
-Can specify the number of variants to read while splitting before writing to disk  
-
+## nextflow.config  
 ### Version 0.3.0  
-Can specify minimum bootstrapping windows to perform analysis  
-
-### Version 0.2.0  
-Can read gzipped input VCFs (Imported from BaitsTools 1.6.5)  
-
-### Version 0.1.0  
-Initial script to parallelize de novo mutation rate calcuations on Grid Engine HPC  
+Fixed RepeatModeler additional thread glitch  
 
 ## ratestools  
 ### Version 0.2.0  
@@ -302,6 +280,51 @@ Concatenates headerless VCF results of identified de novo mutations
 Initial script to summarize parallelized de novo rate calculations  
 
 ## Deprecated 
+## parallel_denovo  
+Removed in RatesTools pipeline version 0.3  
+
+### Version 0.10.2  
+Code commented  
+
+### Version 0.10.1  
+split_vcf.rb no longer required  
+
+### Version 0.10.0  
+split_vcf moved to split_vcf.rb for separate access by nextflow  
+
+### Version 0.9.0  
+--minAF filter  
+
+### Version 0.8.0  
+--parhom and --minAD1 options added to write_qsub  
+
+### Version 0.7.1  
+'write_qsub' calc_denovo_mutation_rate.job file now gzips analyzed split VCFs  
+
+### Version 0.7.0  
+Option '--nosubmit' splits VCFs and writes jobs, but does not submit them  
+Option '--submit' submits previously generated jobs and split VCFs  
+
+### Version 0.6.0  
+Redundant methods (Parser, gz_open_file) moved to denovolib  
+summarize_denovo automatically called upon completion of all split jobs  on cluster  
+
+### Version 0.5.0  
+Template qsub written once and arguments passed to it  
+Can restart processing from a previously split VCF  
+
+### Version 0.4.0  
+Can specify the number of variants to read while splitting before writing to disk  
+
+### Version 0.3.0  
+Can specify minimum bootstrapping windows to perform analysis  
+
+### Version 0.2.0  
+Can read gzipped input VCFs (Imported from BaitsTools 1.6.5)  
+
+### Version 0.1.0  
+Initial script to parallelize de novo mutation rate calcuations on Grid Engine HPC  
+
 ## split_vcf  
 ### Version 0.2.0  
 Now option to gzip output for file saving  

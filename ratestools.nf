@@ -575,13 +575,14 @@ process filterRegions {
 	maxRetries 2
 	
 	input:
-	file site_vcf from sitefilt_vcf_ch
+	path site_vcf from sitefilt_vcf_ch
 	file exclude_bed from exclude_bed_ch
 	
 	output:
 	file "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
 	
 	script:
+	chr = site_vcf.simpleName.split('_chr')[1]
 	if (task.attempt == 1)
 		"""
 		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
@@ -589,18 +590,18 @@ process filterRegions {
 		"""
 	else if (task.attempt == 2)
 		"""
-		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
+		zcat ${site_vcf} > tmp.vcf
+		bedtools intersect -a tmp.vcf -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
 		gzip ${site_vcf.simpleName}.regionfilt.vcf
 		"""
 	else
-		chr = site_vcf.split('.sitefilt')[0].split('_chr')[1]
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed 
 		vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed tmp.bed
 		gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
 		mv gzip ${site_vcf.simpleName}.regionfilt.recode.vcf.gz ${site_vcf.simpleName}.regionfilt.vcf.gz
 		"""
-
+		
 }
 
 process calcDNMRate {

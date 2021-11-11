@@ -590,8 +590,7 @@ process filterRegions {
 		"""
 	else if (task.attempt == 2)
 		"""
-		zcat ${site_vcf} > tmp.vcf
-		bedtools intersect -a tmp.vcf -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
+		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
 		gzip ${site_vcf.simpleName}.regionfilt.vcf
 		"""
 	else
@@ -601,7 +600,7 @@ process filterRegions {
 		gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
 		mv gzip ${site_vcf.simpleName}.regionfilt.recode.vcf.gz ${site_vcf.simpleName}.regionfilt.vcf.gz
 		"""
-		
+
 }
 
 process calcDNMRate {

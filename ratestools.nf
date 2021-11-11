@@ -576,7 +576,7 @@ process filterRegions {
 	file exclude_bed from exclude_bed_ch
 	
 	output:
-	file "${site_vcf.simpleName}.regionfilt.recode.vcf.gz" into regionfilt_vcf_ch
+	file "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
 	
 	"""
 	bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf

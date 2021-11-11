@@ -565,11 +565,14 @@ process filterSites {
 
 process filterRegions {
 
-	// Filter regions using VCFtools
+	// Filter regions using BEDTools. If failure, tries to fix using zcat.
+	// Defaults to VCFtools in case of unrecoverable error 
 	
 	label 'bedtools'
+	label 'vcftools'
 	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
-	errorStrategy 'finish'
+	errorStrategy 'retry'
+	maxRetries 2
 	
 	input:
 	file site_vcf from sitefilt_vcf_ch
@@ -578,10 +581,25 @@ process filterRegions {
 	output:
 	file "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
 	
-	"""
-	bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
-	gzip ${site_vcf.simpleName}.regionfilt.vcf
-	"""
+	script:
+	if (task.attempt == 1)
+		"""
+		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
+		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		"""
+	else if (task.attempt == 2)
+		"""
+		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
+		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		"""
+	else
+		chr = $site_vcf.split('.sitefilt')[0].split('_chr')[1]
+		"""
+		grep ${chr} ${exclude_bed} > tmp.bed 
+		vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed tmp.bed
+		gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
+		mv gzip ${site_vcf.simpleName}.regionfilt.recode.vcf.gz ${site_vcf.simpleName}.regionfilt.vcf.gz
+		"""
 
 }
 

@@ -603,8 +603,8 @@ process filterRegions {
 		tabix ${site_vcf}
 		bcftools view -R tmp.bed -Ob -o tmp.bcf ${site_vcf}
 		tabix tmp.bcf
-		bcftools isec -C -O v -o ${site_vcf.simpleName}.regionfilt.recode.vcf ${site_vcf} tmp.bed
-		gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
+		bcftools isec -C -O v -o ${site_vcf.simpleName}.regionfilt.vcf ${site_vcf} tmp.bed
+		gzip ${site_vcf.simpleName}.regionfilt.vcf
 		"""
 	else
 		"""

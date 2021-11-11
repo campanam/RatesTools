@@ -546,6 +546,7 @@ process filterSites {
 	// Filter sites using VCFtools
 	
 	label 'vcftools'
+	label 'bgzip'
 	publishDir "$params.outdir/SiteFilteredVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
@@ -566,13 +567,16 @@ process filterSites {
 process filterRegions {
 
 	// Filter regions using BEDTools. If failure, tries to fix using zcat.
+	// Attempts BCFtools filtration if BEDTools fails
 	// Defaults to VCFtools in case of unrecoverable error 
 	
 	label 'bedtools'
+	label 'bcftools'
 	label 'vcftools'
+	label 'tabix'
 	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
 	errorStrategy 'retry'
-	maxRetries 2
+	maxRetries 3
 	
 	input:
 	path site_vcf from sitefilt_vcf_ch
@@ -593,12 +597,21 @@ process filterRegions {
 		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
 		gzip ${site_vcf.simpleName}.regionfilt.vcf
 		"""
+	else if (task.attempt == 3)
+		"""
+		grep ${chr} ${exclude_bed} > tmp.bed 
+		tabix ${site_vcf}
+		bcftools view -R tmp.bed -Ob -o tmp.bcf ${site_vcf}
+		tabix tmp.bcf
+		bcftools isec -C -O v -o ${site_vcf.simpleName}.regionfilt.recode.vcf ${site_vcf} tmp.bed
+		gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
+		"""
 	else
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed 
 		vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed tmp.bed
 		gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
-		mv gzip ${site_vcf.simpleName}.regionfilt.recode.vcf.gz ${site_vcf.simpleName}.regionfilt.vcf.gz
+		mv ${site_vcf.simpleName}.regionfilt.recode.vcf.gz ${site_vcf.simpleName}.regionfilt.vcf.gz
 		"""
 
 }

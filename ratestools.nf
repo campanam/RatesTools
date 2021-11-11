@@ -593,7 +593,7 @@ process filterRegions {
 		gzip ${site_vcf.simpleName}.regionfilt.vcf
 		"""
 	else
-		chr = $site_vcf.split('.sitefilt')[0].split('_chr')[1]
+		chr = site_vcf.split('.sitefilt')[0].split('_chr')[1]
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed 
 		vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed tmp.bed

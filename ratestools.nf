@@ -579,7 +579,7 @@ process filterRegions {
 	file "${site_vcf.simpleName}.regionfilt.recode.vcf.gz" into regionfilt_vcf_ch
 	
 	"""
-	bedtools intersect -a ${chr_vcf} -b ${exclude_bed} -v -header > ${chr_vcf.simpleName}.regionfilt.vcf
+	bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
 	gzip ${site_vcf.simpleName}.regionfilt.vcf
 	"""
 

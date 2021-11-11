@@ -559,7 +559,7 @@ process filterSites {
 	
 	"""
 	vcftools --gzvcf ${split_vcf} --recode --out ${split_vcf.simpleName}.sitefilt ${site_filters}
-	gzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+	bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
 	"""
 
 }

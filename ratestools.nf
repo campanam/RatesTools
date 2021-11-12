@@ -603,7 +603,10 @@ process filterRegions {
 		tabix ${site_vcf}
 		bcftools view -R tmp.bed -Ob -o tmp.bcf ${site_vcf}
 		tabix tmp.bcf
-		bcftools isec -C -O v -o ${site_vcf.simpleName}.regionfilt.vcf ${site_vcf} tmp.bcf
+		# bcftools isec gives the target sites not included in the bed
+		bcftools isec -C -O v -o ${site_vcf.simpleName}.targets ${site_vcf}
+		# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
+		bcftools view -T ${site_vcf.simpleName}.targets -Ov -o ${site_vcf.simpleName}.regionfilt.vcf ${site_vcf}
 		gzip ${site_vcf.simpleName}.regionfilt.vcf
 		"""
 	else

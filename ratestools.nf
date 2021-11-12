@@ -500,7 +500,7 @@ process filterChr {
 	file chrs from chr_file
 	
 	output:
-	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch
+	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
 	
 	script:
 	if (chrs.name == "NULL")
@@ -516,6 +516,26 @@ process filterChr {
 		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
 		"""
 	
+}
+
+process pullGQDP {
+
+	// Extract GQ/DP values from autosome scaffolds to look at the distributions of DP and GQ for variant call sites
+
+	label 'bcftools'
+	
+	input:
+	path chrfilt from chrfilt_stats_ch
+	publishDir "$params.outdir/gVCFs_GQ_DP", mode: 'copy'
+	errorStrategy 'finish'
+	
+	output:
+	file ${chrfilt.simpleName}.variants.tsv
+	
+	"""
+	bcftools view -v snps ${chrfilt} | bcftools query -f "%CHROM %POS [ %DP] [ %GQ]\n" -o ${chrfilt.simpleName}.variants.tsv
+	"""
+
 }
 
 process splitVCFs {

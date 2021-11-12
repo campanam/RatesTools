@@ -530,10 +530,10 @@ process pullGQDP {
 	errorStrategy 'finish'
 	
 	output:
-	file ${chrfilt.simpleName}.variants.tsv
+	file "${chrfilt.simpleName}.variants.tsv"
 	
 	"""
-	bcftools view -v snps ${chrfilt} | bcftools query -f "%CHROM %POS [ %DP] [ %GQ]\n" -o ${chrfilt.simpleName}.variants.tsv
+	bcftools view -v snps ${chrfilt} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}.variants.tsv
 	"""
 
 }
@@ -674,16 +674,16 @@ process summarizeDNM {
 	file "*" from split_logs_ch.collect()
 	
 	output:
-	file "*_summary.log"
+	file "${params.prefix}*_summary.log"
 	
 	"""
-	for file in *.log; do 
+	for file in ${params.prefix}*.log; do 
 		if [ ! -d \${file%_chr*.log} ]; then
 			mkdir \${file%_chr*.log}
 		fi
 		mv \$file \${file%_chr*.log}/
 	done
-	for outdir in *; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
+	for outdir in ${params.prefix}*; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
 	"""
 
 }

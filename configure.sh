@@ -154,6 +154,10 @@ done
 sed -i '' "s/markDuplicates = \"picard\"/markDuplicates = \"$mkdup\"/" $filename
 echo 'gzip configuration...'
 get_path_module gzip
+echo 'bgzip configuration...'
+get_path_module bgzip
+echo 'tabix configuration...'
+get_path_module tabix
 echo 'GenMap configuration...'
 get_path_module genmap
 echo 'Use defaults for GenMap (8 threads, Temporary directory: /tmp)? (Y/N)'
@@ -179,6 +183,8 @@ read rm_pa
 sed -i '' "s/rm_pa = 24/rm_pa = $rm_pa/" $filename
 echo 'BEDTools configuration...'
 get_path_module bedtools
+echo 'BCFtools configuration...'
+get_path_module bcftools
 echo 'VCFtools configuration...'
 get_path_module vcftools
 echo 'Use default VCFtools filters (--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2)? (Y/N)'

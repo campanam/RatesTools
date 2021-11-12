@@ -84,6 +84,7 @@ Added handling for Koch DNp statistic filter
 Generalized ad_exit from calc_denovo_mutation_rate as denovolib method filter_exit  
 Removed parsing options for deprecated parallel_denovo  
 Fixed double-forward mutation count bug  
+split_vcf retains complete VCF header for bedtools intersect  
 
 ### Version 0.7.3  
 Improved gz_file_open using yield  
@@ -189,6 +190,9 @@ Accessor script for split_vcf for nextflow
 Fixed RepeatModeler additional thread glitch  
 
 ## ratestools  
+### Version 0.3.0  
+Region filtration now uses BEDTools intersect  
+
 ### Version 0.2.0  
 Reordered vcf filtration so that split_vcf occurs first to maximize parallelization  
 Fixed major bug in fixReadGroups that assigned read groups to the incorrect BAM file  

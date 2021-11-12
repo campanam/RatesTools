@@ -60,14 +60,17 @@ The simplifyBed process identifies and merges overlapping bed entries in the bed
 ## filterChr  
 Using VCFtools [10], the filterChr process generates all-sites VCFs for each offspring and its parents (`vcftools --recode --indv <sire> --indv <dam> --indv <offspring>`). The number of resulting VCFs will thus equal the number of offspring in the dataset. If a list of target chromosomes was provided, this process also filters the output VCFs to include only the specified target regions using the `--chr` option. The resulting VCFs are compressed using `gzip`.  
 
+## pullGQDP
+Using BCFtools [11], the pullGQDP process extracts the GQ and DP information from the chromosome-filtered VCFs (`bcftools view -v snps <chromosome_vcf> | bcftools query -f "%CHROM %POS [ %DP] [ %GQ]\n"`).  
+
 ## splitVCFs  
 The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [`nextflow_split.rb`](ruby_scripts.md#nextflow_splitrb). The resulting VCFs are compressed using `gzip`.  
 
 ## filterSites  
-The filterSites process filters the split VCF files from the splitVCFs process using VCFtools and the site filters provided in the config file (`vcftools --recode <site_filters>`). The resulting VCFs are compressed using `gzip`.  
+The filterSites process filters the split VCF files from the splitVCFs process using VCFtools and the site filters provided in the config file (`vcftools --recode <site_filters>`). The resulting VCFs are compressed using `bgzip` [11].  
 
 ## filterRegions  
-Using VCFtools, the filterRegions process removes low-reliability regions (repeat regions, indel-affected sites, and regions of non-unique mappability) from the site-filtered VCFs from the filterSites process. The low-reliability regions are specified in the output merged bed from the simplifyBed process (`vcftools --recode --exclude-bed <out_cat.bed>`). The resulting VCFs are compressed using `gzip`.  
+The filterRegions process removes low-reliability regions (repeat regions, indel-affected sites, and regions of non-unique mappability) from the site-filtered VCFs from the filterSites process. The low-reliability regions are specified in the output merged bed from the simplifyBed process. On the first pass, the process uses BEDTools [12] intersect on the site-filtered VCF (`bedtools intersect -a <site-filtered vcf> -b <exclude-bed> <out_cat.bed>`). Should this fail (e.g. due to a compression issue), the process repeats using `zcat` to uncompress the VCF and pass it via stdin to BEDTools. If neither BEDTools run is successful, the process attempts to removed the filtered regions using BCFtools view (`bcftools view -R <excluded_bed> -Ob -o tmp.bcf`), BCFtools isec (`bcftools isec -C <site-filtered_vcf> <tmp.bcf>`) and BCFtools view (`bcftools view -T <isec_out> <site-filtered_vcf>`) [11]. If the BCFtools attempt fails, the process defaults to using VCFtools (`vcftools --recode --exclude-bed <out_cat.bed>`). The resulting VCFs are compressed using `gzip`.  
 
 ## calcDNMRate 
 Using the region-filtered VCFs output from the filterRegions process, the calcDNMRate process calculates the per-chromosome mutation rate using [`calc_denovo_mutation_rate.rb`](ruby_scripts.md#calc_denovo_mutation_raterb) and the options specified in the config file (`calc_denovo_mutation_rate.rb -i <chr.vcf> -s <sire> -d <dam> <denovo_mutation_options> > chr.log)`).  
@@ -86,3 +89,5 @@ Using [`summarize_denovo.rb`](ruby_scripts.md#summarize_denovorb), the summarize
 8. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  
 9. Flynn, J.M., Hubley, R., Goubert, C., Rosen, J. Clark,. A.G., Feschotte, C., Smit, A.F. (2020) RepeatModeler2 for automated genomic discovery of transposable element families. *Proc Natl Acad Sci U S A*, __117__, 9451-9457. DOI: [10.1073/pnas.1921046117](https://www.pnas.org/content/117/17/9451.short).  
 10. Danecek, P., Auton, A., Abecasis, G., Albers, C.A., Banks, E., DePristo, M.A., Handsaker, R.E., Lunter, G., Marth, G.T., Sherry, S.T., McVean, G., Durbin, R. (2011) The variant call format and VCFtools. *Bioinformatics*, __27__, 2156–2158. DOI: [10.1093/bioinformatics/btr330](https://academic.oup.com/bioinformatics/article/27/15/2156/402296).  
+11. Danecek, P., Bonfield, J.K., Liddle, J., Marshall, J., Ohan, V., Pollard, M.O., Whitwham, A., Keane, T., McCarthy, S.A., Davies, R.M., Li, H. (2021) Twelves years of SAMtools and BCFtools. *GigaScience*, __10__, giab008. DOI: [10.1093/gigascience/giab008](https://academic.oup.com/gigascience/article/10/2/giab008/6137722).  
+12. Quinlan, A.R., Hall, I.M. (2010) BEDTools: a flexible suite of utilities for comparing genomic features. *Bioinformatics*, __26__, 841-842, doi: [10.1093/bioinformatics/btq0333](https://academic.oup.com/bioinformatics/article/26/6/841/244688).  

@@ -64,7 +64,9 @@ def split_vcf(gzip = false) # Split an input VCF into chromosome pieces for para
 				end
 			elsif line[0..5] == "#CHROM"
 				start = true
-				header = line
+				header << line
+			else
+				header << line
 			end
 		end
 	end

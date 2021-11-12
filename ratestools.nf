@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.2
-Michael G. Campana and Ellie E. Armstrong, 2020
+/* RatesTools version 0.3
+Michael G. Campana and Ellie E. Armstrong, 2020-2021
 Smithsonian Institution and Stanford University
 
 CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -500,7 +500,7 @@ process filterChr {
 	file chrs from chr_file
 	
 	output:
-	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch
+	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
 	
 	script:
 	if (chrs.name == "NULL")
@@ -516,6 +516,26 @@ process filterChr {
 		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
 		"""
 	
+}
+
+process pullGQDP {
+
+	// Extract GQ/DP values from autosome scaffolds to look at the distributions of DP and GQ for variant call sites
+
+	label 'bcftools'
+	
+	input:
+	path chrfilt from chrfilt_stats_ch
+	publishDir "$params.outdir/gVCFs_GQ_DP", mode: 'copy'
+	errorStrategy 'finish'
+	
+	output:
+	file "${chrfilt.simpleName}.variants.tsv"
+	
+	"""
+	bcftools view -v snps ${chrfilt} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}.variants.tsv
+	"""
+
 }
 
 process splitVCFs {
@@ -546,6 +566,7 @@ process filterSites {
 	// Filter sites using VCFtools
 	
 	label 'vcftools'
+	label 'bgzip'
 	publishDir "$params.outdir/SiteFilteredVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
@@ -558,30 +579,63 @@ process filterSites {
 	
 	"""
 	vcftools --gzvcf ${split_vcf} --recode --out ${split_vcf.simpleName}.sitefilt ${site_filters}
-	gzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+	bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
 	"""
 
 }
 
 process filterRegions {
 
-	// Filter regions using VCFtools
+	// Filter regions using BEDTools. If failure, tries to fix using zcat.
+	// Attempts BCFtools filtration if BEDTools fails
+	// Defaults to VCFtools in case of unrecoverable error 
 	
+	label 'bedtools'
+	label 'bcftools'
 	label 'vcftools'
+	label 'tabix'
 	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
-	errorStrategy 'finish'
+	errorStrategy 'retry'
+	maxRetries 3
 	
 	input:
-	file site_vcf from sitefilt_vcf_ch
+	path site_vcf from sitefilt_vcf_ch
 	file exclude_bed from exclude_bed_ch
 	
 	output:
-	file "${site_vcf.simpleName}.regionfilt.recode.vcf.gz" into regionfilt_vcf_ch
+	file "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
 	
-	"""
-	vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed ${exclude_bed}
-	gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
-	"""
+	script:
+	chr = site_vcf.simpleName.split('_chr')[1]
+	if (task.attempt == 1)
+		"""
+		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
+		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		"""
+	else if (task.attempt == 2)
+		"""
+		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
+		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		"""
+	else if (task.attempt == 3)
+		"""
+		grep ${chr} ${exclude_bed} > tmp.bed 
+		tabix ${site_vcf}
+		bcftools view -R tmp.bed -Ob -o tmp.bcf ${site_vcf}
+		tabix tmp.bcf
+		# bcftools isec gives the target sites not included in the bed
+		bcftools isec -C -O v -o ${site_vcf.simpleName}.targets ${site_vcf} tmp.bcf
+		# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
+		bcftools view -T ${site_vcf.simpleName}.targets -Ov -o ${site_vcf.simpleName}.regionfilt.vcf ${site_vcf}
+		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		"""
+	else
+		"""
+		grep ${chr} ${exclude_bed} > tmp.bed 
+		vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed tmp.bed
+		gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
+		mv ${site_vcf.simpleName}.regionfilt.recode.vcf.gz ${site_vcf.simpleName}.regionfilt.vcf.gz
+		"""
 
 }
 
@@ -605,6 +659,7 @@ process calcDNMRate {
 	"""
 	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} ${dnm_opts} > ${splitvcf.simpleName}.log
 	"""
+
 }
 
 process summarizeDNM {
@@ -619,16 +674,16 @@ process summarizeDNM {
 	file "*" from split_logs_ch.collect()
 	
 	output:
-	file "*_summary.log"
+	file "${params.prefix}*_summary.log"
 	
 	"""
-	for file in *.log; do 
+	for file in ${params.prefix}*.log; do 
 		if [ ! -d \${file%_chr*.log} ]; then
 			mkdir \${file%_chr*.log}
 		fi
 		mv \$file \${file%_chr*.log}/
 	done
-	for outdir in *; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
+	for outdir in ${params.prefix}*; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
 	"""
 
 }

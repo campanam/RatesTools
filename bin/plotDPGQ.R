@@ -19,9 +19,8 @@
 
 #load libraries
 library(data.table)
-library(tidyverse)
+library(tidyverse) # Also loads dplyr library
 library(ggpubr)
-library(dplyr)
 
 stem = commandArgs(trailingOnly=TRUE) # Get filestem for output
 

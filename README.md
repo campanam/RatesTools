@@ -50,7 +50,11 @@ RatesTools requires the following external dependencies. See the documentation f
 * [RepeatMasker](http://www.repeatmasker.org/) [11] v. 4.0.9  
 * [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) [12] v. 2.0.1  
 * [BEDTools](https://bedtools.readthedocs.io/en/latest/) [13] v. 2.28.0  
-*  
+
+RatesTools requires the following R packages installed in your R environment:  
+* [tidyverse] [14] v. 1.3.1 with [dplyr] v. 1.0.7 [15]
+* [data.table] [16]
+* [ggpubr] [17]
 
 
 ### Configure the Pipeline    

@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 #----------------------------------------------------------------------------------------
 # plotDPGQ version 0.2
 # Ellie E. Armstrong & Michael G. Campana, 2021

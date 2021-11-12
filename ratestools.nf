@@ -553,7 +553,7 @@ process plotDPGQ {
 	file "${params.prefix}*"
 	
 	"""
-	Rscript plotDPGQ.R $params.prefix
+	plotDPGQ.R $params.prefix
 	"""
 	
 }

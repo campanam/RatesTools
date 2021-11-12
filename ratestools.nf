@@ -523,7 +523,7 @@ process pullDPGQ {
 	// Extract DP/GQ values from autosome scaffolds to look at the distributions of DP and GQ for variant call sites
 
 	label 'bcftools'
-	publishDir "$params.outdir/gVCFs_GQ_DP", mode: 'copy'
+	publishDir "$params.outdir/gVCFs_DP_GQ", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -543,7 +543,7 @@ process plotDPGQ {
 	// Plot DP and GQ distributions
 	
 	label 'R'
-	publishDir "$params.outdir/gVCFs_GQ_DP", mode: 'copy'
+	publishDir "$params.outdir/gVCFs_DP_GQ", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:

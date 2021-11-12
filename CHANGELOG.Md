@@ -196,7 +196,7 @@ Updated process defaults
 Region filtration now uses BEDTools intersect first, then BCFtools, then VCFtools  
 Updated some steps to use bgzip when needed by BCFtools  
 Fixed RepeatModeler additional thread glitch 
-Added pullGQDP process  
+Added pullDPGQ process  
 
 ### Version 0.2.0  
 Reordered vcf filtration so that split_vcf occurs first to maximize parallelization  

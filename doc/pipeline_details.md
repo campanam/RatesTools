@@ -60,8 +60,11 @@ The simplifyBed process identifies and merges overlapping bed entries in the bed
 ## filterChr  
 Using VCFtools [10], the filterChr process generates all-sites VCFs for each offspring and its parents (`vcftools --recode --indv <sire> --indv <dam> --indv <offspring>`). The number of resulting VCFs will thus equal the number of offspring in the dataset. If a list of target chromosomes was provided, this process also filters the output VCFs to include only the specified target regions using the `--chr` option. The resulting VCFs are compressed using `gzip`.  
 
-## pullGQDP
-Using BCFtools [11], the pullGQDP process extracts the GQ and DP information from the chromosome-filtered VCFs (`bcftools view -v snps <chromosome_vcf> | bcftools query -f "%CHROM %POS [ %DP] [ %GQ]\n"`).  
+## pullDPGQ
+Using BCFtools [11], the pullGQDP process extracts the DP and GQ information from the chromosome-filtered VCFs (`bcftools view -v snps <chromosome_vcf> | bcftools query -f "%CHROM %POS [ %DP] [ %GQ]\n"`).  
+
+## plotDPGQ
+The plotDPGQ process plots the DP and GQ information from pullDPGQ.  
 
 ## splitVCFs  
 The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [`nextflow_split.rb`](ruby_scripts.md#nextflow_splitrb). The resulting VCFs are compressed using `gzip`.  

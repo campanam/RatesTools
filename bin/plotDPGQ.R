@@ -23,17 +23,11 @@ library(ggpubr)
 library(dplyr)
 library(data.table)
 
-#set working directory
-#you need to reset this or figure out a way to pipe a variable in from realpath or something
-setwd('~/Documents/Documents - Ellie’s MacBook Pro (2)/Mutation_Rate/scripts_ratestools/')
+stem = commandArgs(trailingOnly=TRUE) # Get filestem for output
 
-###load data
 #get list of dpgq txt files in directory
 dpqg_files <- list.files(pattern = "*.txt")
-for(filename in dpqg_files){
-  print(filename)
-}
-#?????????????????????????????????because this makes any sense
+
 df <- dpqg_files %>%
   set_names(.) %>%
   map_df(read.delim, header=FALSE, sep = " ", .id = "FileName")
@@ -64,7 +58,7 @@ qual <- ggplot(df_clean, aes(x=qual, color=individual)) +
 figure <- ggarrange(depth, qual,
                     ncol = 1, nrow = 2)
 #need to add something that produces png
-jpeg(file="log_depth_qual.jpg", width = 550, height = 700)
+jpeg(file=paste(stem,"log_depth_qual.jpg",sep = ""), width = 550, height = 700)
 figure
 dev.off()
 
@@ -81,5 +75,5 @@ qual_table <- data.frame(matrix(unlist(qual_quant), nrow=1, byrow=TRUE),stringsA
 colnames(qual_table) = c("0%","25%","50%","75%","100%","mean")
 
 
-write.csv(depth_table, file="depth_ratestools.csv", row.names=FALSE)
-write.csv(qual_table, file="qual_ratestools.csv", row.names=FALSE)
+write.csv(depth_table, file=paste(stem,"depth_ratestools.csv", sep = ""), row.names=FALSE)
+write.csv(qual_table, file=paste(stem,"qual_ratestools.csv", sep = ""), row.names=FALSE)

@@ -518,24 +518,44 @@ process filterChr {
 	
 }
 
-process pullGQDP {
+process pullDPGQ {
 
-	// Extract GQ/DP values from autosome scaffolds to look at the distributions of DP and GQ for variant call sites
+	// Extract DP/GQ values from autosome scaffolds to look at the distributions of DP and GQ for variant call sites
 
 	label 'bcftools'
-	
-	input:
-	path chrfilt from chrfilt_stats_ch
 	publishDir "$params.outdir/gVCFs_GQ_DP", mode: 'copy'
 	errorStrategy 'finish'
 	
+	input:
+	path chrfilt from chrfilt_stats_ch
+	
 	output:
-	file "${chrfilt.simpleName}.variants.tsv"
+	file "${chrfilt.simpleName}.variants.tsv" into dp_gq_ch
 	
 	"""
-	bcftools view -v snps ${chrfilt} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}.variants.tsv
+	bcftools view -v snps ${chrfilt} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}.variants.txt
 	"""
 
+}
+
+process plotDPGQ {
+
+	// Plot DP and GQ distributions
+	
+	label 'R'
+	publishDir "$params.outdir/gVCFs_GQ_DP", mode: 'copy'
+	errorStrategy 'finish'
+	
+	input:
+	file "*.txt" from dp_gq_ch.collect()
+	
+	output:
+	file "${params.prefix}*"
+	
+	"""
+	Rscript plotDPGQ.R $params.prefix
+	"""
+	
 }
 
 process splitVCFs {

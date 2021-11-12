@@ -20,10 +20,8 @@
 #load libraries
 library(data.table)
 library(tidyverse)
-library(data.table)
 library(ggpubr)
 library(dplyr)
-library(data.table)
 
 stem = commandArgs(trailingOnly=TRUE) # Get filestem for output
 
@@ -41,10 +39,10 @@ df_clean <- df_clean %>%
 #these filters assume that your IDs are before either a '_' or a '.'
 df_clean$individual <- sub("_\\S+","", df_clean$individual, perl=TRUE)
 df_clean$individual <- gsub("\\..*","",df_clean$individual)
-df_clean$depth_log<- log(as.numeric(as.character(df_clean$depth)))
-df_clean$qual_log<- log(as.numeric(as.character(df_clean$qual)))
-df_clean$depth<- as.numeric(as.character(df_clean$depth))
-df_clean$qual<- as.numeric(as.character(df_clean$qual))
+df_clean$depth_log <- log(as.numeric(as.character(df_clean$depth)))
+df_clean$qual_log <- log(as.numeric(as.character(df_clean$qual)))
+df_clean$depth <- as.numeric(as.character(df_clean$depth))
+df_clean$qual <- as.numeric(as.character(df_clean$qual))
 
 
 #generate plots 

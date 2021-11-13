@@ -188,10 +188,22 @@ Accessor script for split_vcf for nextflow
 ## nextflow.config  
 ### Version 0.3.0  
 Fixed RepeatModeler additional thread glitch  
+Added module options for bedtools, bcftools, bgzip, tabix  
+Updated process defaults  
+
+## plotDPGQ
+### Version 0.2.0  
+First version integrated into pipeline  
+
+### Version 0.1.0
+Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
 ### Version 0.3.0  
-Region filtration now uses BEDTools intersect  
+Region filtration now uses BEDTools intersect first, then BCFtools, then VCFtools  
+Updated some steps to use bgzip when needed by BCFtools  
+Fixed RepeatModeler additional thread glitch 
+Added pullDPGQ process  
 
 ### Version 0.2.0  
 Reordered vcf filtration so that split_vcf occurs first to maximize parallelization  

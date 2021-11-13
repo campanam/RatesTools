@@ -57,7 +57,7 @@ qual <- ggplot(df_clean, aes(x=qual, color=individual)) +
 figure <- ggarrange(depth, qual,
                     ncol = 1, nrow = 2)
 #need to add something that produces png
-jpeg(file=paste(stem,"log_depth_qual.jpg",sep = ""), width = 550, height = 700)
+jpeg(file=paste(stem,"_log_depth_qual.jpg",sep = ""), width = 550, height = 700)
 figure
 dev.off()
 
@@ -74,5 +74,5 @@ qual_table <- data.frame(matrix(unlist(qual_quant), nrow=1, byrow=TRUE),stringsA
 colnames(qual_table) = c("0%","25%","50%","75%","100%","mean")
 
 
-write.csv(depth_table, file=paste(stem,"depth_ratestools.csv", sep = ""), row.names=FALSE)
-write.csv(qual_table, file=paste(stem,"qual_ratestools.csv", sep = ""), row.names=FALSE)
+write.csv(depth_table, file=paste(stem,"_depth_ratestools.csv", sep = ""), row.names=FALSE)
+write.csv(qual_table, file=paste(stem,"_qual_ratestools.csv", sep = ""), row.names=FALSE)

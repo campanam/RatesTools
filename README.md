@@ -54,7 +54,7 @@ RatesTools requires the following external dependencies. See the documentation f
 RatesTools requires the following R packages installed in your R environment:  
 * [Tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) v. 1.0.7 [16]
 * [data.table](https://rdatatable.gitlab.io/data.table/) v. 1.14.2 [17]
-* [ggpubr] [18]
+* [ggpubr](https://rpkgs.datanovia.com/ggpubr/) [18]
 
 
 ### Configure the Pipeline    
@@ -88,6 +88,6 @@ Enter `ratestools.nf -c <config_file>` to run the pipeline. Append `-resume` to 
 13. Flynn, J.M., Hubley, R., Goubert, C., Rosen, J. Clark,. A.G., Feschotte, C., Smit, A.F. (2020) RepeatModeler2 for automated genomic discovery of transposable element families. *Proc Natl Acad Sci U S A*, __117__, 9451-9457. DOI: [10.1073/pnas.1921046117](https://www.pnas.org/content/117/17/9451.short).  
 14. Quinlan, A.R., Hall, I.M. (2010) BEDTools: a flexible suite of utilities for comparing genomic features. *Bioinformatics*, __26__, 841-842, doi: [10.1093/bioinformatics/btq0333](https://academic.oup.com/bioinformatics/article/26/6/841/244688).  
 15. Wickham, H., Averick, M., Bryan, J., Chang, W., D'Agostino McGowan, L., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T.L., Miller, E., Bache, S.M., Müller, K., Ooms, J., Robinson, D., Seidel, D.P., Spinu, V., Takahashi, K., Vaughan, D., Wilke, C., Woo, K. Yutani, H. (2019). Welcome to the Tidyverse. *J Open Source Softw*, __4__, 1686. DOI: [10.21105/joss.01686](https://joss.theoj.org/papers/10.21105/joss.016866).  
-16. Wickham, H., François, R., Henry, L., Müller, K. (2021) dplyr: a grammar of data manipulation. R package version 1.0.7. [URL](https://CRAN.R-project.org/package=dplyr).  
-17. Dowle, M., Srinivasan, A. (2021) data.table: extension of 'data.frame'. R package version 1.14.2. [URL](https://CRAN.R-project.org/package=data.table).  
+16. Wickham, H., François, R., Henry, L., Müller, K. (2021) dplyr: a grammar of data manipulation. R package version 1.0.7. (https://CRAN.R-project.org/package=dplyr).  
+17. Dowle, M., Srinivasan, A. (2021) data.table: extension of 'data.frame'. R package version 1.14.2. (https://CRAN.R-project.org/package=data.table).  
 18.

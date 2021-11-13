@@ -20,7 +20,7 @@
 #load libraries
 library(data.table)
 library(tidyverse) # Also loads dplyr library
-library(ggpubr)
+#library(ggpubr)
 
 stem = commandArgs(trailingOnly=TRUE) # Get filestem for output
 

@@ -530,7 +530,7 @@ process pullDPGQ {
 	path chrfilt from chrfilt_stats_ch
 	
 	output:
-	file "${chrfilt.simpleName}.variants.tsv" into dp_gq_ch
+	file "${chrfilt.simpleName}.variants.txt" into dp_gq_ch
 	
 	"""
 	bcftools view -v snps ${chrfilt} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}.variants.txt

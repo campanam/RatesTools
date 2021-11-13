@@ -20,7 +20,6 @@
 #load libraries
 library(data.table)
 library(tidyverse) # Also loads dplyr library
-#library(ggpubr)
 
 stem = commandArgs(trailingOnly=TRUE) # Get filestem for output
 
@@ -44,25 +43,21 @@ df_clean$depth <- as.numeric(as.character(df_clean$depth))
 df_clean$qual <- as.numeric(as.character(df_clean$qual))
 
 
-#generate plots 
-depth <- ggplot(df_clean, aes(x=depth, color=individual)) + 
+#generate plots
+png(file=paste(stem,"_log_depth.png",sep = ""), width = 550, height = 700)
+ggplot(df_clean, aes(x=depth, color=individual)) + 
   geom_histogram(fill="white", alpha=0.5, position="identity") +
   xlab("") + ylab("log depth") +
   theme(legend.position="top", legend.title = element_blank())
-qual <- ggplot(df_clean, aes(x=qual, color=individual)) + 
+dev.off()
+png(file=paste(stem,"_log_qual.png",sep = ""), width = 550, height = 700)
+ggplot(df_clean, aes(x=qual, color=individual)) + 
   geom_histogram(fill="white", alpha=0.5, position="identity") +
   xlab("") + ylab("log GQ") +
   theme(legend.position="top", legend.title = element_blank())
-
-figure <- ggarrange(depth, qual,
-                    ncol = 1, nrow = 2)
-#need to add something that produces png
-jpeg(file=paste(stem,"_log_depth_qual.jpg",sep = ""), width = 550, height = 700)
-figure
 dev.off()
 
 #generate table of quantiles per individual
-
 depth_quant <- quantile(df_clean$depth, na.rm=TRUE)
 depth_quant$mean <- mean(df_clean$depth, na.rm=TRUE)
 depth_table <- data.frame(matrix(unlist(depth_quant), nrow=1, byrow=TRUE),stringsAsFactors=FALSE)
@@ -72,7 +67,6 @@ qual_quant <- quantile(df_clean$qual, na.rm=TRUE)
 qual_quant$mean <- mean(df_clean$qual, na.rm=TRUE)
 qual_table <- data.frame(matrix(unlist(qual_quant), nrow=1, byrow=TRUE),stringsAsFactors=FALSE)
 colnames(qual_table) = c("0%","25%","50%","75%","100%","mean")
-
 
 write.csv(depth_table, file=paste(stem,"_depth_ratestools.csv", sep = ""), row.names=FALSE)
 write.csv(qual_table, file=paste(stem,"_qual_ratestools.csv", sep = ""), row.names=FALSE)

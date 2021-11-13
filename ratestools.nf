@@ -550,7 +550,8 @@ process plotDPGQ {
 	file "*.txt" from dp_gq_ch.collect()
 	
 	output:
-	file "${params.prefix}_log_depth_qual.jpg"
+	file "${params.prefix}_log_depth.png"
+	file "${params.prefix}_log_qual.png"
 	file "${params.prefix}_depth_ratestools.csv"
 	file "${params.prefix}_qual_ratestools.csv"
 	

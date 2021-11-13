@@ -1,4 +1,4 @@
-# RatesTools Ruby Scripts  
+# RatesTools Ruby and R Scripts  
 
 __Michael G. Campana & Ellie E. Armstrong, 2019-2021__  
 Smithsonian Conservation Biology Institute  

@@ -205,6 +205,8 @@ if [ $answer == 'N' ]; then
 fi
 echo 'awk configuration...'
 get_path_module awk
+echo 'R configuration...'
+get_path_module R
 echo 'Testing for Picard...'
 get_jar_path Picard picard.jar
 echo 'Use default Java options for Picard? (Y/N)'

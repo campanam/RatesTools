@@ -37,24 +37,24 @@ RatesTools requires the following external dependencies. See the documentation f
 * awk  
 * sed  
 * zcat  
-* [BWA](http://bio-bwa.sourceforge.net/) [3] v. 0.7.17  
-* [SAMtools](http://www.htslib.org/) [4,5] v. 1.9  
-* [BCFtools](http://www.htslib.org/) [4,5] v. 1.9  
-* [bgzip and tabix from HTSlib](http://www.htslib.org/) [5] v. 1.9  
+* [BWA](http://bio-bwa.sourceforge.net/) [4] v. 0.7.17  
+* [SAMtools](http://www.htslib.org/) [5,6] v. 1.9  
+* [BCFtools](http://www.htslib.org/) [5,6] v. 1.9  
+* [bgzip and tabix from HTSlib](http://www.htslib.org/) [6] v. 1.9  
 * [Java](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html) v. 1.8  
-* [Picard](https://broadinstitute.github.io/picard/) [6] v. 2.23.8  
-* [Sambamba](https://lomereiter.github.io/sambamba/) [7] v. 0.7.1  
+* [Picard](https://broadinstitute.github.io/picard/) [7] v. 2.23.8  
+* [Sambamba](https://lomereiter.github.io/sambamba/) [8] v. 0.7.1  
 * [Genome Analysis Toolkit](https://github.com/broadgsa/gatk) v. 3.8-1  
-* [VCFtools](https://vcftools.github.io/index.html) [8] v.0.1.16  
-* [GenMap](https://github.com/cpockrandt/genmap) [9] v.1.2.0 with [SeqAn](https://github.com/seqan/seqan/tree/f548b50705be3f824a65a696943ea90a390564ce) [10] v. 2.4.1  
-* [RepeatMasker](http://www.repeatmasker.org/) [11] v. 4.0.9  
-* [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) [12] v. 2.0.1  
-* [BEDTools](https://bedtools.readthedocs.io/en/latest/) [13] v. 2.28.0  
+* [VCFtools](https://vcftools.github.io/index.html) [9] v.0.1.16  
+* [GenMap](https://github.com/cpockrandt/genmap) [10] v.1.2.0 with [SeqAn](https://github.com/seqan/seqan/tree/f548b50705be3f824a65a696943ea90a390564ce) [11] v. 2.4.1  
+* [RepeatMasker](http://www.repeatmasker.org/) [12] v. 4.0.9  
+* [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) [13] v. 2.0.1  
+* [BEDTools](https://bedtools.readthedocs.io/en/latest/) [14] v. 2.28.0  
 
 RatesTools requires the following R packages installed in your R environment:  
-* [tidyverse] [14] v. 1.3.1 with [dplyr] v. 1.0.7 [15]
-* [data.table] [16]
-* [ggpubr] [17]
+* [Tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) v. 1.0.7 [16]
+* [data.table](https://rdatatable.gitlab.io/data.table/) v. 1.14.2 [17]
+* [ggpubr] [18]
 
 
 ### Configure the Pipeline    
@@ -74,7 +74,7 @@ Enter `ratestools.nf -c <config_file>` to run the pipeline. Append `-resume` to 
 
 ## References  
 1. Di Tommaso, P., Chatzou, M., Floden, E.W., Prieto Barja, P., Palumbo, E., Notredame, C. (2017) Nextflow enables reproducible computational workflows. *Nat Biotechnol*, __35__, 316–319. DOI: [10.1038/nbt.3820](https://www.nature.com/articles/nbt.3820).  
-2. R Core Team (2020) *R: A language and environment for statistical computing.* R Foundation for Statistical Computing, Vienna, Austria. [URL](https://www.r-project.org/).  
+2. R Core Team (2020) *R: A language and environment for statistical computing.* R Foundation for Statistical Computing, Vienna, Austria. (https://www.r-project.org/).  
 3. McKenna, A., Hanna, M., Banks, E., Sivachenko, A., Cibulskis, K., Kernytsky, A., Garimella, K., Altshuler, D., Gabriel, S., Daly, M., DePristo, M.A. (2010) The Genome Analysis Toolkit: a MapReduce framework for analyzing next-generation DNA sequencing data. *Genome Res*, __20__, 1297-1303. DOI: [10.1101/gr.107524.110](https://genome.cshlp.org/content/20/9/1297.abstract).  
 4. Li, H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. *arXiv*, [1303.3997v2](https://arxiv.org/abs/1303.3997).  
 5. Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., 1000 Genome Project Data Processing Subgroup (2009) The Sequence Alignment/Map format and SAMtools. *Bioinformatics*, 25, 2078-2079. DOI: [10.1093/bioinformatics/btp352](https://academic.oup.com/bioinformatics/article/25/16/2078/204688).  
@@ -87,3 +87,7 @@ Enter `ratestools.nf -c <config_file>` to run the pipeline. Append `-resume` to 
 12. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  
 13. Flynn, J.M., Hubley, R., Goubert, C., Rosen, J. Clark,. A.G., Feschotte, C., Smit, A.F. (2020) RepeatModeler2 for automated genomic discovery of transposable element families. *Proc Natl Acad Sci U S A*, __117__, 9451-9457. DOI: [10.1073/pnas.1921046117](https://www.pnas.org/content/117/17/9451.short).  
 14. Quinlan, A.R., Hall, I.M. (2010) BEDTools: a flexible suite of utilities for comparing genomic features. *Bioinformatics*, __26__, 841-842, doi: [10.1093/bioinformatics/btq0333](https://academic.oup.com/bioinformatics/article/26/6/841/244688).  
+15. Wickham, H., Averick, M., Bryan, J., Chang, W., D'Agostino McGowan, L., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T.L., Miller, E., Bache, S.M., Müller, K., Ooms, J., Robinson, D., Seidel, D.P., Spinu, V., Takahashi, K., Vaughan, D., Wilke, C., Woo, K. Yutani, H. (2019). Welcome to the Tidyverse. *J Open Source Softw*, __4__, 1686. DOI: [10.21105/joss.01686](https://joss.theoj.org/papers/10.21105/joss.016866).  
+16. Wickham, H., François, R., Henry, L., Müller, K. (2021) dplyr: a grammar of data manipulation. R package version 1.0.7. [URL](https://CRAN.R-project.org/package=dplyr).  
+17. Dowle, M., Srinivasan, A. (2021) data.table: extension of 'data.frame'. R package version 1.14.2. [URL](https://CRAN.R-project.org/package=data.table).  
+18.

@@ -52,8 +52,8 @@ RatesTools requires the following external dependencies. See the documentation f
 * [BEDTools](https://bedtools.readthedocs.io/en/latest/) [14] v. 2.28.0  
 
 RatesTools requires the following R packages installed in your R environment:  
-* [Tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) v. 1.0.7 [16] and [ggplot2](https://ggplot2.tidyverse.org/) v. 3.3.5 [17].
-* [data.table](https://rdatatable.gitlab.io/data.table/) v. 1.14.2 [18]
+* [Tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) [16] v. 1.0.7  and [ggplot2](https://ggplot2.tidyverse.org/) [17] v. 3.3.5.
+* [data.table](https://rdatatable.gitlab.io/data.table/) [18] v. 1.14.2 
 
 ### Configure the Pipeline    
 Assisted configuration of the RatesTools pipeline can be accomplished using the `configure.sh` bash script. The script copies the `nextflow.config` included with the repository and modifies the copy for the target system. The `configure.sh` script detects software installed on the local system and prompts the user to provide module files, paths to undetected files, and program options. The configuration file can also be manually edited using a text editor. However, please note that the `configure.sh` script requires an *unmodified* `nextflow.config` file to work.  

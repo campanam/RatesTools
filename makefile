@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------------------
-# Michael G. Campana and Ellie E. Armstrong, 2020
+# Michael G. Campana and Ellie E. Armstrong, 2020-2021
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 

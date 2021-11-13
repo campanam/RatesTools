@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 #----------------------------------------------------------------------------------------
-# plotDPGQ version 0.2
+# plotDPGQ version 0.2.0
 # Ellie E. Armstrong & Michael G. Campana, 2021
 # Stanford University and Smithsonian Institution
 

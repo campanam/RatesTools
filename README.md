@@ -52,7 +52,7 @@ RatesTools requires the following external dependencies. See the documentation f
 * [BEDTools](https://bedtools.readthedocs.io/en/latest/) [14] v. 2.28.0  
 
 RatesTools requires the following R packages installed in your R environment:  
-* [Tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) [16] v. 1.0.7  and [ggplot2](https://ggplot2.tidyverse.org/) [17] v. 3.3.5.
+* [tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) [16] v. 1.0.7  and [ggplot2](https://ggplot2.tidyverse.org/) [17] v. 3.3.5.
 * [data.table](https://rdatatable.gitlab.io/data.table/) [18] v. 1.14.2 
 
 ### Configure the Pipeline    

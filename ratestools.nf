@@ -506,7 +506,7 @@ process filterChr {
 		"""
 		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
 		vcftools --gzvcf $comb_vcf --recode --out ${prefix}.chrfilt \$chr_line
-		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
+		gzip ${prefix}.chrfilt.recode.vcf
 		"""
 }
 

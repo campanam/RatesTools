@@ -58,7 +58,10 @@ Using [`indels2bed.rb`](ruby_r_scripts.md#indels2bedrb), the maskIndels process 
 The simplifyBed process identifies and merges overlapping bed entries in the bed results from the repeatMaskRM, genMapMap and maskIndels processes. First, overlapping bed entries are merged for each of the three chromosome-sorted and coordinate-sorted bed files using [`simplify_sorted_bed.rb`](ruby_r_scripts.md#simplify_sorted_bedrb). The three merged bed files are then concatenated using `cat`. Overlapping entries in the resulting, unsorted bed file are merged using [`simplify_bed.rb`](ruby_r_scripts.md#simplify_bedrb).  
 
 ## filterChr  
-Using VCFtools [10], the filterChr process generates all-sites VCFs for each offspring and its parents (`vcftools --recode --indv <sire> --indv <dam> --indv <offspring>`). The number of resulting VCFs will thus equal the number of offspring in the dataset. If a list of target chromosomes was provided, this process also filters the output VCFs to include only the specified target regions using the `--chr` option. The resulting VCFs are compressed using `gzip`.  
+If a list of target chromosomes was provided, this process filters using VCFtools [10] the output VCFs to include only the specified target regions using the `--chr` option. The resulting VCFs are compressed using `gzip`.  
+
+## splitTrios
+Using VCFtools, the splitTrios process generates all-sites VCFs for each offspring and its parents (`vcftools --recode --indv <sire> --indv <dam> --indv <offspring>`). The number of resulting VCFs will thus equal the number of offspring in the dataset. The resulting VCFs are compressed using `gzip`.  
 
 ## pullDPGQ
 Using BCFtools [11], the pullGQDP process extracts the DP and GQ information from the chromosome-filtered VCFs (`bcftools view -v snps <chromosome_vcf> | bcftools query -f "%CHROM %POS [ %DP] [ %GQ]\n"`).  
@@ -69,8 +72,11 @@ The plotDPGQ process plots the DP and GQ information from pullDPGQ using [`plotD
 ## splitVCFs  
 The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [`nextflow_split.rb`](ruby_r_scripts.md#nextflow_splitrb). The resulting VCFs are compressed using `gzip`.  
 
-## filterSites  
-The filterSites process filters the split VCF files from the splitVCFs process using VCFtools and the site filters provided in the config file (`vcftools --recode <site_filters>`). The resulting VCFs are compressed using `bgzip` [11].  
+## vcftoolsFilterSites  
+The filterSites process filters the split VCF files from the splitVCFs process using VCFtools and the site filters provided in the config file (`vcftools --recode <site_filters>`). Set the vcftools_site_filters paramater to "NULL" to turn off this filter. The resulting VCFs are compressed using `bgzip` [11].  
+
+## gatkFilterSites  
+The filterSites process filters the VCF files from the splitVCFs/vcftoolsFilterSites process using GATK and the site filters provided in the config file (`java -jar GenomeAnalysisTK.jar -T`). Set the gatk_site_filters paramater to "NULL" to turn off this filter. The resulting VCFs are compressed using `bgzip` [11].  
 
 ## filterRegions  
 The filterRegions process removes low-reliability regions (repeat regions, indel-affected sites, and regions of non-unique mappability) from the site-filtered VCFs from the filterSites process. The low-reliability regions are specified in the output merged bed from the simplifyBed process. On the first pass, the process uses BEDTools [12] intersect on the site-filtered VCF (`bedtools intersect -a <site-filtered_vcf> -b <out_cat.bed>`). Should this fail (e.g. due to a compression issue), the process repeats using `zcat` to uncompress the VCF and pass it via stdin to BEDTools. If neither BEDTools run is successful, the process attempts to removed the filtered regions using BCFtools view (`bcftools view -R <out_cat.bed> -Ob -o tmp.bcf`), BCFtools isec (`bcftools isec -C <site-filtered_vcf> <tmp.bcf>`) and BCFtools view (`bcftools view -T <isec_out> <site-filtered_vcf>`) [11]. If the BCFtools attempt fails, the process defaults to using VCFtools (`vcftools --recode --exclude-bed <out_cat.bed>`). The resulting VCFs are compressed using `gzip`.  

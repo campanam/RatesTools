@@ -1,7 +1,7 @@
 # RatesTools Pipeline Details  
 
-__Michael G. Campana & Ellie E. Armstrong, 2019-2020__  
-Smithsonian Conservation Biology Institute  
+__Michael G. Campana & Ellie E. Armstrong, 2019-2022__  
+Smithsonian's National Zoo and Conservation Biology Institute  
 Stanford University  
 
 The following document provides detailed descriptions of the steps included in the RatesTools pipeline. Please note that the commands shown below only list non-standard options for clarity. We omit basic input/output required for these commands. See the documentation for these programs for operation details.  

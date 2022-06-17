@@ -191,7 +191,12 @@ Fixed RepeatModeler additional thread glitch
 Added module options for bedtools, bcftools, bgzip, tabix  
 Updated process defaults  
 
-## plotDPGQ
+## plotDPGQ  
+### Version 0.3.0  
+Fixed bug that misread sample names  
+Corrected output so that all PNGs properly named  
+Fixed table coding so that all individual samples calculated in CSVs  
+
 ### Version 0.2.0  
 First version integrated into pipeline  
 
@@ -199,6 +204,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.4.0  
+Updated plotDPGQ output PNGs  
+
 ### Version 0.3.0  
 Region filtration now uses BEDTools intersect first, then BCFtools, then VCFtools  
 Updated some steps to use bgzip when needed by BCFtools  

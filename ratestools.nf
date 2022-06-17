@@ -62,7 +62,7 @@ process alignSeqs {
 	
 	output:
 	file "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
-	val pair_id into filt_sample_ch // sample name for downstream use
+	val pair_id into filt_sample_ch, stats_sample_ch // sample name for downstream use
 	val samtools_extra_threads into samtools_threads_ch
 	
 	
@@ -274,8 +274,8 @@ process genotypegVCFs {
 	val prefix from params.prefix
 	
 	output:
-	file "${prefix}_combined.vcf*" into combined_vcf_ch 
-	file "${prefix}_combined.vcf.gz" into combined_indels_ch
+	file "${prefix}_combined.vcf*"
+	file "${prefix}_combined.vcf.gz" into combined_vcf_ch, combined_indels_ch
 	
 	"""
 	VARPATH=""
@@ -481,8 +481,6 @@ process simplifyBed {
 
 }
 
-filt_sample_ch2 = filt_sample_ch.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
-
 process filterChr {
 	
 	// Optionally include only specific chromsomes
@@ -492,7 +490,38 @@ process filterChr {
 	errorStrategy 'finish'
 	
 	input:
-	file "*" from combined_vcf_ch
+	file comb_vcf from combined_vcf_ch
+	val prefix from params.prefix
+	file chrs from chr_file
+	
+	output:
+	file "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
+	
+	script:
+	if (chrs.name == "NULL")
+		"""
+		cp $comb_vcf ${prefix}.chrfilt.recode.vcf.gz
+		"""
+	else
+		"""
+		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
+		vcftools --gzvcf $comb_vcf --recode --out ${prefix}.chrfilt \$chr_line
+		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
+		"""
+}
+
+filt_sample_ch2 = filt_sample_ch.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
+
+process splitTrios {
+	
+	// Split samples into trios for analysis
+	
+	label 'vcftools'
+	publishDir "$params.outdir/SplitTrioVCFs", mode: 'copy'
+	errorStrategy 'finish'
+	
+	input:
+	file chr_vcf from chrfilt_vcf_ch
 	val dam from params.dam
 	val sire from params.sire
 	val prefix from params.prefix
@@ -500,22 +529,14 @@ process filterChr {
 	file chrs from chr_file
 	
 	output:
-	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
+	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
 	
-	script:
-	if (chrs.name == "NULL")
-		"""
-		vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id}
-		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
+	"""
+	vcftools --gzvcf $chr_vcf --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id}
+	gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
 		
-		"""
-	else
-		"""
-		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
-		vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id} \$chr_line
-		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
-		"""
-	
+	"""
+
 }
 
 process pullDPGQ {
@@ -528,12 +549,13 @@ process pullDPGQ {
 	
 	input:
 	path chrfilt from chrfilt_stats_ch
+	val pair_id from stats_sample_ch
 	
 	output:
 	file "${chrfilt.simpleName}.variants.txt" into dp_gq_ch
 	
 	"""
-	bcftools view -v snps ${chrfilt} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}.variants.txt
+	bcftools view -v snps ${chrfilt} -s ${pair_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_offspring${pair_id}.variants.txt
 	"""
 
 }
@@ -569,7 +591,7 @@ process splitVCFs {
 	errorStrategy 'finish'
 	
 	input:
-	file chr_vcf from chrfilt_vcf_ch
+	file chr_vcf from triosplit_vcf_ch
 	
 	output:
 	file "${chr_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten

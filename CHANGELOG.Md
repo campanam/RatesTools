@@ -11,12 +11,13 @@ Stanford University
 5. [kochDNp](#kochdnp)  
 6. [nextflow_split](#nextflow_split)  
 7. [nextflow.config](#nextflowconfig)  
-8. [ratestools](#ratestools)  
-9. [RM2bed](#rm2bed)  
-10. [simplify_bed](#simplify_bed)  
-11. [simplify_sorted_bed](#simplify_sorted_bed)  
-12. [summarize_denovo](#summarize_denovo)  
-13. [Deprecated](#deprecated)  
+8. [plotDPGQ](#plotDPGQ)  
+9. [ratestools](#ratestools)  
+10. [RM2bed](#rm2bed)  
+11. [simplify_bed](#simplify_bed)  
+12. [simplify_sorted_bed](#simplify_sorted_bed)  
+13. [summarize_denovo](#summarize_denovo)  
+14. [Deprecated](#deprecated)  
 
 
 ## calc_denovo_mutation_rate  

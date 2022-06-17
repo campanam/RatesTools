@@ -555,7 +555,7 @@ process pullDPGQ {
 	file "${chrfilt.simpleName}.variants.txt" into dp_gq_ch
 	
 	"""
-	bcftools view -v snps ${chrfilt} -s ${pair_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_offspring${pair_id}.variants.txt
+	bcftools view -v snps ${chrfilt} -s ${pair_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_ind${pair_id}.variants.txt
 	"""
 
 }

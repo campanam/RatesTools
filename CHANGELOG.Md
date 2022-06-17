@@ -186,6 +186,11 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## nextflow.config  
+### Version 0.4.0  
+Split site_filters into vcftools_site_filters and gatk_site_filters  
+Updated process list in both profiles for new processes  
+Fixed some missing processes from v0.3.0 in default profile  
+
 ### Version 0.3.0  
 Fixed RepeatModeler additional thread glitch  
 Added module options for bedtools, bcftools, bgzip, tabix  

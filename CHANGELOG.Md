@@ -211,6 +211,12 @@ Initial script (plotDPGQ-clean.R)
 ## ratestools  
 ### Version 0.4.0  
 Updated plotDPGQ output PNGs  
+split filterSites in vcftoolsFilterSites and gatkFilterSites  
+Added 'NULL' option to site filtrations to bypass unnecessary processing  
+Divided filterChr into filterChr and splitTrios  
+filterChr (new version) now only does chromosome filtering  
+splitTrios does trio splitting after chromosome filtration  
+Fixed pullDPGQ input so that all individuals calculated from chr-filtered VCFs  
 
 ### Version 0.3.0  
 Region filtration now uses BEDTools intersect first, then BCFtools, then VCFtools  

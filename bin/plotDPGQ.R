@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 #----------------------------------------------------------------------------------------
-# plotDPGQ version 0.2.0
+# plotDPGQ version 0.3.0
 # Ellie E. Armstrong & Michael G. Campana, 2021
 # Stanford University and Smithsonian Institution
 
@@ -24,9 +24,9 @@ library(tidyverse) # Also loads dplyr library
 stem = commandArgs(trailingOnly=TRUE) # Get filestem for output
 
 #get list of dpgq txt files in directory
-dpqg_files <- list.files(pattern = "*.txt")
+dpgq_files <- list.files(pattern = "*.txt")
 
-df <- dpqg_files %>%
+df <- dpgq_files %>%
   set_names(.) %>%
   map_df(read.delim, header=FALSE, sep = " ", .id = "FileName")
 
@@ -34,9 +34,9 @@ df <- dpqg_files %>%
 df_clean <- subset(df, select = -c(V3,V5))
 df_clean <- df_clean %>% 
   rename(chr=V1, position=V2, depth=V4, qual=V6, individual=FileName)
-#these filters assume that your IDs are before either a '_' or a '.'
-df_clean$individual <- sub("_\\S+","", df_clean$individual, perl=TRUE)
-df_clean$individual <- gsub("\\..*","",df_clean$individual)
+#Remove extraneous bits of file name
+df_clean$individual <- sub(".*_offspring","", df_clean$individual, perl=TRUE)
+df_clean$individual <- sub(".variants.txt","",df_clean$individual)
 df_clean$depth_log <- log(as.numeric(as.character(df_clean$depth)))
 df_clean$qual_log <- log(as.numeric(as.character(df_clean$qual)))
 df_clean$depth <- as.numeric(as.character(df_clean$depth))
@@ -45,28 +45,58 @@ df_clean$qual <- as.numeric(as.character(df_clean$qual))
 
 #generate plots
 png(file=paste(stem,"_log_depth.png",sep = ""), width = 550, height = 700)
-ggplot(df_clean, aes(x=depth, color=individual)) + 
+ggplot(df_clean, aes(x=depth_log, color=individual)) + 
   geom_histogram(fill="white", alpha=0.5, position="identity") +
   xlab("") + ylab("log depth") +
   theme(legend.position="top", legend.title = element_blank())
 dev.off()
+png(file=paste(stem,"_depth.png",sep = ""), width = 550, height = 700)
+ggplot(df_clean, aes(x=depth, color=individual)) + 
+  geom_histogram(fill="white", alpha=0.5, position="identity") +
+  xlab("") + ylab("depth") +
+  theme(legend.position="top", legend.title = element_blank())
+dev.off()
 png(file=paste(stem,"_log_qual.png",sep = ""), width = 550, height = 700)
+ggplot(df_clean, aes(x=qual_log, color=individual)) + 
+  geom_histogram(fill="white", alpha=0.5, position="identity") +
+  xlab("") + ylab("log GQ") +
+  theme(legend.position="top", legend.title = element_blank())
+dev.off()
+png(file=paste(stem,"_qual.png",sep = ""), width = 550, height = 700)
 ggplot(df_clean, aes(x=qual, color=individual)) + 
   geom_histogram(fill="white", alpha=0.5, position="identity") +
   xlab("") + ylab("log GQ") +
   theme(legend.position="top", legend.title = element_blank())
 dev.off()
 
+samples <- c(unique(df_clean$individual))
+depth_table <- data.frame(matrix(ncol = 7, nrow = 0))
+qual_table <- data.frame(matrix(ncol = 7, nrow = 0))
+colnames(depth_table) = c("Sample","0%","25%","50%","75%","100%","mean")
+colnames(qual_table) = c("Sample","0%","25%","50%","75%","100%","mean")
+
+for (ind in samples) {
 #generate table of quantiles per individual
+depth_quant <- quantile(df_clean[df_clean$individual == ind,]$depth, na.rm=TRUE)
+depth_quant$mean <- mean(df_clean[df_clean$individual == ind,]$depth, na.rm=TRUE)
+tmp <- c(ind,unlist(depth_quant))
+depth_table[nrow(depth_table)+1,] <- tmp
+
+qual_quant <- quantile(df_clean[df_clean$individual == ind,]$qual, na.rm=TRUE)
+qual_quant$mean <- mean(df_clean[df_clean$individual == ind,]$qual, na.rm=TRUE)
+tmp <-c(ind,unlist(qual_quant))
+qual_table[nrow(qual_table)+1,] <- tmp
+}
+#Calculate values for all individuals together
 depth_quant <- quantile(df_clean$depth, na.rm=TRUE)
 depth_quant$mean <- mean(df_clean$depth, na.rm=TRUE)
-depth_table <- data.frame(matrix(unlist(depth_quant), nrow=1, byrow=TRUE),stringsAsFactors=FALSE)
-colnames(depth_table) = c("0%","25%","50%","75%","100%","mean")
+tmp <- c("AllCombined",unlist(depth_quant))
+depth_table[nrow(depth_table)+1,] <- tmp
 
 qual_quant <- quantile(df_clean$qual, na.rm=TRUE)
 qual_quant$mean <- mean(df_clean$qual, na.rm=TRUE)
-qual_table <- data.frame(matrix(unlist(qual_quant), nrow=1, byrow=TRUE),stringsAsFactors=FALSE)
-colnames(qual_table) = c("0%","25%","50%","75%","100%","mean")
+tmp <- c("AllCombined",unlist(qual_quant))
+qual_table[nrow(qual_table)+1,] <- tmp
 
 write.csv(depth_table, file=paste(stem,"_depth_ratestools.csv", sep = ""), row.names=FALSE)
 write.csv(qual_table, file=paste(stem,"_qual_ratestools.csv", sep = ""), row.names=FALSE)

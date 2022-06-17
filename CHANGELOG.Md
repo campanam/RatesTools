@@ -1,5 +1,5 @@
 # CHANGE LOG  
-Michael G. Campana & Ellie E. Armstrong, 2019-2021  
+Michael G. Campana & Ellie E. Armstrong, 2019-2022  
 Smithsonian Institution  
 Stanford University  
 

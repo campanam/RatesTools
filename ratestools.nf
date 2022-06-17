@@ -605,26 +605,60 @@ process splitVCFs {
 	
 }
 
-process filterSites {
+process vcftoolsFilterSites {
 
 	// Filter sites using VCFtools
 	
 	label 'vcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/SiteFilteredVCFs", mode: 'copy'
+	publishDir "$params.outdir/VCFtoolsSiteFilteredVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
 	file split_vcf from split_vcfs_ch
-	val site_filters from params.site_filters
+	val site_filters from params.vcftools_site_filters
 	
 	output:
 	file "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
 	
-	"""
-	vcftools --gzvcf ${split_vcf} --recode --out ${split_vcf.simpleName}.sitefilt ${site_filters}
-	bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
-	"""
+	script:
+	if (site_filters == "NULL")
+		"""
+		cp $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf
+		bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+		"""
+	else
+		"""
+		vcftools --gzvcf ${split_vcf} --recode --out ${split_vcf.simpleName}.sitefilt ${site_filters}
+		bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+		"""
+
+}
+
+process gatkFilterSites {
+
+	// Apply GATK-only site filters
+	
+	label 'gatk'
+	label 'bgzip'
+	publishDir "$params.outdir/GATKSiteFilteredVCFs", mode: 'copy'
+	errorStrategy 'finish'
+	
+	input:
+	file site_vcf from sitefilt_vcf_ch
+	val site_filters from params.gatk_site_filters
+	
+	output:
+	file "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
+	
+	script:
+	if (site_filters == "NULL")
+		"""
+		cp $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		"""
+	else
+		"""
+		"""
 
 }
 
@@ -643,7 +677,7 @@ process filterRegions {
 	maxRetries 3
 	
 	input:
-	path site_vcf from sitefilt_vcf_ch
+	path site_vcf from gatk_sitefilt_vcf_ch
 	file exclude_bed from exclude_bed_ch
 	
 	output:

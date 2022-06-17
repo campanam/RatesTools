@@ -35,7 +35,7 @@ df_clean <- subset(df, select = -c(V3,V5))
 df_clean <- df_clean %>% 
   rename(chr=V1, position=V2, depth=V4, qual=V6, individual=FileName)
 #Remove extraneous bits of file name
-df_clean$individual <- sub(".*_offspring","", df_clean$individual, perl=TRUE)
+df_clean$individual <- sub(".*_ind","", df_clean$individual, perl=TRUE)
 df_clean$individual <- sub(".variants.txt","",df_clean$individual)
 df_clean$depth_log <- log(as.numeric(as.character(df_clean$depth)))
 df_clean$qual_log <- log(as.numeric(as.character(df_clean$qual)))

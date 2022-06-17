@@ -202,7 +202,7 @@ Initial script (plotDPGQ-clean.R)
 ### Version 0.3.0  
 Region filtration now uses BEDTools intersect first, then BCFtools, then VCFtools  
 Updated some steps to use bgzip when needed by BCFtools  
-Fixed RepeatModeler additional thread glitch 
+Fixed RepeatModeler additional thread glitch  
 Added pullDPGQ process  
 
 ### Version 0.2.0  

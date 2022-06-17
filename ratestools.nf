@@ -641,12 +641,17 @@ process gatkFilterSites {
 	
 	label 'gatk'
 	label 'bgzip'
+	label 'tabix'
 	publishDir "$params.outdir/GATKSiteFilteredVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
+	path refseq from params.refseq
+	file "*" from bwa_index_ch
 	file site_vcf from sitefilt_vcf_ch
 	val site_filters from params.gatk_site_filters
+	val gatk from params.gatk
+	val gatk_java from params.gatk_java
 	
 	output:
 	file "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
@@ -658,6 +663,10 @@ process gatkFilterSites {
 		"""
 	else
 		"""
+		tabix $site_vcf
+		java ${gatk_java} -jar ${gatk} -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
+		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf -R $refseq --excludeFiltered
+		bgzip ${site_vcf.simpleName}.gatksitefilt.vcf 
 		"""
 
 }

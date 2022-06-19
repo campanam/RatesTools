@@ -552,7 +552,7 @@ process pullDPGQ {
 	val pair_id from stats_sample_ch
 	
 	output:
-	file "${chrfilt.simpleName}.variants.txt" into dp_gq_ch
+	file "${chrfilt.simpleName}_ind${pair_id}.variants.txt" into dp_gq_ch
 	
 	"""
 	bcftools view -v snps ${chrfilt} -s ${pair_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_ind${pair_id}.variants.txt

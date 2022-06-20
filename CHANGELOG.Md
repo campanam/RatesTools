@@ -20,6 +20,9 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.11.1  
+Fixed missing kochDNp require_relative statement  
+
 ### Version 0.11.0  
 Added handling for Koch DNp statistic filter  
 Generalized ad_exit for all filtering errors (method filter_exit) and moved to denovolib  

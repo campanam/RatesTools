@@ -225,6 +225,7 @@ Divided filterChr into filterChr and splitTrios
 filterChr (new version) now only does chromosome filtering  
 splitTrios does trio splitting after chromosome filtration  
 Fixed pullDPGQ input so that all individuals calculated from chr-filtered VCFs  
+Numbered output directories  
 
 ### Version 0.3.0  
 Region filtration now uses BEDTools intersect first, then BCFtools, then VCFtools  

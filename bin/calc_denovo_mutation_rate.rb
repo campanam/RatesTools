@@ -3,7 +3,7 @@
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
 CALCDENOVOVER = "0.11.1"
-# Michael G. Campana and Ellie E. Armstrong, 2019-2021
+# Michael G. Campana and Ellie E. Armstrong, 2019-2022
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 

@@ -24,7 +24,7 @@ library(tidyverse) # Also loads dplyr library
 stem = commandArgs(trailingOnly=TRUE) # Get filestem for output
 
 #get list of dpgq txt files in directory
-dpgq_files <- list.files(pattern = "*.txt")
+dpgq_files <- Sys.readlink(list.files(pattern = "*.txt"))
 
 df <- dpgq_files %>%
   set_names(.) %>%

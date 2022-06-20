@@ -208,7 +208,7 @@ process fixMate {
 	// Fix mate information using Picard
 	
 	label 'picard'
-	publishDir "$params.outdir/FinalBAMs", mode: 'copy'
+	publishDir "$params.outdir/01_FinalBAMs", mode: 'copy'
 	errorStrategy 'finish'
 		
 	input:
@@ -233,7 +233,7 @@ process callVariants {
 	// Index final bam and call variants using GATK
 	
 	label 'gatk'
-	publishDir "$params.outdir/gVCFs", mode: 'copy'
+	publishDir "$params.outdir/02_gVCFs", mode: 'copy'
 	errorStrategy 'finish'
 		
 	input:
@@ -262,7 +262,7 @@ process genotypegVCFs {
 	// Uncompressed combined VCF because GATK 3.8-1 inflate/deflate is glitched for this tool
 	
 	label 'gatk'
-	publishDir "$params.outdir/CombinedVCF", mode: 'copy'
+	publishDir "$params.outdir/03_CombinedVCF", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -338,7 +338,7 @@ process repeatMask {
 	
 	label 'repeatmasker'
 	errorStrategy 'finish'
-	publishDir "$params.outdir/RepeatMasking", mode: 'copy'
+	publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
 	
 	input:
 	path refseq from params.refseq
@@ -364,7 +364,7 @@ process repeatModeler {
 	
 	label 'repeatmodeler'
 	errorStrategy 'finish'
-	publishDir "$params.outdir/RepeatMasking", mode: 'copy'
+	publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
 	
 	input:
 	path refseq from params.refseq
@@ -393,7 +393,7 @@ process repeatMaskRM {
 	label 'repeatmasker'
 	label 'ruby'
 	errorStrategy 'finish'
-	publishDir "$params.outdir/RepeatMasking", mode: 'copy'
+	publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
 	
 	input:
 	path refseq from params.refseq
@@ -444,7 +444,7 @@ process simplifyBed {
 	
 	label 'ruby'
 	errorStrategy 'finish'
-	publishDir "$params.outdir/ExcludedRegions", mode: 'copy'
+	publishDir "$params.outdir/05_ExcludedRegions", mode: 'copy'
 	
 	input:
 	file indel_bed from indels_ch
@@ -486,7 +486,7 @@ process filterChr {
 	// Optionally include only specific chromsomes
 	
 	label 'vcftools'
-	publishDir "$params.outdir/FilterChrVCFs", mode: 'copy'
+	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -517,7 +517,7 @@ process splitTrios {
 	// Split samples into trios for analysis
 	
 	label 'vcftools'
-	publishDir "$params.outdir/SplitTrioVCFs", mode: 'copy'
+	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -544,7 +544,7 @@ process pullDPGQ {
 	// Extract DP/GQ values from autosome scaffolds to look at the distributions of DP and GQ for variant call sites
 
 	label 'bcftools'
-	publishDir "$params.outdir/gVCFs_DP_GQ", mode: 'copy'
+	publishDir "$params.outdir/08_gVCFs_DP_GQ", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -552,7 +552,7 @@ process pullDPGQ {
 	val pair_id from stats_sample_ch
 	
 	output:
-	file "${chrfilt.simpleName}_ind${pair_id}.variants.txt" into dp_gq_ch
+	path "${chrfilt.simpleName}_ind${pair_id}.variants.txt" into dp_gq_ch
 	
 	"""
 	bcftools view -v snps ${chrfilt} -s ${pair_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_ind${pair_id}.variants.txt
@@ -565,7 +565,7 @@ process plotDPGQ {
 	// Plot DP and GQ distributions
 	
 	label 'R'
-	publishDir "$params.outdir/gVCFs_DP_GQ", mode: 'copy'
+	publishDir "$params.outdir/08_gVCFs_DP_GQ", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -587,7 +587,7 @@ process splitVCFs {
 	// Split VCFs by contig/chromosome/scaffold etc
 	
 	label 'ruby'
-	publishDir "$params.outdir/SplitVCFs", mode: 'copy'
+	publishDir "$params.outdir/09_SplitVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -611,7 +611,7 @@ process vcftoolsFilterSites {
 	
 	label 'vcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/VCFtoolsSiteFilteredVCFs", mode: 'copy'
+	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -642,7 +642,7 @@ process gatkFilterSites {
 	label 'gatk'
 	label 'bgzip'
 	label 'tabix'
-	publishDir "$params.outdir/GATKSiteFilteredVCFs", mode: 'copy'
+	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -681,7 +681,7 @@ process filterRegions {
 	label 'bcftools'
 	label 'vcftools'
 	label 'tabix'
-	publishDir "$params.outdir/RegionFilteredVCFs", mode: 'copy'
+	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy'
 	errorStrategy 'retry'
 	maxRetries 3
 	
@@ -731,7 +731,7 @@ process calcDNMRate {
 	// Calculate de novo mutations using calc_denovo_mutation_rate
 	
 	label 'ruby'
-	publishDir "$params.outdir/SplitCalcDNMLogs", mode: 'copy'
+	publishDir "$params.outdir/13_SplitCalcDNMLogs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
@@ -754,7 +754,7 @@ process summarizeDNM {
 	// Calculate genome-wide DNM rate using summarize_denovo
 	
 	label 'ruby'
-	publishDir "$params.outdir/SummarizeDNMLogs", mode: 'copy'
+	publishDir "$params.outdir/14_SummarizeDNMLogs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:

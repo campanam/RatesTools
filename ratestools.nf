@@ -569,7 +569,7 @@ process plotDPGQ {
 	errorStrategy 'finish'
 	
 	input:
-	file "*.txt" from dp_gq_ch.collect()
+	path "*.txt" from dp_gq_ch.collect()
 	
 	output:
 	file "${params.prefix}_*.png"

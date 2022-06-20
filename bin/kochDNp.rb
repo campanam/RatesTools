@@ -2,8 +2,8 @@
 
 #----------------------------------------------------------------------------------------
 # kochDNp
-KOCHDNPVER = "0.1.0"
-# Michael G. Campana and Ellie E. Armstrong, 2021
+KOCHDNPVER = "0.1.1"
+# Michael G. Campana and Ellie E. Armstrong, 2022
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -184,7 +184,7 @@ def posthoc_filter # Post-hoc filter previously generated de novo mutation candi
 	end
 end
 #-----------------------------------------------------------------------------------------
-unless ARGV[0].nil? # Run post-hoc code only when specified, not when incorporated into calc_denovo_mutation_rate
+unless ARGV.include?("-k") or ARGV.include?("--kochDNp") # Run post-hoc code only when specified, not when incorporated into calc_denovo_mutation_rate
 	$options = Parser.parse(ARGV, true)
 	posthoc_filter
 end

@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.3
-Michael G. Campana and Ellie E. Armstrong, 2020-2021
+/* RatesTools version 0.4
+Michael G. Campana and Ellie E. Armstrong, 2020-2022
 Smithsonian Institution and Stanford University
 
 CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -62,7 +62,7 @@ process alignSeqs {
 	
 	output:
 	file "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
-	val pair_id into filt_sample_ch // sample name for downstream use
+	val pair_id into filt_sample_ch, stats_sample_ch // sample name for downstream use
 	val samtools_extra_threads into samtools_threads_ch
 	
 	
@@ -274,8 +274,8 @@ process genotypegVCFs {
 	val prefix from params.prefix
 	
 	output:
-	file "${prefix}_combined.vcf*" into combined_vcf_ch 
-	file "${prefix}_combined.vcf.gz" into combined_indels_ch
+	file "${prefix}_combined.vcf*"
+	file "${prefix}_combined.vcf.gz" into combined_vcf_ch, combined_indels_ch
 	
 	"""
 	VARPATH=""
@@ -481,8 +481,6 @@ process simplifyBed {
 
 }
 
-filt_sample_ch2 = filt_sample_ch.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
-
 process filterChr {
 	
 	// Optionally include only specific chromsomes
@@ -492,7 +490,38 @@ process filterChr {
 	errorStrategy 'finish'
 	
 	input:
-	file "*" from combined_vcf_ch
+	file comb_vcf from combined_vcf_ch
+	val prefix from params.prefix
+	file chrs from chr_file
+	
+	output:
+	file "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
+	
+	script:
+	if (chrs.name == "NULL")
+		"""
+		cp $comb_vcf ${prefix}.chrfilt.recode.vcf.gz
+		"""
+	else
+		"""
+		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
+		vcftools --gzvcf $comb_vcf --recode --out ${prefix}.chrfilt \$chr_line
+		gzip ${prefix}.chrfilt.recode.vcf
+		"""
+}
+
+filt_sample_ch2 = filt_sample_ch.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
+
+process splitTrios {
+	
+	// Split samples into trios for analysis
+	
+	label 'vcftools'
+	publishDir "$params.outdir/SplitTrioVCFs", mode: 'copy'
+	errorStrategy 'finish'
+	
+	input:
+	file chr_vcf from chrfilt_vcf_ch
 	val dam from params.dam
 	val sire from params.sire
 	val prefix from params.prefix
@@ -500,22 +529,14 @@ process filterChr {
 	file chrs from chr_file
 	
 	output:
-	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
+	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
 	
-	script:
-	if (chrs.name == "NULL")
-		"""
-		vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id}
-		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
+	"""
+	vcftools --gzvcf $chr_vcf --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id}
+	gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
 		
-		"""
-	else
-		"""
-		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
-		vcftools --gzvcf *vcf.gz --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id} \$chr_line
-		gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
-		"""
-	
+	"""
+
 }
 
 process pullDPGQ {
@@ -528,12 +549,13 @@ process pullDPGQ {
 	
 	input:
 	path chrfilt from chrfilt_stats_ch
+	val pair_id from stats_sample_ch
 	
 	output:
-	file "${chrfilt.simpleName}.variants.txt" into dp_gq_ch
+	file "${chrfilt.simpleName}_ind${pair_id}.variants.txt" into dp_gq_ch
 	
 	"""
-	bcftools view -v snps ${chrfilt} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}.variants.txt
+	bcftools view -v snps ${chrfilt} -s ${pair_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_ind${pair_id}.variants.txt
 	"""
 
 }
@@ -550,8 +572,7 @@ process plotDPGQ {
 	file "*.txt" from dp_gq_ch.collect()
 	
 	output:
-	file "${params.prefix}_log_depth.png"
-	file "${params.prefix}_log_qual.png"
+	file "${params.prefix}_*.png"
 	file "${params.prefix}_depth_ratestools.csv"
 	file "${params.prefix}_qual_ratestools.csv"
 	
@@ -570,7 +591,7 @@ process splitVCFs {
 	errorStrategy 'finish'
 	
 	input:
-	file chr_vcf from chrfilt_vcf_ch
+	file chr_vcf from triosplit_vcf_ch
 	
 	output:
 	file "${chr_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten
@@ -584,26 +605,69 @@ process splitVCFs {
 	
 }
 
-process filterSites {
+process vcftoolsFilterSites {
 
 	// Filter sites using VCFtools
 	
 	label 'vcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/SiteFilteredVCFs", mode: 'copy'
+	publishDir "$params.outdir/VCFtoolsSiteFilteredVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
 	file split_vcf from split_vcfs_ch
-	val site_filters from params.site_filters
+	val site_filters from params.vcftools_site_filters
 	
 	output:
 	file "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
 	
-	"""
-	vcftools --gzvcf ${split_vcf} --recode --out ${split_vcf.simpleName}.sitefilt ${site_filters}
-	bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
-	"""
+	script:
+	if (site_filters == "NULL")
+		"""
+		cp $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf
+		bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+		"""
+	else
+		"""
+		vcftools --gzvcf ${split_vcf} --recode --out ${split_vcf.simpleName}.sitefilt ${site_filters}
+		bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+		"""
+
+}
+
+process gatkFilterSites {
+
+	// Apply GATK-only site filters
+	
+	label 'gatk'
+	label 'bgzip'
+	label 'tabix'
+	publishDir "$params.outdir/GATKSiteFilteredVCFs", mode: 'copy'
+	errorStrategy 'finish'
+	
+	input:
+	path refseq from params.refseq
+	file "*" from bwa_index_ch
+	file site_vcf from sitefilt_vcf_ch
+	val site_filters from params.gatk_site_filters
+	val gatk from params.gatk
+	val gatk_java from params.gatk_java
+	
+	output:
+	file "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
+	
+	script:
+	if (site_filters == "NULL")
+		"""
+		cp $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		"""
+	else
+		"""
+		tabix $site_vcf
+		java ${gatk_java} -jar ${gatk} -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
+		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf -R $refseq --excludeFiltered
+		bgzip ${site_vcf.simpleName}.gatksitefilt.vcf 
+		"""
 
 }
 
@@ -622,7 +686,7 @@ process filterRegions {
 	maxRetries 3
 	
 	input:
-	path site_vcf from sitefilt_vcf_ch
+	path site_vcf from gatk_sitefilt_vcf_ch
 	file exclude_bed from exclude_bed_ch
 	
 	output:

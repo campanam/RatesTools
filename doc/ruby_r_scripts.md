@@ -1,7 +1,7 @@
 # RatesTools Ruby and R Scripts  
 
-__Michael G. Campana & Ellie E. Armstrong, 2019-2021__  
-Smithsonian Conservation Biology Institute  
+__Michael G. Campana & Ellie E. Armstrong, 2019-2022__  
+Smithsonian's National Zoo and Conservation Biology Institute  
 Stanford University  
 
 Here we document the usage and functions of the Ruby scripts included in the RatesTools package.  

@@ -1,5 +1,5 @@
 # CHANGE LOG  
-Michael G. Campana & Ellie E. Armstrong, 2019-2021  
+Michael G. Campana & Ellie E. Armstrong, 2019-2022  
 Smithsonian Institution  
 Stanford University  
 
@@ -11,12 +11,13 @@ Stanford University
 5. [kochDNp](#kochdnp)  
 6. [nextflow_split](#nextflow_split)  
 7. [nextflow.config](#nextflowconfig)  
-8. [ratestools](#ratestools)  
-9. [RM2bed](#rm2bed)  
-10. [simplify_bed](#simplify_bed)  
-11. [simplify_sorted_bed](#simplify_sorted_bed)  
-12. [summarize_denovo](#summarize_denovo)  
-13. [Deprecated](#deprecated)  
+8. [plotDPGQ](#plotDPGQ)  
+9. [ratestools](#ratestools)  
+10. [RM2bed](#rm2bed)  
+11. [simplify_bed](#simplify_bed)  
+12. [simplify_sorted_bed](#simplify_sorted_bed)  
+13. [summarize_denovo](#summarize_denovo)  
+14. [Deprecated](#deprecated)  
 
 
 ## calc_denovo_mutation_rate  
@@ -189,12 +190,22 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## nextflow.config  
+### Version 0.4.0  
+Split site_filters into vcftools_site_filters and gatk_site_filters  
+Updated process list in both profiles for new processes  
+Fixed some missing processes from v0.3.0 in default profile  
+
 ### Version 0.3.0  
 Fixed RepeatModeler additional thread glitch  
 Added module options for bedtools, bcftools, bgzip, tabix  
 Updated process defaults  
 
-## plotDPGQ
+## plotDPGQ  
+### Version 0.3.0  
+Fixed bug that misread sample names  
+Corrected output so that all PNGs properly named  
+Fixed table coding so that all individual samples calculated in CSVs  
+
 ### Version 0.2.0  
 First version integrated into pipeline  
 
@@ -202,6 +213,15 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.4.0  
+Updated plotDPGQ output PNGs  
+split filterSites in vcftoolsFilterSites and gatkFilterSites  
+Added 'NULL' option to site filtrations to bypass unnecessary processing  
+Divided filterChr into filterChr and splitTrios  
+filterChr (new version) now only does chromosome filtering  
+splitTrios does trio splitting after chromosome filtration  
+Fixed pullDPGQ input so that all individuals calculated from chr-filtered VCFs  
+
 ### Version 0.3.0  
 Region filtration now uses BEDTools intersect first, then BCFtools, then VCFtools  
 Updated some steps to use bgzip when needed by BCFtools  

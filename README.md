@@ -1,6 +1,6 @@
 # RatesTools  
 
-__Michael G. Campana and Ellie E. Armstrong, 2019-2021__  
+__Michael G. Campana and Ellie E. Armstrong, 2019-2022__  
 Smithsonian Institution  
 Stanford University  
 

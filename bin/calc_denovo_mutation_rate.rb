@@ -121,7 +121,7 @@ class Snp
 			unless parhom_filter # Do not classify as denovo if parents heterozyogous and options parhom
 				unless genopool.include?(offspr_alleles)
 					retain_snp = true # Remove SNPs that do not pass Koch DNp filter if option is used
-					retain_snp = filter_candidate(offspring_pl, dam_pl, sire_pl, cutoff) if $options.kochDNp
+					retain_snp = filter_candidate(offspring_pl, dam_pl, sire_pl, $options.cutoff) if $options.kochDNp
 					if retain_snp # Classify SNPs that passed Koch DNp filter (or all SNPs if Koch DNp filter not used)
 						mutation_class = classify_denovo(sire_alleles, dam_alleles, offspr_alleles, offspr)
 						denovo_status = [true,mutation_class]

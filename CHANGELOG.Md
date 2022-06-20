@@ -23,6 +23,7 @@ Stanford University
 ## calc_denovo_mutation_rate  
 ### Version 0.11.1  
 Fixed missing kochDNp require_relative statement  
+Fixed cutoff instead of $options.cutoff bug  
 
 ### Version 0.11.0  
 Added handling for Koch DNp statistic filter  
@@ -172,6 +173,9 @@ Output BED header line starts with # as appropriate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## kochDNp  
+### Version 0.1.1  
+Fixed bug that ran command-line parser when run from calc_denovo_mutation_rate
+
 ### Version 0.1.0  
 Calculates and filters by Koch DNp statistic  
 

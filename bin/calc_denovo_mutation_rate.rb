@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.11.0"
+CALCDENOVOVER = "0.11.1"
 # Michael G. Campana and Ellie E. Armstrong, 2019-2021
 # Smithsonian Institution and Stanford University
 
@@ -21,6 +21,7 @@ CALCDENOVOVER = "0.11.0"
 # This script calculates the de novo mutation rate from trios from a provided filtered VCF
 
 require_relative 'denovolib'
+require_relative 'kochDNp'
 
 $previous_snp = nil # Global variable storing previous SNP information if phasing is known. nil when new contig/scaffold or new phasing block.
 $total_sites = 0 # Total number of retained sites

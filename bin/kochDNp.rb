@@ -185,6 +185,7 @@ def posthoc_filter # Post-hoc filter previously generated de novo mutation candi
 end
 #-----------------------------------------------------------------------------------------
 unless ARGV.include?("-k") or ARGV.include?("--kochDNp") # Run post-hoc code only when specified, not when incorporated into calc_denovo_mutation_rate
+	ARGV[0] ||= '-h'
 	$options = Parser.parse(ARGV, true)
 	posthoc_filter
 end

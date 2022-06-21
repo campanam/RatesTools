@@ -115,8 +115,8 @@ def calculate_DNp(pp_array)
 	scalefactor = pp_array.max
 	pp_array_scaled = pp_array.map { |x| 10 ** (x - scalefactor) }
 	#print pp_array_scaled.sum
-    logsum = scalefactor + Math.log10(pp_array_scaled.sum)
-    dnp_array = pp_array.map { |x| 10 ** (x - logsum) }
+	logsum = scalefactor + Math.log10(pp_array_scaled.sum)
+	dnp_array = pp_array.map { |x| 10 ** (x - logsum) }
 	koch_DNp = dnp_array[9] + dnp_array[17]
 	return koch_DNp
 end

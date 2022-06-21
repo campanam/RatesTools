@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.4
+/* RatesTools version 0.5
 Michael G. Campana and Ellie E. Armstrong, 2020-2022
 Smithsonian Institution and Stanford University
 
@@ -168,12 +168,18 @@ process realignIndels {
 	file "${rg_bam.simpleName}.realn.bam" into realn_bam_ch
 	file "${rg_bam.simpleName}.realn.bai" into realn_bai_ch
 	file "${rg_bam.baseName}.bai"
-
-	"""
-	java ${picard_java} -jar ${picard} BuildBamIndex I=${rg_bam}
-	java ${gatk_java} -jar ${gatk} -T RealignerTargetCreator -R ${refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
-	java ${gatk_java} -jar ${gatk} -T IndelRealigner -R ${refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
-	"""
+	
+	script:
+	if (params.gatk_build == 3)
+		"""
+		java ${picard_java} -jar ${picard} BuildBamIndex I=${rg_bam}
+		java ${gatk_java} -jar ${gatk} -T RealignerTargetCreator -R ${refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
+		java ${gatk_java} -jar ${gatk} -T IndelRealigner -R ${refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
+		"""
+	else if (params.gatk_build == 4)
+		"""
+		java ${gatk_java} -jar ${gatk} LeftAlignIndels -R ${refseq} -I $rg_bam -O ${rg_bam.simpleName}.realn.bam
+		"""
 
 }
 
@@ -197,9 +203,15 @@ process filterBAMs {
 	file "${realn_bam.simpleName}.filt.bam" into filt_bam_ch
 	file "${realn_bam.simpleName}.filt.bai" into filt_bai_ch
 	
-	"""
-	java ${gatk_java} -jar ${gatk} -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${gatk_nct} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
-	"""
+	script:
+	if (params.gatk_build == 3)
+		"""
+		java ${gatk_java} -jar ${gatk} -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${gatk_nct} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
+		"""
+	else if (params.gatk_build == 4)
+		"""
+		java ${gatk_java} -jar ${gatk} PrintReads -I ${realn_bam} -O ${realn_bam.simpleName}.filt.bam --read-filter BadCigar --read-filter DuplicateRead --read-filter FailsVendorQualityCheck --read-filter HCMappingQuality --read-filter MappingQualityUnavailable --read-filter NotPrimaryAlignment --read-filter UnmappedRead --filter-bases_not_stored --filter_mismatching_base_and_quals
+		"""
 	
 }
 
@@ -248,11 +260,17 @@ process callVariants {
 	file "*" from bwa_index_ch
 	
 	output:
-	file "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch 
+	file "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch
 	
-	"""
-	java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${gatk_nct} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
-	"""
+	script:
+	if (params.gatk_build == 3)
+		"""
+		java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${gatk_nct} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
+		"""
+	else if (params.gatk_build == 4)
+		"""
+		java ${gatk_java} -jar ${gatk} HaplotypeCaller -R $refseq -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
+		"""
 
 }
 
@@ -277,12 +295,21 @@ process genotypegVCFs {
 	file "${prefix}_combined.vcf*"
 	file "${prefix}_combined.vcf.gz" into combined_vcf_ch, combined_indels_ch
 	
-	"""
-	VARPATH=""
-	for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-	java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o ${prefix}_combined.vcf -R ${refseq} --includeNonVariantSites\$VARPATH
-	gzip ${prefix}_combined.vcf # Clean up giant VCF before going on with filtering
-	"""
+	script:
+	if (params.gatk_build == 3)
+		"""
+		VARPATH=""
+		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
+		java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o ${prefix}_combined.vcf -R ${refseq} --includeNonVariantSites\$VARPATH
+		gzip ${prefix}_combined.vcf # Clean up giant VCF before going on with filtering
+		"""
+	else if (params.gatk_build == 4)
+		"""
+		VARPATH=""
+		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
+		java ${gatk_java} -jar ${gatk} CombineGVCFs -R $refseq -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
+		java ${gatk_java} -jar ${gatk} GenotypeGVCFs -R $refseq --include-non-variant-sites -I tmp.g.vcf.gz -O ${prefix}_combined.vcf.gz
+		"""
 }
 
 process genMapIndex {
@@ -659,14 +686,20 @@ process gatkFilterSites {
 	script:
 	if (site_filters == "NULL")
 		"""
-		cp $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		ln -s $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		"""
-	else
+	else if (gatk_build == 3)
 		"""
 		tabix $site_vcf
 		java ${gatk_java} -jar ${gatk} -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
 		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf -R $refseq --excludeFiltered
 		bgzip ${site_vcf.simpleName}.gatksitefilt.vcf 
+		"""
+	else if (gatk_build == 4)
+		"""
+		tabix $site_vcf
+		java ${gatk_java} -jar ${gatk} VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters
+		java ${gatk_java} -jar ${gatk} SelectVariants -R $refseq -V $site_vcf -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
 		"""
 
 }

@@ -195,6 +195,9 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## nextflow.config  
+### Version 0.5.0  
+GATK4 compatibility  
+
 ### Version 0.4.0  
 Split site_filters into vcftools_site_filters and gatk_site_filters  
 Updated process list in both profiles for new processes  
@@ -218,6 +221,10 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.0  
+GATK4 compatibility  
+Improved use of symbolic links/writing to disk  
+
 ### Version 0.4.0  
 Updated plotDPGQ output PNGs  
 split filterSites in vcftoolsFilterSites and gatkFilterSites  

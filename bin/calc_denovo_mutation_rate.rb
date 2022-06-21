@@ -21,7 +21,7 @@ CALCDENOVOVER = "0.11.1"
 # This script calculates the de novo mutation rate from trios from a provided filtered VCF
 
 require_relative 'denovolib'
-require_relative 'kochDNp'
+require_relative 'kochDNp' if (ARGV.include?("-k") || ARGV.include?("--kochDNp"))
 
 $previous_snp = nil # Global variable storing previous SNP information if phasing is known. nil when new contig/scaffold or new phasing block.
 $total_sites = 0 # Total number of retained sites

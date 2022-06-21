@@ -24,6 +24,7 @@ Stanford University
 ### Version 0.11.1  
 Fixed missing kochDNp require_relative statement  
 Fixed cutoff instead of $options.cutoff bug  
+Fixed bug that called whole offspring_pl hash rather than individual PL array  
 
 ### Version 0.11.0  
 Added handling for Koch DNp statistic filter  

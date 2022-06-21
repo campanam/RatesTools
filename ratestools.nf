@@ -379,7 +379,7 @@ process repeatMask {
 	"""
 	RepeatMasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
 	if [ ! -f ${refseq}.masked ]; then # Handling for no repeats detected
-		cp ${refseq} ${refseq}.masked
+		ln -s ${refseq} ${refseq}.masked
 	fi
 	"""
 
@@ -486,23 +486,23 @@ process simplifyBed {
 	if [ ! "\$(wc -l < ${indel_bed})" -eq 0 ]; then
 		simplify_sorted_bed.rb ${indel_bed} > ${indel_bed.baseName}_sorted.bed
 	else
-		cp ${indel_bed} ${indel_bed.baseName}_sorted.bed
+		ln -s ${indel_bed} ${indel_bed.baseName}_sorted.bed
 	fi
 	if [ ! "\$(wc -l < ${rm_bed})" -eq 0 ]; then
 		simplify_sorted_bed.rb ${rm_bed} > ${rm_bed.baseName}_sorted.bed
 	else
-		cp ${rm_bed} ${rm_bed.baseName}_sorted.bed
+		ln -s ${rm_bed} ${rm_bed.baseName}_sorted.bed
 	fi
 	if [ ! "\$(wc -l < ${gm_bed})" -eq 0 ]; then
 		simplify_sorted_bed.rb ${gm_bed} > ${gm_bed.baseName}_sorted.bed
 	else
-		cp ${gm_bed} ${gm_bed.baseName}_sorted.bed
+		ln -s ${gm_bed} ${gm_bed.baseName}_sorted.bed
 	fi
 	cat ${indel_bed.baseName}_sorted.bed ${rm_bed.baseName}_sorted.bed ${gm_bed.baseName}_sorted.bed > ${prefix}_excluded.bed
 	if [ ! "\$(wc -l < ${prefix}_excluded.bed)" -eq 0 ]; then
 		simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
 	else
-		cp ${prefix}_excluded.bed ${prefix}_excluded_reduced.bed
+		ln -s ${prefix}_excluded.bed ${prefix}_excluded_reduced.bed
 	fi
 	"""
 
@@ -561,7 +561,6 @@ process splitTrios {
 	"""
 	vcftools --gzvcf $chr_vcf --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id}
 	gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
-		
 	"""
 
 }
@@ -651,8 +650,7 @@ process vcftoolsFilterSites {
 	script:
 	if (site_filters == "NULL")
 		"""
-		cp $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf
-		bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+		bgzip -c $split_vcf > ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
 		"""
 	else
 		"""
@@ -729,13 +727,11 @@ process filterRegions {
 	chr = site_vcf.simpleName.split('_chr')[1]
 	if (task.attempt == 1)
 		"""
-		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
-		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		"""
 	else if (task.attempt == 2)
 		"""
-		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
-		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		"""
 	else if (task.attempt == 3)
 		"""
@@ -746,15 +742,13 @@ process filterRegions {
 		# bcftools isec gives the target sites not included in the bed
 		bcftools isec -C -O v -o ${site_vcf.simpleName}.targets ${site_vcf} tmp.bcf
 		# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
-		bcftools view -T ${site_vcf.simpleName}.targets -Ov -o ${site_vcf.simpleName}.regionfilt.vcf ${site_vcf}
-		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		bcftools view -T ${site_vcf.simpleName}.targets -Ov ${site_vcf} | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		"""
 	else
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed 
 		vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed tmp.bed
-		gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
-		mv ${site_vcf.simpleName}.regionfilt.recode.vcf.gz ${site_vcf.simpleName}.regionfilt.vcf.gz
+		gzip -c ${site_vcf.simpleName}.regionfilt.recode.vcf > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		"""
 
 }

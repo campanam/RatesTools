@@ -308,7 +308,7 @@ process genotypegVCFs {
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
 		java ${gatk_java} -jar ${gatk} CombineGVCFs -R $refseq -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
-		java ${gatk_java} -jar ${gatk} GenotypeGVCFs -R $refseq --include-non-variant-sites -I tmp.g.vcf.gz -O ${prefix}_combined.vcf.gz
+		java ${gatk_java} -jar ${gatk} GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O ${prefix}_combined.vcf.gz
 		"""
 }
 

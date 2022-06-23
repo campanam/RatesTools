@@ -686,14 +686,14 @@ process gatkFilterSites {
 		"""
 		ln -s $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		"""
-	else if (gatk_build == 3)
+	else if (params.gatk_build == 3)
 		"""
 		tabix $site_vcf
 		java ${gatk_java} -jar ${gatk} -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
 		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf -R $refseq --excludeFiltered
 		bgzip ${site_vcf.simpleName}.gatksitefilt.vcf 
 		"""
-	else if (gatk_build == 4)
+	else if (params.gatk_build == 4)
 		"""
 		tabix $site_vcf
 		java ${gatk_java} -jar ${gatk} VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters

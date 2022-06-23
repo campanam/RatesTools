@@ -178,6 +178,7 @@ process realignIndels {
 		"""
 	else if (params.gatk_build == 4)
 		"""
+		java ${picard_java} -jar ${picard} BuildBamIndex I=${rg_bam}
 		java ${gatk_java} -jar ${gatk} LeftAlignIndels -R ${refseq} -I $rg_bam -O ${rg_bam.simpleName}.realn.bam
 		"""
 

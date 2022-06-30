@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.11.1"
+CALCDENOVOVER = "0.11.2"
 # Michael G. Campana and Ellie E. Armstrong, 2019-2022
 # Smithsonian Institution and Stanford University
 
@@ -109,26 +109,32 @@ class Snp
 			parhom_filter = true if sire_alleles.uniq.size != 1
 			parhom_filter = true if dam_alleles.uniq.size != 1
 		end
-		poss_genotypes_unphased.push([sire_alleles[0],dam_alleles[0]].sort) # Resorting because could change during recombination
-		poss_genotypes_unphased.push([sire_alleles[0],dam_alleles[1]].sort)
-		poss_genotypes_unphased.push([sire_alleles[1],dam_alleles[0]].sort)
-		poss_genotypes_unphased.push([sire_alleles[1],dam_alleles[1]].sort)
-		poss_genotypes_unphased = poss_genotypes_unphased.uniq # If only one possible, uniq! will return nil
-		for offspr in offspring.keys
-			offspr_alleles, offspr_phased = split_alleles(offspring[offspr])
-			offspr_phased && dam_phased && sire_phased ? genopool = check_phasing(poss_genotypes_unphased) : genopool = poss_genotypes_unphased # Determine whether to use phased or unphased genotypes	
-			denovo_status = [false,""] # Default status is no de novo mutation
-			unless parhom_filter # Do not classify as denovo if parents heterozyogous and options parhom
-				unless genopool.include?(offspr_alleles)
-					retain_snp = true # Remove SNPs that do not pass Koch DNp filter if option is used
-					retain_snp = filter_candidate(offspring_pl[offspr], dam_pl, sire_pl, $options.cutoff) if $options.kochDNp
-					if retain_snp # Classify SNPs that passed Koch DNp filter (or all SNPs if Koch DNp filter not used)
-						mutation_class = classify_denovo(sire_alleles, dam_alleles, offspr_alleles, offspr)
-						denovo_status = [true,mutation_class]
+		if sire_alleles[0].nil? || dam_alleles[0].nil? # Handling for minAD1/minAF filter where no reads are informative for alleles in GATK4
+			for offspr in offspring.keys
+				@denovo[offspr] = [false,""] # Set to default status of no de novo mutation
+			end
+		else
+			poss_genotypes_unphased.push([sire_alleles[0],dam_alleles[0]].sort) # Resorting because could change during recombination
+			poss_genotypes_unphased.push([sire_alleles[0],dam_alleles[1]].sort)
+			poss_genotypes_unphased.push([sire_alleles[1],dam_alleles[0]].sort)
+			poss_genotypes_unphased.push([sire_alleles[1],dam_alleles[1]].sort)
+			poss_genotypes_unphased = poss_genotypes_unphased.uniq # If only one possible, uniq! will return nil
+			for offspr in offspring.keys
+				offspr_alleles, offspr_phased = split_alleles(offspring[offspr])
+				offspr_phased && dam_phased && sire_phased ? genopool = check_phasing(poss_genotypes_unphased) : genopool = poss_genotypes_unphased # Determine whether to use phased or unphased genotypes	
+				denovo_status = [false,""] # Default status is no de novo mutation
+				unless parhom_filter # Do not classify as denovo if parents heterozyogous and options parhom
+					unless genopool.include?(offspr_alleles)
+						retain_snp = true # Remove SNPs that do not pass Koch DNp filter if option is used
+						retain_snp = filter_candidate(offspring_pl[offspr], dam_pl, sire_pl, $options.cutoff) if $options.kochDNp
+						if retain_snp # Classify SNPs that passed Koch DNp filter (or all SNPs if Koch DNp filter not used)
+							mutation_class = classify_denovo(sire_alleles, dam_alleles, offspr_alleles, offspr)
+							denovo_status = [true,mutation_class]
+						end
 					end
 				end
+				@denovo[offspr] = denovo_status
 			end
-			@denovo[offspr] = denovo_status
 		end
 	end
 end

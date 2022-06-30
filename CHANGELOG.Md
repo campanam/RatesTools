@@ -21,6 +21,9 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.11.2  
+Fixed GATK4 total AD = 0 bug  
+
 ### Version 0.11.1  
 Fixed missing kochDNp require_relative statement  
 Fixed cutoff instead of $options.cutoff bug  

@@ -806,7 +806,7 @@ process summarizeDNM {
 	file "*" from split_logs_ch.collect()
 	
 	output:
-	file "${params.prefix}*_summary.log"
+	file "${params.prefix}*_summary.log" into summary_log_ch
 	
 	"""
 	for file in ${params.prefix}*.log; do 
@@ -816,6 +816,25 @@ process summarizeDNM {
 		mv \$file \${file%_chr*.log}/
 	done
 	for outdir in ${params.prefix}*; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
+	"""
+	
+all_logs_ch = summary_log_ch.mix(regionfilt_log_ch, gatk_sitefilt_log_ch, sitefilt_log_ch, triosplit_log_ch, chrfilt_log_ch)
+
+}
+
+process generateSummaryStats {
+
+	label 'ruby'
+	publishDir "$params.outdir/15_SummaryStats", mode: "copy"
+	errorStrategy 'finish'
+	
+	input:
+	file "*" from all_logs_ch.collect()
+	
+	output:
+	file "summary_stats.csv"
+	
+	"""
 	"""
 
 }

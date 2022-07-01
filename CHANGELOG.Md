@@ -88,6 +88,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.8.1  
+split_vcf now uses bgzip rather than gzip for GATK site filtering  
+
 ### Version 0.8.0  
 Added handling for Koch DNp statistic filter  
 Generalized ad_exit from calc_denovo_mutation_rate as denovolib method filter_exit  

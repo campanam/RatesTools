@@ -205,12 +205,12 @@ fi
 echo 'Testing for GATK...'
 get_jar_path GATK GenomeAnalysisTK.jar
 echo 'Enter GATK major version number (3 or 4).'
-read $gatkver
-while [[ $gatkver != '3' && $gatkver != '4' ]]; do
+read gatkver
+while [[ $gatkver != 3 && $gatkver != 4 ]]; do
 	echo 'Enter GATK major version number (3 or 4).'
-	read $gatkver
+	read gatkver
 done
-if $gatkver != 3; then
+if [ $gatkver != 3 ]; then
 	sed -i '' "s/gatk_build = 3/gatk_build = \$gatkver/" $filename
 fi
 echo 'Use default Java options for GATK? (Y/N)'
@@ -235,24 +235,36 @@ if `command -v java 2>&1 >/dev/null`; then # If java found, identify version
 		echo "WARNING: GATK requires Java 1.8. Current Java environment is incompatible."
 	fi
 fi
-echo 'Use default VCFtools site filters (--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2)? (Y/N)'
+echo 'Filter sites using VCFtools? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
-	echo 'Enter filters to pass to VCFtools.'
-	read site_filters
-	sed -i '' "s/vcftools_site_filters = \"--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2\"/vcftools_site_filters = \"$site_filters\"/" $filename
+	sed -i '' "s/vcftools_site_filters = \"--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2\"/vcftools_site_filters = \"NULL\"/" $filename
+else
+	echo 'Use default VCFtools site filters (--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2)? (Y/N)'
+	yes_no_answer
+	if [ $answer == 'N' ]; then
+		echo 'Enter filters to pass to VCFtools.'
+		read site_filters
+		sed -i '' "s/vcftools_site_filters = \"--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2\"/vcftools_site_filters = \"$site_filters\"/" $filename
+	fi
 fi
-echo 'Use default GATK site filters (QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5)?(Y/N)'
+echo 'Filter sites using GATK? (Y/N)'
 yes_no_answer
-if [[ $answer == 'Y' && $gatkver == '4' ]]; then
-	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression/gatk_site_filters = \'--filter-name \"filter\" --filter-expression/" $filename
-else if [[ $answer == 'N' && $gatkver == '3']]
-	echo 'Enter filters to pass to GATK.'
-	read gatk_site_filters
-	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filterName \"filter\" --filterExpression \'$gatk_site_filters\'/" $filename
-else if [[ $answer == 'N' && $gatkver == '4']]
-	read gatk_site_filters
-	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filter-name \"filter\" --filter-expression \'$gatk_site_filters\'/" $filename
+if [ $answer == 'N' ]; then
+	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'NULL'/" $filename
+else
+	echo 'Use default GATK site filters (QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5)? (Y/N)'
+	yes_no_answer
+	if [[ $answer == 'Y' && $gatkver == 4 ]]; then
+		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression/gatk_site_filters = \'--filter-name \"filter\" --filter-expression/" $filename
+	elif [[ $answer == 'N' && $gatkver == 3 ]]; then
+		echo 'Enter filters to pass to GATK.'
+		read gatk_site_filters
+		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filterName \"filter\" --filterExpression \'$gatk_site_filters\'/" $filename
+	elif [[ $answer == 'N' && $gatkver == 4 ]]; then
+		read gatk_site_filters
+		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filter-name \"filter\" --filter-expression \'$gatk_site_filters\'/" $filename
+	fi
 fi
 echo 'Use default calc_denovo_mutation_rate options (-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom)? (Y/N)'
 yes_no_answer

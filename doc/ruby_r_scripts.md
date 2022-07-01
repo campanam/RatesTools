@@ -20,7 +20,7 @@ The following calc_denovo_mutation_rate.rb options are available:
 `-t, --theta [VALUE]`: Heterozygosity (theta) for Koch DNp (Default = 0.008)  
 `-c, --cutoff [VALUE]`: Koch DNp cutoff (Default = 0.3)  
 `--parhom`: Require parents to be homozygous at candidate DNM sites. Parental heterozygosity forces the candidate site(s) to be discarded.  
-`--minAD1`: Discard candidate DNMs if parents have DNM alleles present (even if the parents' alleles are not called). Requires the 'AD' tag to be specified in the VCF.  
+`--minAD1`: Call all alleles at a site with an allelic depth of at least 1 (even if not called by the genotyper). Requires the 'AD' tag to be specified in the VCF. If the total allelic depth is 0 (e.g. if no informative reads are included but the total read depth is greater than the required threshold), the site is discarded as a potential DNM.  
 `--minAF [VALUE]`: Filter alleles by minimum frequency.  
 `-w, --window [VALUE]`: Sequence window length (bp) for bootstrapping (Default = 1000000).  
 `-S, --step [VALUE]`: Window step (bp) for bootstrapping (Default = 1000000).  
@@ -72,7 +72,7 @@ Program information options (Do not use other options with the following):
 `-h, --help`: Show help.  
 
 ## nextflow_split.rb  
-The nextflow_split.rb script splits an all-sites VCF by chromosomes/contigs for parallelization of filtering and de novo mutation rate calculations using the RatesTools pipeline.
+The nextflow_split.rb script splits an all-sites VCF by chromosomes/contigs for parallelization of filtering and de novo mutation rate calculations using the RatesTools pipeline.  
 
 Basic usage is: `nextflow_split.rb -i <in.VCF> -o <outdir>`. Help is available using `nextflow_split.rb -h`.  
 

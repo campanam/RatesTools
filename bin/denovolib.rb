@@ -180,7 +180,7 @@ class Parser # Parse input for calc_denovo_mutation_rate.rb and post-hoc kochDNP
 				opts.on("--parhom", "Require parents to be homozygous at DNM sites") do |parhom|
 					args.parhom = true
 				end
-				opts.on("--minAD1", "Discard DNMs if parents have DNM alleles even if not called") do |minAD1|
+				opts.on("--minAD1", "Call all alleles with a minimum allelic depth of at least 1") do |minAD1|
 					args.minAD1 = true
 				end
 				opts.on("--minAF [VALUE]", Float, "Filter alleles by minimum frequency") do |minAF|

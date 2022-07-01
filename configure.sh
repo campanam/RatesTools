@@ -206,10 +206,13 @@ echo 'Testing for GATK...'
 get_jar_path GATK GenomeAnalysisTK.jar
 echo 'Enter GATK major version number (3 or 4).'
 read $gatkver
-while [[ $gatkver != 3 && $gatkver != 4 ]]; do
+while [[ $gatkver != '3' && $gatkver != '4' ]]; do
 	echo 'Enter GATK major version number (3 or 4).'
 	read $gatkver
 done
+if $gatkver != 3; then
+	sed -i '' "s/gatk_build = 3/gatk_build = \$gatkver/" $filename
+fi
 echo 'Use default Java options for GATK? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
@@ -241,13 +244,13 @@ if [ $answer == 'N' ]; then
 fi
 echo 'Use default GATK site filters (QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5)?(Y/N)'
 yes_no_answer
-if [[ $answer == 'Y' && $gatkver == 4 ]]; then
+if [[ $answer == 'Y' && $gatkver == '4' ]]; then
 	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression/gatk_site_filters = \'--filter-name \"filter\" --filter-expression/" $filename
-else if [[ $answer == 'N' && $gatkver == 3]]
+else if [[ $answer == 'N' && $gatkver == '3']]
 	echo 'Enter filters to pass to GATK.'
 	read gatk_site_filters
 	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filterName \"filter\" --filterExpression \'$gatk_site_filters\'/" $filename
-else if [[ $answer == 'N' && $gatkver == 4]]
+else if [[ $answer == 'N' && $gatkver == '4']]
 	read gatk_site_filters
 	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filter-name \"filter\" --filter-expression \'$gatk_site_filters\'/" $filename
 fi

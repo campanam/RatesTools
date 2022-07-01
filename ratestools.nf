@@ -610,6 +610,7 @@ process splitVCFs {
 	// Split VCFs by contig/chromosome/scaffold etc
 	
 	label 'ruby'
+	label 'bgzip'
 	publishDir "$params.outdir/09_SplitVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
@@ -661,7 +662,6 @@ process gatkFilterSites {
 	// Apply GATK-only site filters
 	
 	label 'gatk'
-	label 'bgzip'
 	label 'tabix'
 	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy'
 	errorStrategy 'finish'
@@ -742,8 +742,7 @@ process filterRegions {
 	else
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed 
-		vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed tmp.bed
-		gzip -c ${site_vcf.simpleName}.regionfilt.recode.vcf > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		"""
 
 }

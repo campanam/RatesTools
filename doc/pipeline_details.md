@@ -70,7 +70,7 @@ Using BCFtools [11], the pullGQDP process extracts the DP and GQ information fro
 The plotDPGQ process plots the DP and GQ information from pullDPGQ using [`plotDPGQ.R`](ruby_r_scripts.md#plotDPGQR).  
 
 ## splitVCFs  
-The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [`nextflow_split.rb`](ruby_r_scripts.md#nextflow_splitrb). The resulting VCFs are compressed using `gzip`.  
+The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [`nextflow_split.rb`](ruby_r_scripts.md#nextflow_splitrb). The resulting VCFs are compressed using `bgzip`.  
 
 ## vcftoolsFilterSites  
 The filterSites process filters the split VCF files from the splitVCFs process using VCFtools and the site filters provided in the config file (`vcftools --recode <site_filters>`). Set the vcftools_site_filters parameter to "NULL" to turn off this filter. The resulting VCFs are compressed using `bgzip` [11].  

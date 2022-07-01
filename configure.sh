@@ -1,7 +1,7 @@
 #! /bin/bash
 
 #----------------------------------------------------------------------------------------
-# Michael G. Campana and Ellie E. Armstrong, 2020-2021
+# Michael G. Campana and Ellie E. Armstrong, 2020-2022
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 

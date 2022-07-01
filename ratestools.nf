@@ -308,7 +308,7 @@ process genotypegVCFs {
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
 		java ${gatk_java} -jar ${gatk} CombineGVCFs -R $refseq -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
-		java ${gatk_java} -jar ${gatk} GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O >(gunzip -c ${prefix}_combined.vcf.gz | gzip)
+		java ${gatk_java} -jar ${gatk} GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O >(gzip > ${prefix}_combined.vcf.gz)
 		"""
 }
 
@@ -690,8 +690,7 @@ process gatkFilterSites {
 		"""
 		tabix $site_vcf
 		java ${gatk_java} -jar ${gatk} -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
-		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf -R $refseq --excludeFiltered
-		bgzip ${site_vcf.simpleName}.gatksitefilt.vcf 
+		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R $refseq --excludeFiltered
 		"""
 	else if (params.gatk_build == 4)
 		"""

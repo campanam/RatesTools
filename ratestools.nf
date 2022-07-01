@@ -300,8 +300,7 @@ process genotypegVCFs {
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o ${prefix}_combined.vcf -R ${refseq} --includeNonVariantSites\$VARPATH
-		gzip ${prefix}_combined.vcf # Clean up giant VCF before going on with filtering
+		java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o >(gzip > ${prefix}_combined.vcf.gz) -R ${refseq} --includeNonVariantSites\$VARPATH
 		"""
 	else if (params.gatk_build == 4)
 		"""

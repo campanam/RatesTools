@@ -531,8 +531,7 @@ process filterChr {
 	else
 		"""
 		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
-		vcftools --gzvcf $comb_vcf --recode --out ${prefix}.chrfilt \$chr_line
-		gzip ${prefix}.chrfilt.recode.vcf
+		vcftools --gzvcf $comb_vcf --recode -c \$chr_line | gzip > ${prefix}.chrfilt.recode.vcf.gz
 		"""
 }
 
@@ -558,8 +557,7 @@ process splitTrios {
 	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
 	
 	"""
-	vcftools --gzvcf $chr_vcf --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id}
-	gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
+	vcftools --gzvcf $chr_vcf --recode -c --indv ${dam} --indv ${sire} --indv ${pair_id} | gzip > ${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz
 	"""
 
 }
@@ -649,12 +647,11 @@ process vcftoolsFilterSites {
 	script:
 	if (site_filters == "NULL")
 		"""
-		bgzip -c $split_vcf > ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
+		ln -s $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
 		"""
 	else
 		"""
-		vcftools --gzvcf ${split_vcf} --recode --out ${split_vcf.simpleName}.sitefilt ${site_filters}
-		bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+		vcftools --gzvcf ${split_vcf} --recode -c ${site_filters} | bgzip > ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
 		"""
 
 }

@@ -39,10 +39,56 @@ def extract_site_count(count, logpattern, indiv)
 		end
 	end
 end
-
+#----------------------------------------------------------------------------------------
+def classify_sites(outindiv)
+	mutclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
+					"T->G" => 0, "C->T" => 0, "C->G" => 0, "C->A" => 0, "G->T" => 0,
+					"G->A" => 0, "G->C" => 0, "Other" => 0 }
+	start = false # Flag to collect data
+	File.open(ARGV[1] + "_offspring" + outindiv + "_summary.log") do |f3|
+		while line = f3.gets
+			if start
+				snp_array = line[0..-2].split("\t")
+				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
+				alleles.delete("<non_ref>") if alleles.include?("<non_ref>")
+				alleles.delete(".") if alleles.include?(".") # Ignore for non-polymorphic sites
+				tags = snp_array[8].split(":") # Get indexes of GT tags
+				gt = tags.index("GT")
+				par_genotypes = [] # Array of parental genotypes
+				for i in 9...snp_array.size # There should always be 3 samples if using RatesTools pipeline. Will break if using calc_denovo_mutation_rate within more individuals.
+					genotype = snp_array[i].split(":")[gt].gsub("|", "/").split("/").uniq.map { |x| x.to_i }
+					if i == @off_index
+						off_genotype = genotype
+					else
+						par_genotypes.push(genotype)
+					end
+				end
+				# Basic handling assuming biallelic SNPs, single-forward, parental homozygous. Dumps all other types into "other".
+				if par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [0,1]
+					mutclass = "#{alleles[0]}->#{alleles[1]}"
+					mutclasses[mutclass] += 1
+				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0,1]
+					mutclass = "#{alleles[1]}->#{alleles[0]}"
+					mutclasses[mutclass] += 1
+				else
+					mutclasses["Other"] += 1
+				end
+			elsif line[0..5] == "#CHROM"
+				header_arr = line[0..-2].split("\t")
+				@off_index = header_arr.index(outindiv)
+				start = true
+			end
+		end	
+	end
+	puts "\n" + outindiv + " Mutation Classes\nMutation,Count"
+	for mut in mutclasses.keys
+		puts mut + "," + mutclasses[mut].to_s
+	end
+end
+#----------------------------------------------------------------------------------------
 if ARGV[0].nil?
 	# If no parameters passed, print help screen
-	format_splash('filterGM', DNMSUMSTATSVER, '<logs_directory> > <out.csv>')
+	format_splash('dnm_summary_stats', DNMSUMSTATSVER, '<logs_directory> <output_prefix> > <out.csv>')
 else
 	$individuals = [] # Array of individual names
 	$allsites = nil # Total number of sites before filtration
@@ -85,10 +131,17 @@ else
 		end
 	end
 	puts "Individual,AllSites,ChrSites,TrioSites,VCFtoolsFiltSites,GATKFiltSites,RegionFiltSites"
+	outindivs = []
 	for indiv in $individuals
 		extract_site_count($vcf_filtsites, '_sitefilt.log', indiv)
 		extract_site_count($gatk_filtsites, '_gatksitefilt.log', indiv)
 		extract_site_count($regionsites, '_regionfilt.log', indiv)
-		puts indiv + "," + $allsites + "," + $chrsites + "," + $triosites[indiv].to_s + "," + $vcf_filtsites[indiv].to_s + "," + $gatk_filtsites[indiv].to_s + "," + $regionsites[indiv].to_s
+		outindiv = indiv.gsub(ARGV[1] + "_offspring", "")
+		outindivs.push(outindiv)
+		puts outindiv + "," + $allsites + "," + $chrsites + "," + $triosites[indiv].to_s + "," + $vcf_filtsites[indiv].to_s + "," + $gatk_filtsites[indiv].to_s + "," + $regionsites[indiv].to_s
+		
+	end
+	for outindiv in outindivs
+		classify_sites(outindiv)
 	end
 end

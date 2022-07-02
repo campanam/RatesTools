@@ -639,7 +639,7 @@ process vcftoolsFilterSites {
 	
 	label 'vcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern '*.vcf.gz'
+	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
@@ -672,7 +672,7 @@ process gatkFilterSites {
 	label 'gatk'
 	label 'tabix'
 	label 'vcftools'
-	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy', pattern '*.vcf.gz'
+	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:

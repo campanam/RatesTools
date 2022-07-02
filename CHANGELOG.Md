@@ -138,6 +138,10 @@ print_results moved to denovolib
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 gz_open_file improved to version in BaitsTools 1.6.6  
 
+dnm_summary_stats
+### Version 0.1.0  
+First script to calculate summary statistics  
+
 ## filterGM  
 ### Version 0.3.2  
 Improved gz_file_open using yield  

@@ -512,7 +512,7 @@ process filterChr {
 	// Optionally include only specific chromsomes
 	
 	label 'vcftools'
-	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy'
+	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
@@ -522,6 +522,7 @@ process filterChr {
 	
 	output:
 	file "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
+	file 'chrfilt.log' optional true into chrfilt_log_ch 
 	
 	script:
 	if (chrs.name == "NULL")
@@ -532,6 +533,7 @@ process filterChr {
 		"""
 		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
 		vcftools --gzvcf $comb_vcf --recode -c \$chr_line | gzip > ${prefix}.chrfilt.recode.vcf.gz
+		tail -n2 .command.log | head -n1 > chrfilt.log
 		"""
 }
 
@@ -542,7 +544,7 @@ process splitTrios {
 	// Split samples into trios for analysis
 	
 	label 'vcftools'
-	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy'
+	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
@@ -555,9 +557,11 @@ process splitTrios {
 	
 	output:
 	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
+	file "${prefix}_offspring${pair_id}_trio.log" into triosplit_log_ch
 	
 	"""
 	vcftools --gzvcf $chr_vcf --recode -c --indv ${dam} --indv ${sire} --indv ${pair_id} | gzip > ${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz
+	tail -n2 .command.log | head -n1 >  ${prefix}_offspring${pair_id}_trio.log
 	"""
 
 }
@@ -635,7 +639,7 @@ process vcftoolsFilterSites {
 	
 	label 'vcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy'
+	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
@@ -644,15 +648,19 @@ process vcftoolsFilterSites {
 	
 	output:
 	file "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
+	file "${split_vcf.simpleName}_sitefilt.log" into sitefilt_log_ch
 	
 	script:
 	if (site_filters == "NULL")
 		"""
 		ln -s $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
+		vcftools --gzvcf $split_vcf
+		tail -n2 .command.log | head -n1 >  ${split_vcf.simpleName}_sitefilt.log
 		"""
 	else
 		"""
 		vcftools --gzvcf ${split_vcf} --recode -c ${site_filters} | bgzip > ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${split_vcf.simpleName}_sitefilt.log
 		"""
 
 }
@@ -663,7 +671,8 @@ process gatkFilterSites {
 	
 	label 'gatk'
 	label 'tabix'
-	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy'
+	label 'vcftools'
+	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy', pattern '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
@@ -676,23 +685,30 @@ process gatkFilterSites {
 	
 	output:
 	file "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
+	file "${site_vcf.simpleName}_gatksitefilt.log" into gatk_sitefilt_log_ch
 	
 	script:
 	if (site_filters == "NULL")
 		"""
 		ln -s $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		vcftools --gzvcf $site_vcf
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_gatksitefilt.log
 		"""
 	else if (params.gatk_build == 3)
 		"""
 		tabix $site_vcf
 		java ${gatk_java} -jar ${gatk} -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
 		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R $refseq --excludeFiltered
+		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_gatksitefilt.log
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		tabix $site_vcf
 		java ${gatk_java} -jar ${gatk} VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters
 		java ${gatk_java} -jar ${gatk} SelectVariants -R $refseq -V $site_vcf -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
+		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_gatksitefilt.log
 		"""
 
 }
@@ -707,7 +723,7 @@ process filterRegions {
 	label 'bcftools'
 	label 'vcftools'
 	label 'tabix'
-	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy'
+	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'retry'
 	maxRetries 3
 	
@@ -717,16 +733,21 @@ process filterRegions {
 	
 	output:
 	file "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
+	file "${site_vcf.simpleName}_regionfilt.log" into regionfilt_log_ch
 	
 	script:
 	chr = site_vcf.simpleName.split('_chr')[1]
 	if (task.attempt == 1)
 		"""
 		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 	else if (task.attempt == 2)
 		"""
 		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 	else if (task.attempt == 3)
 		"""
@@ -738,11 +759,14 @@ process filterRegions {
 		bcftools isec -C -O v -o ${site_vcf.simpleName}.targets ${site_vcf} tmp.bcf
 		# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
 		bcftools view -T ${site_vcf.simpleName}.targets -Ov ${site_vcf} | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 	else
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed 
 		vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 
 }
@@ -782,7 +806,7 @@ process summarizeDNM {
 	file "*" from split_logs_ch.collect()
 	
 	output:
-	file "${params.prefix}*_summary.log"
+	file "${params.prefix}*_summary.log" into summary_log_ch
 	
 	"""
 	for file in ${params.prefix}*.log; do 
@@ -792,6 +816,26 @@ process summarizeDNM {
 		mv \$file \${file%_chr*.log}/
 	done
 	for outdir in ${params.prefix}*; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
+	"""
+	
+all_logs_ch = summary_log_ch.mix(regionfilt_log_ch, gatk_sitefilt_log_ch, sitefilt_log_ch, triosplit_log_ch, chrfilt_log_ch)
+
+}
+
+process generateSummaryStats {
+
+	label 'ruby'
+	publishDir "$params.outdir/15_SummaryStats", mode: "copy"
+	errorStrategy 'finish'
+	
+	input:
+	file "*" from all_logs_ch.collect()
+	
+	output:
+	file "summary_stats.csv"
+	
+	"""
+	dnm_summary_stats.rb . > summary_stats.csv
 	"""
 
 }

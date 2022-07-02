@@ -37,6 +37,11 @@ Program information options (Do not use other options with the following):
 ## denovolib.rb  
 This script provides a library of methods and classes used by the remaining Ruby scripts in the RatesTools pipeline.  
 
+## dnm_summary_stats.rb  
+The dnm_summary_stats.rb script summarizes retained site counts from the various filtration steps of the RatesTools pipeline. It also classifies single-forward DNM by their substitution class. All other candidate DNMs are counted as "Other".  
+
+Usage is: `dnm_summary_stats.rb <logs_directory> <output_prefix> > <out.csv>`.  
+
 ## filterGM.rb  
 The filterGM.rb script filters a GenMap [2] mappability bed file. The user specifies a mappability cut-off above which to retain sites (default behavior). Optionally, the user can output regions below the cut-off (e.g. for subsequent removal) by appending 'exclude' to the command line. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
 

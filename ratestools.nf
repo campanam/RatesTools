@@ -278,6 +278,7 @@ process genotypegVCFs {
 
 	// Joint genotype gVCFs using GATK
 	// Uncompressed combined VCF because GATK 3.8-1 inflate/deflate is glitched for this tool
+	// Also uncompressed combined VCF because GATK4 cannot generate index with gzipped output
 	
 	label 'gatk'
 	publishDir "$params.outdir/03_CombinedVCF", mode: 'copy'
@@ -300,14 +301,16 @@ process genotypegVCFs {
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o >(gzip > ${prefix}_combined.vcf.gz)
+		java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o ${prefix}_combined.vcf
+		gzip ${prefix}_combined.vcf
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
 		java ${gatk_java} -jar ${gatk} CombineGVCFs -R $refseq -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
-		java ${gatk_java} -jar ${gatk} GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O >(gzip > ${prefix}_combined.vcf.gz)
+		java ${gatk_java} -jar ${gatk} GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O ${prefix}_combined.vcf
+		gzip ${prefix}_combined.vcf
 		"""
 }
 

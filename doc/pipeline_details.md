@@ -87,6 +87,9 @@ Using the region-filtered VCFs output from the filterRegions process, the calcDN
 ## summarizeDNM  
 Using [`summarize_denovo.rb`](ruby_r_scripts.md#summarize_denovorb), the summarizeDNM process combines the per-chromosome mutation rate results from the calcDNMRate process to obtain the genomic mutation rate.  
 
+## generateSummaryStats  
+Using [`dnm_summary_stats.rb`](ruby_r_scripts.md#dnm_summary_stats.rb), the generate SummaryStats process calculates the numbers of sites retained after each filtration stage in the RatesTools pipeline. It also calculate the number of single-forward DNMs (assuming parental homozygosity) of each mutation class. All other candidate DNMs are aggregated as "Other".  
+
 ## References  
 1. Li, H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. *arXiv*, [1303.3997v2](https://arxiv.org/abs/1303.3997).  
 2. Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., 1000 Genome Project Data Processing Subgroup (2009) The Sequence Alignment/Map format and SAMtools. *Bioinformatics*, 25, 2078-2079. DOI: [10.1093/bioinformatics/btp352](https://academic.oup.com/bioinformatics/article/25/16/2078/204688).  

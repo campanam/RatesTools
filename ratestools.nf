@@ -817,10 +817,10 @@ process summarizeDNM {
 	done
 	for outdir in ${params.prefix}*; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
 	"""
-	
-all_logs_ch = summary_log_ch.mix(regionfilt_log_ch, gatk_sitefilt_log_ch, sitefilt_log_ch, triosplit_log_ch, chrfilt_log_ch)
 
 }
+
+all_logs_ch = summary_log_ch.mix(regionfilt_log_ch, gatk_sitefilt_log_ch, sitefilt_log_ch, triosplit_log_ch, chrfilt_log_ch)
 
 process generateSummaryStats {
 

@@ -181,6 +181,9 @@ get_path_module RepeatModeler
 echo 'Enter number of threads for RepeatMasker/RepeatModeler.'
 read rm_pa
 sed -i '' "s/rm_pa = 24/rm_pa = $rm_pa/" $filename
+echo 'Enter number of bases to remove on each side of an indel.'
+read indelpad
+sed -i '' "s/indelpad = 5/indelpad = $indelpad/" $filename
 echo 'BEDTools configuration...'
 get_path_module bedtools
 echo 'BCFtools configuration...'

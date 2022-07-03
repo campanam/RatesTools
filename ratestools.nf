@@ -842,3 +842,25 @@ process generateSummaryStats {
 	"""
 
 }
+
+workflow.onError {
+	println "RatesTools pipeline encountered an error. Error message: $workflow.errorMessage."
+	if (params.email != "NULL") {
+		sendMail(to: params.email, subject: "RatesTools error.", body: "RatesTools pipeline encountered an error. Error message: $workflow.errorMessage.")
+	}
+}
+workflow.onComplete {
+	// workflow.onComplete is also run when an error is encountered, but is triggered when all processes finish.
+	// Running error messages using onError so that the user gets them at first possible opportunity
+	if (workflow.success) {
+		println "RatesTools pipeline completed successfully at $workflow.complete!"
+		if (params.email != "NULL") {
+			sendMail(to: params.email, subject: 'RatesTools successful completion', body: "RatesTools pipeline completed successfully at $workflow.complete!")
+		}
+	} else {
+		println "RatesTools pipeline completed with errors at $workflow.complete.\nError message: $workflow.errorMessage"
+		if (params.email != "NULL") {
+			sendMail(to: params.email, subject: 'RatesTools completed with errors', body: "RatesTools pipeline completed with errors at $workflow.complete.\nError message: $workflow.errorMessage")
+		}
+	}
+}

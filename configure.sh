@@ -274,3 +274,10 @@ if [ $answer == 'N' ]; then
 	read dnm_opts
 	sed -i '' "s/dnm_opts = \"-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom\"/dnm_opts = \"$dnm_opts\"/" $filename
 fi
+echo 'Send emails regarding pipeline completion status and encountered errors? (Y/N)'
+yes_no_answer
+if [ $answer == 'Y' ]; then
+	echo 'Enter email address.'
+	read email
+	sed -i '' "s/email = \"NULL\"/email = $email/" $filename
+fi

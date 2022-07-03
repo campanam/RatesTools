@@ -457,12 +457,13 @@ process maskIndels {
 	
 	input:
 	file combo_vcf from combined_indels_ch
+	val indelpad from params.indelpad
 	
 	output:
 	file "${combo_vcf.simpleName}_indels.bed" into indels_ch
 	
 	"""
-	indels2bed.rb ${combo_vcf} 5 > ${combo_vcf.simpleName}_indels.bed
+	indels2bed.rb ${combo_vcf} $indelpad > ${combo_vcf.simpleName}_indels.bed
 	"""
 
 }

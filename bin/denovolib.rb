@@ -40,7 +40,7 @@ def split_vcf(bgzip = false) # Split an input VCF into chromosome pieces for par
 						File.open($options.outdir + "/chr" + outfile + ".vcf", 'a') do |write|
 							write << outlines
 						end
-						`gzip #{$options.outdir + "/chr" + outfile + ".vcf"}` if gzip # If outputting compressed vcfs
+						`bgzip #{$options.outdir + "/chr" + outfile + ".vcf"}` if bgzip # If outputting compressed vcfs
 					end
 					writecycles = 0 # Reset write cycles count
 					outlines = "" # Reset outlines

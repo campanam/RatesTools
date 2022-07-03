@@ -838,7 +838,7 @@ process generateSummaryStats {
 	file "summary_stats.csv"
 	
 	"""
-	dnm_summary_stats.rb . > summary_stats.csv
+	dnm_summary_stats.rb . ${params.prefix} > summary_stats.csv
 	"""
 
 }

@@ -209,6 +209,7 @@ Accessor script for split_vcf for nextflow
 ### Version 0.5.0  
 GATK4 compatibility  
 Email errors/completion status  
+Variable indel padding  
 
 ### Version 0.4.0  
 Split site_filters into vcftools_site_filters and gatk_site_filters  
@@ -237,6 +238,7 @@ Initial script (plotDPGQ-clean.R)
 GATK4 compatibility  
 Improved use of symbolic links/writing to disk  
 Completion messages and emailing of completion status/errors  
+Variable indel padding  
 
 ### Version 0.4.0  
 Updated plotDPGQ output PNGs  

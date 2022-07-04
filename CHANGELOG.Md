@@ -24,6 +24,7 @@ Stanford University
 ### Version 0.11.2  
 Fixed GATK4 total AD = 0 bug  
 More accurate minAD1 help description  
+Fixed snp_record (line 239) glitch  
 
 ### Version 0.11.1  
 Fixed missing kochDNp require_relative statement  

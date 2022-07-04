@@ -21,6 +21,11 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.11.2  
+Fixed GATK4 total AD = 0 bug  
+More accurate minAD1 help description  
+Fixed snp_record (line 239) glitch  
+
 ### Version 0.11.1  
 Fixed missing kochDNp require_relative statement  
 Fixed cutoff instead of $options.cutoff bug  
@@ -85,6 +90,10 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## denovolib  
+### Version 0.8.1  
+split_vcf now uses bgzip rather than gzip for GATK site filtering  
+filter_exit returns exit status 1  
+
 ### Version 0.8.0  
 Added handling for Koch DNp statistic filter  
 Generalized ad_exit from calc_denovo_mutation_rate as denovolib method filter_exit  
@@ -130,6 +139,10 @@ print_results moved to denovolib
 ### Version 0.1.0  
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 gz_open_file improved to version in BaitsTools 1.6.6  
+
+dnm_summary_stats
+### Version 0.1.0  
+First script to calculate summary statistics  
 
 ## filterGM  
 ### Version 0.3.2  
@@ -195,6 +208,11 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## nextflow.config  
+### Version 0.5.0  
+GATK4 compatibility  
+Email errors/completion status  
+Variable indel padding  
+
 ### Version 0.4.0  
 Split site_filters into vcftools_site_filters and gatk_site_filters  
 Updated process list in both profiles for new processes  
@@ -218,6 +236,13 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.0  
+GATK4 compatibility  
+Improved use of symbolic links/writing to disk  
+Completion messages and emailing of completion status/errors  
+Variable indel padding  
+Use path rather than file qualifiers  
+
 ### Version 0.4.0  
 Updated plotDPGQ output PNGs  
 split filterSites in vcftoolsFilterSites and gatkFilterSites  

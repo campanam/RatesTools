@@ -2,8 +2,8 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.8.0"
-# Michael G. Campana and Ellie E. Armstrong, 2021
+DENOVOLIBVER = "0.8.1"
+# Michael G. Campana and Ellie E. Armstrong, 2022
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -24,7 +24,7 @@ require 'zlib'
 
 # Library of methods accessed by other RatesTools ruby scripts
 
-def split_vcf(gzip = false) # Split an input VCF into chromosome pieces for parallelization using paralle_denovo.rb or nextflow_split.rb
+def split_vcf(bgzip = false) # Split an input VCF into chromosome pieces for parallelization using nextflow_split.rb
 	@vcfs = [] # Array of VCF names. Exclude filepath from names
 	start = false
 	header = ""
@@ -40,7 +40,7 @@ def split_vcf(gzip = false) # Split an input VCF into chromosome pieces for para
 						File.open($options.outdir + "/chr" + outfile + ".vcf", 'a') do |write|
 							write << outlines
 						end
-						`gzip #{$options.outdir + "/chr" + outfile + ".vcf"}` if gzip # If outputting compressed vcfs
+						`bgzip #{$options.outdir + "/chr" + outfile + ".vcf"}` if bgzip # If outputting compressed vcfs
 					end
 					writecycles = 0 # Reset write cycles count
 					outlines = "" # Reset outlines
@@ -73,7 +73,7 @@ def split_vcf(gzip = false) # Split an input VCF into chromosome pieces for para
 	File.open($options.outdir + "/chr" + outfile + ".vcf", 'a') do |write| # Output final line
 		write << outlines
 	end
-	`gzip #{$options.outdir + "/chr" + outfile + ".vcf"}` if gzip # If outputting compressed vcfs
+	`bgzip #{$options.outdir + "/chr" + outfile + ".vcf"}` if bgzip # If outputting compressed vcfs
 	return @vcfs
 end
 #-----------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ end
 def filter_exit(message, snp_record) # Method to exit program if tag missing or data unsuited to specified filter
 	$stderr.puts message
 	$stderr.puts snp_record
-	exit
+	exit 1
 end
 #-----------------------------------------------------------------------------------------
 def format_splash(cmd, version, cmdline) # Format output for basic script help screens
@@ -180,7 +180,7 @@ class Parser # Parse input for calc_denovo_mutation_rate.rb and post-hoc kochDNP
 				opts.on("--parhom", "Require parents to be homozygous at DNM sites") do |parhom|
 					args.parhom = true
 				end
-				opts.on("--minAD1", "Discard DNMs if parents have DNM alleles even if not called") do |minAD1|
+				opts.on("--minAD1", "Call all alleles with a minimum allelic depth of at least 1") do |minAD1|
 					args.minAD1 = true
 				end
 				opts.on("--minAF [VALUE]", Float, "Filter alleles by minimum frequency") do |minAF|

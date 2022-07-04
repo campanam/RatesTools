@@ -20,7 +20,7 @@ The following calc_denovo_mutation_rate.rb options are available:
 `-t, --theta [VALUE]`: Heterozygosity (theta) for Koch DNp (Default = 0.008)  
 `-c, --cutoff [VALUE]`: Koch DNp cutoff (Default = 0.3)  
 `--parhom`: Require parents to be homozygous at candidate DNM sites. Parental heterozygosity forces the candidate site(s) to be discarded.  
-`--minAD1`: Discard candidate DNMs if parents have DNM alleles present (even if the parents' alleles are not called). Requires the 'AD' tag to be specified in the VCF.  
+`--minAD1`: Call all alleles at a site with an allelic depth of at least 1 (even if not called by the genotyper). Requires the 'AD' tag to be specified in the VCF. If the total allelic depth is 0 (e.g. if no informative reads are included but the total read depth is greater than the required threshold), the site is discarded as a potential DNM.  
 `--minAF [VALUE]`: Filter alleles by minimum frequency.  
 `-w, --window [VALUE]`: Sequence window length (bp) for bootstrapping (Default = 1000000).  
 `-S, --step [VALUE]`: Window step (bp) for bootstrapping (Default = 1000000).  
@@ -36,6 +36,11 @@ Program information options (Do not use other options with the following):
 
 ## denovolib.rb  
 This script provides a library of methods and classes used by the remaining Ruby scripts in the RatesTools pipeline.  
+
+## dnm_summary_stats.rb  
+The dnm_summary_stats.rb script summarizes retained site counts from the various filtration steps of the RatesTools pipeline. It also classifies single-forward DNM by their substitution class. All other candidate DNMs are counted as "Other".  
+
+Usage is: `dnm_summary_stats.rb <logs_directory> <output_prefix> > <out.csv>`.  
 
 ## filterGM.rb  
 The filterGM.rb script filters a GenMap [2] mappability bed file. The user specifies a mappability cut-off above which to retain sites (default behavior). Optionally, the user can output regions below the cut-off (e.g. for subsequent removal) by appending 'exclude' to the command line. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
@@ -72,7 +77,7 @@ Program information options (Do not use other options with the following):
 `-h, --help`: Show help.  
 
 ## nextflow_split.rb  
-The nextflow_split.rb script splits an all-sites VCF by chromosomes/contigs for parallelization of filtering and de novo mutation rate calculations using the RatesTools pipeline.
+The nextflow_split.rb script splits an all-sites VCF by chromosomes/contigs for parallelization of filtering and de novo mutation rate calculations using the RatesTools pipeline.  
 
 Basic usage is: `nextflow_split.rb -i <in.VCF> -o <outdir>`. Help is available using `nextflow_split.rb -h`.  
 

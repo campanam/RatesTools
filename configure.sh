@@ -1,7 +1,7 @@
 #! /bin/bash
 
 #----------------------------------------------------------------------------------------
-# Michael G. Campana and Ellie E. Armstrong, 2020-2021
+# Michael G. Campana and Ellie E. Armstrong, 2020-2022
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -181,32 +181,21 @@ get_path_module RepeatModeler
 echo 'Enter number of threads for RepeatMasker/RepeatModeler.'
 read rm_pa
 sed -i '' "s/rm_pa = 24/rm_pa = $rm_pa/" $filename
+echo 'Enter number of bases to remove on each side of an indel.'
+read indelpad
+sed -i '' "s/indelpad = 5/indelpad = $indelpad/" $filename
 echo 'BEDTools configuration...'
 get_path_module bedtools
 echo 'BCFtools configuration...'
 get_path_module bcftools
 echo 'VCFtools configuration...'
 get_path_module vcftools
-echo 'Use default VCFtools filters (--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2)? (Y/N)'
-yes_no_answer
-if [ $answer == 'N' ]; then
-	echo 'Enter filters to pass to VCFtools.'
-	read site_filters
-	sed -i '' "s/site_filters = \"--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2\"/site_filters = \"$site_filters\"/" $filename
-fi
-echo 'Ruby configuration...'
-get_path_module ruby
-echo 'Use default calc_denovo_mutation_rate options (-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom)? (Y/N)'
-yes_no_answer
-if [ $answer == 'N' ]; then
-	echo 'Enter parameters to pass to calc_denovo_mutation_rate.'
-	read dnm_opts
-	sed -i '' "s/dnm_opts = \"-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom\"/dnm_opts = \"$dnm_opts\"/" $filename
-fi
 echo 'awk configuration...'
 get_path_module awk
 echo 'R configuration...'
 get_path_module R
+echo 'Ruby configuration...'
+get_path_module ruby
 echo 'Testing for Picard...'
 get_jar_path Picard picard.jar
 echo 'Use default Java options for Picard? (Y/N)'
@@ -218,6 +207,15 @@ if [ $answer == 'N' ]; then
 fi
 echo 'Testing for GATK...'
 get_jar_path GATK GenomeAnalysisTK.jar
+echo 'Enter GATK major version number (3 or 4).'
+read gatkver
+while [[ $gatkver != 3 && $gatkver != 4 ]]; do
+	echo 'Enter GATK major version number (3 or 4).'
+	read gatkver
+done
+if [ $gatkver != 3 ]; then
+	sed -i '' "s/gatk_build = 3/gatk_build = \$gatkver/" $filename
+fi
 echo 'Use default Java options for GATK? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
@@ -239,4 +237,50 @@ if `command -v java 2>&1 >/dev/null`; then # If java found, identify version
 	else
 		echo "WARNING: GATK requires Java 1.8. Current Java environment is incompatible."
 	fi
+fi
+echo 'Filter sites using VCFtools? (Y/N)'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	sed -i '' "s/vcftools_site_filters = \"--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2\"/vcftools_site_filters = \"NULL\"/" $filename
+else
+	echo 'Use default VCFtools site filters (--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2)? (Y/N)'
+	yes_no_answer
+	if [ $answer == 'N' ]; then
+		echo 'Enter filters to pass to VCFtools.'
+		read site_filters
+		sed -i '' "s/vcftools_site_filters = \"--minDP 30 --minGQ 65 --maxDP 250 --max-missing 1 --min-alleles 1 --max-alleles 2\"/vcftools_site_filters = \"$site_filters\"/" $filename
+	fi
+fi
+echo 'Filter sites using GATK? (Y/N)'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'NULL'/" $filename
+else
+	echo 'Use default GATK site filters (QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5)? (Y/N)'
+	yes_no_answer
+	if [[ $answer == 'Y' && $gatkver == 4 ]]; then
+		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression/gatk_site_filters = \'--filter-name \"filter\" --filter-expression/" $filename
+	elif [[ $answer == 'N' && $gatkver == 3 ]]; then
+		echo 'Enter filters to pass to GATK.'
+		read gatk_site_filters
+		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filterName \"filter\" --filterExpression \'$gatk_site_filters\'/" $filename
+	elif [[ $answer == 'N' && $gatkver == 4 ]]; then
+		echo 'Enter filters to pass to GATK.'
+		read gatk_site_filters
+		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filter-name \"filter\" --filter-expression \'$gatk_site_filters\'/" $filename
+	fi
+fi
+echo 'Use default calc_denovo_mutation_rate options (-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom)? (Y/N)'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	echo 'Enter parameters to pass to calc_denovo_mutation_rate.'
+	read dnm_opts
+	sed -i '' "s/dnm_opts = \"-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom\"/dnm_opts = \"$dnm_opts\"/" $filename
+fi
+echo 'Send emails regarding pipeline completion status and encountered errors? (Y/N)'
+yes_no_answer
+if [ $answer == 'Y' ]; then
+	echo 'Enter email address.'
+	read email
+	sed -i '' "s/email = \"NULL\"/email = $email/" $filename
 fi

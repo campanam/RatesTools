@@ -22,19 +22,19 @@ The markDuplicates process marks PCR duplicates using either `sambamba markdup` 
 The fixReadGroups process adds sample read group information to the bam files using Picard AddOrReplaceReadGroups (`java -jar picard.jar AddOrReplaceReadGroups`).  
 
 ## realignIndels  
-The realignIndels process first builds a bam index (.bai) for the fixReadGroups output bam using Picard BuildBamIndex (`java -jar picard.jar BuildBamIndex`). It then identifies intervals for indel realignment using Genome Analysis Toolkit (GATK) [5] RealignerTargetCreator (`java -jar GenomeAnalysisTK.jar -T RealignerTargetCreator`) and realigns indels using GATK IndelRealigner (`java -jar GenomeAnalysisTk.jar -T IndelRealigner --filter_bases_not_stored`).  
+The realignIndels process first builds a bam index (.bai) for the fixReadGroups output bam using Picard BuildBamIndex (`java -jar picard.jar BuildBamIndex`). It then identifies intervals for indel realignment using Genome Analysis Toolkit (GATK) [5]. For GATK 3, this process uses RealignerTargetCreator (`java -jar GenomeAnalysisTK.jar -T RealignerTargetCreator`) and realigns indels using GATK IndelRealigner (`java -jar GenomeAnalysisTk.jar -T IndelRealigner --filter_bases_not_stored`). For GATK 4, this process uses LeftAlignIndels  (`java -jar GenomeAnalysisTk.jar LeftAlignIndels`).  
 
 ## filterBAMs  
-The filterBAM process strictly filters aligned reads using GATK PrintReads following [6] (`java -jar GenomeAnalysisTK.jar -T PrintReads --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals`).  
+The filterBAM process strictly filters aligned reads using GATK PrintReads following [6] for GATK 3 (`java -jar GenomeAnalysisTK.jar -T PrintReads --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals`). These settings are adjusted for GATK 4 compatibility (`java -jar GenomeAnalysisTK.jar PrintReads --read-filter GoodCigarReadFilter --read-filter NotDuplicateReadFilter --read-filter PassesVendorQualityCheckReadFilter --read-filter MappingQualityReadFilter --read-filter MappingQualityAvailableReadFilter --read-filter PrimaryLineReadFilter --read-filter MappedReadFilter --read-filter NotOpticalDuplicateReadFilter --read-filter ProperlyPairedReadFilter`).  
 
 ## fixMate  
 The fixMate process corrects sequence mate pair tags using Picard FixMateInformation (`java -jar picard.jar FixMateInformation ADD_MATE_CIGAR=true`). It then builds a bam index (.bai) for the output bam file using Picard BuildBamIndex (`java -jar picard.jar BuildBamIndex`).  
 
 ## callVariants  
-The callVariants process calls individual sequence variants (gVCF format) using GATK HaplotypeCaller (`java -jar GenomeAnalysisTK.jar -T HaplotypeCaller -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -ERC GVCF -out_mode EMIT_ALL_SITES`).  
+The callVariants process calls individual sequence variants (gVCF format) using GATK HaplotypeCaller (GATK 3: `java -jar GenomeAnalysisTK.jar -T HaplotypeCaller -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -ERC GVCF -out_mode EMIT_ALL_SITES`; GATK 4: `java -jar GenomeAnalysisTK.jar HaplotypeCaller -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation`).  
 
 ## genotypegVCFs  
-The genotypegVCFs process performs joint-genotyping and generates an all-sites VCF for all samples using GATK GenotypeGVCFs (`java -jar GenomeAnalysisTK.jar -T GenotypeGVCFs --includeNonVariantSites`).  It then compresses the resulting multi-sample VCF using `gzip`.  
+The genotypegVCFs process performs joint-genotyping and generates an all-sites VCF for all samples. It then compresses the resulting multi-sample VCF using `gzip`. For GATK 3, this process uses GenotypeGVCFs (`java -jar GenomeAnalysisTK.jar -T GenotypeGVCFs --includeNonVariantSites`). For GATK 4, the process first combines the individual gVCFs using CombineGVCFs (`java -jar GenomeAnalysisTK.jar CombineGVCFs --convert-to-base-pair-resolution`) and then performs joint genotyping using GenotypeGVCFs (`java -jar GenomeAnalysisTK.jar GenotypeGVCFs --include-non-variant-sites`).  
 
 ## genMapIndex  
 The genMapIndex process generates the GenMap [7] index for the reference sequence for downstream mappability calculations (`genmap index`).  
@@ -70,13 +70,13 @@ Using BCFtools [11], the pullGQDP process extracts the DP and GQ information fro
 The plotDPGQ process plots the DP and GQ information from pullDPGQ using [`plotDPGQ.R`](ruby_r_scripts.md#plotDPGQR).  
 
 ## splitVCFs  
-The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [`nextflow_split.rb`](ruby_r_scripts.md#nextflow_splitrb). The resulting VCFs are compressed using `gzip`.  
+The splitVCFs process splits each VCF generated during the filterChr process by chromosome/contig name for parallelization of downstream processes using [`nextflow_split.rb`](ruby_r_scripts.md#nextflow_splitrb). The resulting VCFs are compressed using `bgzip`.  
 
 ## vcftoolsFilterSites  
 The filterSites process filters the split VCF files from the splitVCFs process using VCFtools and the site filters provided in the config file (`vcftools --recode <site_filters>`). Set the vcftools_site_filters parameter to "NULL" to turn off this filter. The resulting VCFs are compressed using `bgzip` [11].  
 
 ## gatkFilterSites  
-The filterSites process filters the VCF files from the splitVCFs/vcftoolsFilterSites process using GATK and the site filters provided in the config file (`java -jar GenomeAnalysisTK.jar -T VariantFiltration` and `java -jar GenomeAnalysisTK.jar -T SelectVariants`). Set the gatk_site_filters parameter to 'NULL' to turn off this filter. The resulting VCFs are compressed using `bgzip` [11].  
+The filterSites process filters the VCF files from the splitVCFs/vcftoolsFilterSites process using GATK and the site filters provided in the config file (GATK3: `java -jar GenomeAnalysisTK.jar -T VariantFiltration` and `java -jar GenomeAnalysisTK.jar -T SelectVariants --excludeFiltered`; GATK 4: `java -jar GenomeAnalysisTK.jar VariantFiltration` and `java -jar GenomeAnalysisTK.jar SelectVariants --exclude-filtered`). Set the gatk_site_filters parameter to 'NULL' to turn off this filter.  
 
 ## filterRegions  
 The filterRegions process removes low-reliability regions (repeat regions, indel-affected sites, and regions of non-unique mappability) from the site-filtered VCFs from the filterSites process. The low-reliability regions are specified in the output merged bed from the simplifyBed process. On the first pass, the process uses BEDTools [12] intersect on the site-filtered VCF (`bedtools intersect -a <site-filtered_vcf> -b <out_cat.bed>`). Should this fail (e.g. due to a compression issue), the process repeats using `zcat` to uncompress the VCF and pass it via stdin to BEDTools. If neither BEDTools run is successful, the process attempts to removed the filtered regions using BCFtools view (`bcftools view -R <out_cat.bed> -Ob -o tmp.bcf`), BCFtools isec (`bcftools isec -C <site-filtered_vcf> <tmp.bcf>`) and BCFtools view (`bcftools view -T <isec_out> <site-filtered_vcf>`) [11]. If the BCFtools attempt fails, the process defaults to using VCFtools (`vcftools --recode --exclude-bed <out_cat.bed>`). The resulting VCFs are compressed using `gzip`.  
@@ -86,6 +86,9 @@ Using the region-filtered VCFs output from the filterRegions process, the calcDN
 
 ## summarizeDNM  
 Using [`summarize_denovo.rb`](ruby_r_scripts.md#summarize_denovorb), the summarizeDNM process combines the per-chromosome mutation rate results from the calcDNMRate process to obtain the genomic mutation rate.  
+
+## generateSummaryStats  
+Using [`dnm_summary_stats.rb`](ruby_r_scripts.md#dnm_summary_stats.rb), the generate SummaryStats process calculates the numbers of sites retained after each filtration stage in the RatesTools pipeline. It also calculate the number of single-forward DNMs (assuming parental homozygosity) of each mutation class. All other candidate DNMs are aggregated as "Other".  
 
 ## References  
 1. Li, H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. *arXiv*, [1303.3997v2](https://arxiv.org/abs/1303.3997).  

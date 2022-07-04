@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.4
+/* RatesTools version 0.5
 Michael G. Campana and Ellie E. Armstrong, 2020-2022
 Smithsonian Institution and Stanford University
 
@@ -36,7 +36,7 @@ process prepareRef {
 	path refseq from params.refseq
 	
 	output:
-	file "${refseq.baseName}*.{amb,ann,bwt,pac,sa,fai,dict}" into bwa_index_ch // Channel to find these files again
+	path "${refseq.baseName}*.{amb,ann,bwt,pac,sa,fai,dict}" into bwa_index_ch // Channel to find these files again
 	
 	"""
 	bwa index ${bwa_alg}${refseq}
@@ -58,10 +58,10 @@ process alignSeqs {
 	path refseq from params.refseq
 	tuple val(pair_id), path(reads) from readpairs_ch
 	val bwa_threads from params.bwa_threads
-	file "*" from bwa_index_ch
+	path "*" from bwa_index_ch
 	
 	output:
-	file "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
+	path "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
 	val pair_id into filt_sample_ch, stats_sample_ch // sample name for downstream use
 	val samtools_extra_threads into samtools_threads_ch
 	
@@ -82,11 +82,11 @@ process sortBAM {
 	errorStrategy 'finish'
 
 	input:
-	file raw_bam from raw_bam_ch
+	path raw_bam from raw_bam_ch
 	val samtools_extra_threads from samtools_threads_ch
 	
 	output:
-	file "${raw_bam.simpleName}.srt.bam" into sorted_bam_ch
+	path "${raw_bam.simpleName}.srt.bam" into sorted_bam_ch
 	
 	"""
 	samtools sort -@ ${samtools_extra_threads} ${raw_bam} > ${raw_bam.simpleName}.srt.bam
@@ -103,13 +103,13 @@ process markDuplicates {
 	errorStrategy 'finish'
 	
 	input:
-	file sorted_bam from sorted_bam_ch
+	path sorted_bam from sorted_bam_ch
 	val markDuplicates from params.markDuplicates
 	path picard from params.picard
 	val picard_java from params.picard_java
 	
 	output:
-	file "${sorted_bam.simpleName}.markdup.bam" into markdup_bam_ch
+	path "${sorted_bam.simpleName}.markdup.bam" into markdup_bam_ch
 	
 	script:
 	if ( markDuplicates == "sambamba" )
@@ -137,7 +137,7 @@ process fixReadGroups {
 	path refseq from params.refseq
 	
 	output:
-	file "${markdup_bam.simpleName}.rg.bam" into rg_bam_ch
+	path "${markdup_bam.simpleName}.rg.bam" into rg_bam_ch
 	
 	script:
 	pair_id = "${markdup_bam.simpleName}".minus("_${refseq.simpleName}")
@@ -162,18 +162,25 @@ process realignIndels {
 	val picard_java from params.picard_java
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
-	file "*" from bwa_index_ch
+	path "*" from bwa_index_ch
 	
 	output:
-	file "${rg_bam.simpleName}.realn.bam" into realn_bam_ch
-	file "${rg_bam.simpleName}.realn.bai" into realn_bai_ch
-	file "${rg_bam.baseName}.bai"
-
-	"""
-	java ${picard_java} -jar ${picard} BuildBamIndex I=${rg_bam}
-	java ${gatk_java} -jar ${gatk} -T RealignerTargetCreator -R ${refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
-	java ${gatk_java} -jar ${gatk} -T IndelRealigner -R ${refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
-	"""
+	path "${rg_bam.simpleName}.realn.bam" into realn_bam_ch
+	path "${rg_bam.simpleName}.realn.bai" into realn_bai_ch
+	path "${rg_bam.baseName}.bai"
+	
+	script:
+	if (params.gatk_build == 3)
+		"""
+		java ${picard_java} -jar ${picard} BuildBamIndex I=${rg_bam}
+		java ${gatk_java} -jar ${gatk} -T RealignerTargetCreator -R ${refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
+		java ${gatk_java} -jar ${gatk} -T IndelRealigner -R ${refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
+		"""
+	else if (params.gatk_build == 4)
+		"""
+		java ${picard_java} -jar ${picard} BuildBamIndex I=${rg_bam}
+		java ${gatk_java} -jar ${gatk} LeftAlignIndels -R ${refseq} -I $rg_bam -O ${rg_bam.simpleName}.realn.bam
+		"""
 
 }
 
@@ -191,16 +198,21 @@ process filterBAMs {
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
 	val gatk_nct from params.gatk_nct
-	file "*" from bwa_index_ch
+	path "*" from bwa_index_ch
 	
 	output:
-	file "${realn_bam.simpleName}.filt.bam" into filt_bam_ch
-	file "${realn_bam.simpleName}.filt.bai" into filt_bai_ch
+	path "${realn_bam.simpleName}.filt.bam" into filt_bam_ch
+	path "${realn_bam.simpleName}.filt.bai" into filt_bai_ch
 	
-	"""
-	java ${gatk_java} -jar ${gatk} -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${gatk_nct} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
-	"""
-	
+	script:
+	if (params.gatk_build == 3)
+		"""
+		java ${gatk_java} -jar ${gatk} -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${gatk_nct} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
+		"""
+	else if (params.gatk_build == 4)
+		"""
+		java ${gatk_java} -jar ${gatk} PrintReads -I ${realn_bam} -O ${realn_bam.simpleName}.filt.bam --read-filter GoodCigarReadFilter --read-filter NotDuplicateReadFilter --read-filter PassesVendorQualityCheckReadFilter --read-filter MappingQualityReadFilter --read-filter MappingQualityAvailableReadFilter --read-filter PrimaryLineReadFilter --read-filter MappedReadFilter --read-filter NotOpticalDuplicateReadFilter --read-filter ProperlyPairedReadFilter
+		"""
 }
 
 process fixMate {
@@ -218,8 +230,8 @@ process fixMate {
 	val picard_java from params.picard_java
 	
 	output:
-	file "${filt_bam.simpleName}.fix.bam" into fix_bam_ch
-	file "${filt_bam.simpleName}.fix.bai" into fix_bai_ch
+	path "${filt_bam.simpleName}.fix.bam" into fix_bam_ch
+	path "${filt_bam.simpleName}.fix.bai" into fix_bai_ch
 	
 	"""
 	java ${picard_java} -jar ${picard} FixMateInformation I=${filt_bam} O=${filt_bam.simpleName}.fix.bam ADD_MATE_CIGAR=true
@@ -245,14 +257,20 @@ process callVariants {
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
 	val gatk_nct from params.gatk_nct
-	file "*" from bwa_index_ch
+	path "*" from bwa_index_ch
 	
 	output:
-	file "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch 
+	path "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch
 	
-	"""
-	java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${gatk_nct} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
-	"""
+	script:
+	if (params.gatk_build == 3)
+		"""
+		java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${gatk_nct} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
+		"""
+	else if (params.gatk_build == 4)
+		"""
+		java ${gatk_java} -jar ${gatk} HaplotypeCaller -R $refseq -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
+		"""
 
 }
 
@@ -260,6 +278,7 @@ process genotypegVCFs {
 
 	// Joint genotype gVCFs using GATK
 	// Uncompressed combined VCF because GATK 3.8-1 inflate/deflate is glitched for this tool
+	// Also uncompressed combined VCF because GATK4 cannot generate index with gzipped output
 	
 	label 'gatk'
 	publishDir "$params.outdir/03_CombinedVCF", mode: 'copy'
@@ -267,22 +286,32 @@ process genotypegVCFs {
 	
 	input:
 	path refseq from params.refseq
-	file "*" from bwa_index_ch
-	file "*" from var_vcf_ch.collect()
+	path "*" from bwa_index_ch
+	path "*" from var_vcf_ch.collect()
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
 	val prefix from params.prefix
 	
 	output:
-	file "${prefix}_combined.vcf*"
-	file "${prefix}_combined.vcf.gz" into combined_vcf_ch, combined_indels_ch
+	path "${prefix}_combined.vcf*"
+	path "${prefix}_combined.vcf.gz" into combined_vcf_ch, combined_indels_ch
 	
-	"""
-	VARPATH=""
-	for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-	java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -o ${prefix}_combined.vcf -R ${refseq} --includeNonVariantSites\$VARPATH
-	gzip ${prefix}_combined.vcf # Clean up giant VCF before going on with filtering
-	"""
+	script:
+	if (params.gatk_build == 3)
+		"""
+		VARPATH=""
+		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
+		java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o ${prefix}_combined.vcf
+		gzip ${prefix}_combined.vcf
+		"""
+	else if (params.gatk_build == 4)
+		"""
+		VARPATH=""
+		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
+		java ${gatk_java} -jar ${gatk} CombineGVCFs -R $refseq -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
+		java ${gatk_java} -jar ${gatk} GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O ${prefix}_combined.vcf
+		gzip ${prefix}_combined.vcf
+		"""
 }
 
 process genMapIndex {
@@ -298,7 +327,7 @@ process genMapIndex {
 	
 	output:
 	path "${refseq.simpleName}_index" into genmap_index_ch
-	file "${refseq.simpleName}_index/*" into genmap_index_files_ch
+	path "${refseq.simpleName}_index/*" into genmap_index_files_ch
 	
 	"""
 	export TMPDIR=${gm_tmpdir}
@@ -320,10 +349,10 @@ process genMapMap {
 	path refseq from params.refseq
 	val gm_threads from params.gm_threads
 	path genmap_index from genmap_index_ch
-	file '*' from genmap_index_files_ch
+	path '*' from genmap_index_files_ch
 	
 	output:
-	file "${refseq.simpleName}_genmap.1.0.bed" into genmap_ch
+	path "${refseq.simpleName}_genmap.1.0.bed" into genmap_ch
 	
 	"""
 	genmap map -K 30 -E 2 -T ${gm_threads} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
@@ -346,13 +375,13 @@ process repeatMask {
 	val rm_pa from params.rm_pa
 	
 	output:
-	file "${refseq}.masked" into rm_ref_ch
-	file "${refseq}.out" into rm_out_ch
+	path "${refseq}.masked" into rm_ref_ch
+	path "${refseq}.out" into rm_out_ch
 	
 	"""
 	RepeatMasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
 	if [ ! -f ${refseq}.masked ]; then # Handling for no repeats detected
-		cp ${refseq} ${refseq}.masked
+		ln -s ${refseq} ${refseq}.masked
 	fi
 	"""
 
@@ -368,12 +397,12 @@ process repeatModeler {
 	
 	input:
 	path refseq from params.refseq
-	file refseq_masked from rm_ref_ch
+	path refseq_masked from rm_ref_ch
 	val rm_pa from params.rm_pa
 	
 	output:
-	file "**consensi.fa.classified" into rm_lib_ch
-	file refseq_masked into rm_ref_ch2
+	path "**consensi.fa.classified" into rm_lib_ch
+	path refseq_masked into rm_ref_ch2
 	
 	"""
 	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
@@ -397,14 +426,14 @@ process repeatMaskRM {
 	
 	input:
 	path refseq from params.refseq
-	file rm_lib from rm_lib_ch
-	file rm_out from rm_out_ch
-	file refseq_masked from rm_ref_ch2
+	path rm_lib from rm_lib_ch
+	path rm_out from rm_out_ch
+	path refseq_masked from rm_ref_ch2
 	val rm_pa from params.rm_pa
 	
 	output:
-	file "${refseq}.masked.*" optional true
-	file "${refseq}.RM.bed" into rm_bed_ch
+	path "${refseq}.masked.*" optional true
+	path "${refseq}.RM.bed" into rm_bed_ch
 	
 	"""
 	if [ "\$(wc -l < consensi.fa.classified)" -eq 0 ]; then
@@ -427,13 +456,14 @@ process maskIndels {
 	errorStrategy 'finish'
 	
 	input:
-	file combo_vcf from combined_indels_ch
+	path combo_vcf from combined_indels_ch
+	val indelpad from params.indelpad
 	
 	output:
-	file "${combo_vcf.simpleName}_indels.bed" into indels_ch
+	path "${combo_vcf.simpleName}_indels.bed" into indels_ch
 	
 	"""
-	indels2bed.rb ${combo_vcf} 5 > ${combo_vcf.simpleName}_indels.bed
+	indels2bed.rb ${combo_vcf} $indelpad > ${combo_vcf.simpleName}_indels.bed
 	"""
 
 }
@@ -447,35 +477,35 @@ process simplifyBed {
 	publishDir "$params.outdir/05_ExcludedRegions", mode: 'copy'
 	
 	input:
-	file indel_bed from indels_ch
-	file rm_bed from rm_bed_ch
-	file gm_bed from genmap_ch
+	path indel_bed from indels_ch
+	path rm_bed from rm_bed_ch
+	path gm_bed from genmap_ch
 	val prefix from params.prefix
 	
 	output:
-	file "${prefix}_excluded_reduced.bed" into exclude_bed_ch
+	path "${prefix}_excluded_reduced.bed" into exclude_bed_ch
 	
 	"""
 	if [ ! "\$(wc -l < ${indel_bed})" -eq 0 ]; then
 		simplify_sorted_bed.rb ${indel_bed} > ${indel_bed.baseName}_sorted.bed
 	else
-		cp ${indel_bed} ${indel_bed.baseName}_sorted.bed
+		ln -s ${indel_bed} ${indel_bed.baseName}_sorted.bed
 	fi
 	if [ ! "\$(wc -l < ${rm_bed})" -eq 0 ]; then
 		simplify_sorted_bed.rb ${rm_bed} > ${rm_bed.baseName}_sorted.bed
 	else
-		cp ${rm_bed} ${rm_bed.baseName}_sorted.bed
+		ln -s ${rm_bed} ${rm_bed.baseName}_sorted.bed
 	fi
 	if [ ! "\$(wc -l < ${gm_bed})" -eq 0 ]; then
 		simplify_sorted_bed.rb ${gm_bed} > ${gm_bed.baseName}_sorted.bed
 	else
-		cp ${gm_bed} ${gm_bed.baseName}_sorted.bed
+		ln -s ${gm_bed} ${gm_bed.baseName}_sorted.bed
 	fi
 	cat ${indel_bed.baseName}_sorted.bed ${rm_bed.baseName}_sorted.bed ${gm_bed.baseName}_sorted.bed > ${prefix}_excluded.bed
 	if [ ! "\$(wc -l < ${prefix}_excluded.bed)" -eq 0 ]; then
 		simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
 	else
-		cp ${prefix}_excluded.bed ${prefix}_excluded_reduced.bed
+		ln -s ${prefix}_excluded.bed ${prefix}_excluded_reduced.bed
 	fi
 	"""
 
@@ -486,27 +516,28 @@ process filterChr {
 	// Optionally include only specific chromsomes
 	
 	label 'vcftools'
-	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy'
+	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
-	file comb_vcf from combined_vcf_ch
+	path comb_vcf from combined_vcf_ch
 	val prefix from params.prefix
-	file chrs from chr_file
+	path chrs from chr_file
 	
 	output:
-	file "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
+	path "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
+	path 'chrfilt.log' optional true into chrfilt_log_ch 
 	
 	script:
 	if (chrs.name == "NULL")
 		"""
-		cp $comb_vcf ${prefix}.chrfilt.recode.vcf.gz
+		ln -s $comb_vcf ${prefix}.chrfilt.recode.vcf.gz
 		"""
 	else
 		"""
 		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
-		vcftools --gzvcf $comb_vcf --recode --out ${prefix}.chrfilt \$chr_line
-		gzip ${prefix}.chrfilt.recode.vcf
+		vcftools --gzvcf $comb_vcf --recode -c \$chr_line | gzip > ${prefix}.chrfilt.recode.vcf.gz
+		tail -n2 .command.log | head -n1 > chrfilt.log
 		"""
 }
 
@@ -517,24 +548,24 @@ process splitTrios {
 	// Split samples into trios for analysis
 	
 	label 'vcftools'
-	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy'
+	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
-	file chr_vcf from chrfilt_vcf_ch
+	path chr_vcf from chrfilt_vcf_ch
 	val dam from params.dam
 	val sire from params.sire
 	val prefix from params.prefix
 	val pair_id from filt_sample_ch2
-	file chrs from chr_file
+	path chrs from chr_file
 	
 	output:
-	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
+	path "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
+	path "${prefix}_offspring${pair_id}_trio.log" into triosplit_log_ch
 	
 	"""
-	vcftools --gzvcf $chr_vcf --recode --out ${prefix}_offspring${pair_id}.chrfilt --indv ${dam} --indv ${sire} --indv ${pair_id}
-	gzip ${prefix}_offspring${pair_id}.chrfilt.recode.vcf
-		
+	vcftools --gzvcf $chr_vcf --recode -c --indv ${dam} --indv ${sire} --indv ${pair_id} | gzip > ${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz
+	tail -n2 .command.log | head -n1 >  ${prefix}_offspring${pair_id}_trio.log
 	"""
 
 }
@@ -572,9 +603,9 @@ process plotDPGQ {
 	path "*.txt" from dp_gq_ch.collect()
 	
 	output:
-	file "${params.prefix}_*.png"
-	file "${params.prefix}_depth_ratestools.csv"
-	file "${params.prefix}_qual_ratestools.csv"
+	path "${params.prefix}_*.png"
+	path "${params.prefix}_depth_ratestools.csv"
+	path "${params.prefix}_qual_ratestools.csv"
 	
 	"""
 	plotDPGQ.R $params.prefix
@@ -587,14 +618,15 @@ process splitVCFs {
 	// Split VCFs by contig/chromosome/scaffold etc
 	
 	label 'ruby'
+	label 'bgzip'
 	publishDir "$params.outdir/09_SplitVCFs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
-	file chr_vcf from triosplit_vcf_ch
+	path chr_vcf from triosplit_vcf_ch
 	
 	output:
-	file "${chr_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten
+	path "${chr_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten
 	
 	"""
 	nextflow_split.rb -i ${chr_vcf} -o ${chr_vcf.simpleName}_split
@@ -611,26 +643,28 @@ process vcftoolsFilterSites {
 	
 	label 'vcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy'
+	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
-	file split_vcf from split_vcfs_ch
+	path split_vcf from split_vcfs_ch
 	val site_filters from params.vcftools_site_filters
 	
 	output:
-	file "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
+	path "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
+	path "${split_vcf.simpleName}_sitefilt.log" into sitefilt_log_ch
 	
 	script:
 	if (site_filters == "NULL")
 		"""
-		cp $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf
-		bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+		cp -P $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
+		vcftools --gzvcf $split_vcf
+		tail -n2 .command.log | head -n1 >  ${split_vcf.simpleName}_sitefilt.log
 		"""
 	else
 		"""
-		vcftools --gzvcf ${split_vcf} --recode --out ${split_vcf.simpleName}.sitefilt ${site_filters}
-		bgzip ${split_vcf.simpleName}.sitefilt.recode.vcf
+		vcftools --gzvcf ${split_vcf} --recode -c ${site_filters} | bgzip > ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${split_vcf.simpleName}_sitefilt.log
 		"""
 
 }
@@ -640,33 +674,45 @@ process gatkFilterSites {
 	// Apply GATK-only site filters
 	
 	label 'gatk'
-	label 'bgzip'
 	label 'tabix'
-	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy'
+	label 'vcftools'
+	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
 	path refseq from params.refseq
-	file "*" from bwa_index_ch
-	file site_vcf from sitefilt_vcf_ch
+	path "*" from bwa_index_ch
+	path site_vcf from sitefilt_vcf_ch
 	val site_filters from params.gatk_site_filters
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
 	
 	output:
-	file "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
+	path "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
+	path "${site_vcf.simpleName}_gatksitefilt.log" into gatk_sitefilt_log_ch
 	
 	script:
 	if (site_filters == "NULL")
 		"""
-		cp $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		ln -s $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		vcftools --gzvcf $site_vcf
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_gatksitefilt.log
 		"""
-	else
+	else if (params.gatk_build == 3)
 		"""
 		tabix $site_vcf
 		java ${gatk_java} -jar ${gatk} -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
-		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf -R $refseq --excludeFiltered
-		bgzip ${site_vcf.simpleName}.gatksitefilt.vcf 
+		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R $refseq --excludeFiltered
+		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_gatksitefilt.log
+		"""
+	else if (params.gatk_build == 4)
+		"""
+		tabix $site_vcf
+		java ${gatk_java} -jar ${gatk} VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters
+		java ${gatk_java} -jar ${gatk} SelectVariants -R $refseq -V $site_vcf -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
+		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_gatksitefilt.log
 		"""
 
 }
@@ -681,28 +727,31 @@ process filterRegions {
 	label 'bcftools'
 	label 'vcftools'
 	label 'tabix'
-	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy'
+	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'retry'
 	maxRetries 3
 	
 	input:
 	path site_vcf from gatk_sitefilt_vcf_ch
-	file exclude_bed from exclude_bed_ch
+	path exclude_bed from exclude_bed_ch
 	
 	output:
-	file "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
+	path "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
+	path "${site_vcf.simpleName}_regionfilt.log" into regionfilt_log_ch
 	
 	script:
 	chr = site_vcf.simpleName.split('_chr')[1]
 	if (task.attempt == 1)
 		"""
-		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
-		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 	else if (task.attempt == 2)
 		"""
-		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header > ${site_vcf.simpleName}.regionfilt.vcf
-		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 	else if (task.attempt == 3)
 		"""
@@ -713,15 +762,15 @@ process filterRegions {
 		# bcftools isec gives the target sites not included in the bed
 		bcftools isec -C -O v -o ${site_vcf.simpleName}.targets ${site_vcf} tmp.bcf
 		# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
-		bcftools view -T ${site_vcf.simpleName}.targets -Ov -o ${site_vcf.simpleName}.regionfilt.vcf ${site_vcf}
-		gzip ${site_vcf.simpleName}.regionfilt.vcf
+		bcftools view -T ${site_vcf.simpleName}.targets -Ov ${site_vcf} | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 	else
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed 
-		vcftools --gzvcf ${site_vcf} --recode --out ${site_vcf.simpleName}.regionfilt --exclude-bed tmp.bed
-		gzip ${site_vcf.simpleName}.regionfilt.recode.vcf
-		mv ${site_vcf.simpleName}.regionfilt.recode.vcf.gz ${site_vcf.simpleName}.regionfilt.vcf.gz
+		vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 
 }
@@ -735,13 +784,13 @@ process calcDNMRate {
 	errorStrategy 'finish'
 	
 	input:
-	file splitvcf from regionfilt_vcf_ch
+	path splitvcf from regionfilt_vcf_ch
 	val sire from params.sire
 	val dam from params.dam
 	val dnm_opts from params.dnm_opts
 	
 	output:
-	file "${splitvcf.simpleName}.log" into split_logs_ch
+	path "${splitvcf.simpleName}.log" into split_logs_ch
 	
 	"""
 	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} ${dnm_opts} > ${splitvcf.simpleName}.log
@@ -758,10 +807,10 @@ process summarizeDNM {
 	errorStrategy 'finish'
 	
 	input:
-	file "*" from split_logs_ch.collect()
+	path "*" from split_logs_ch.collect()
 	
 	output:
-	file "${params.prefix}*_summary.log"
+	path "${params.prefix}*_summary.log" into summary_log_ch
 	
 	"""
 	for file in ${params.prefix}*.log; do 
@@ -773,4 +822,46 @@ process summarizeDNM {
 	for outdir in ${params.prefix}*; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
 	"""
 
+}
+
+all_logs_ch = summary_log_ch.mix(regionfilt_log_ch, gatk_sitefilt_log_ch, sitefilt_log_ch, triosplit_log_ch, chrfilt_log_ch)
+
+process generateSummaryStats {
+
+	label 'ruby'
+	publishDir "$params.outdir/15_SummaryStats", mode: "copy"
+	errorStrategy 'finish'
+	
+	input:
+	path "*" from all_logs_ch.collect()
+	
+	output:
+	path "summary_stats.csv"
+	
+	"""
+	dnm_summary_stats.rb . ${params.prefix} > summary_stats.csv
+	"""
+
+}
+
+workflow.onError {
+	println "RatesTools pipeline encountered an error. Error message: $workflow.errorMessage."
+	if (params.email != "NULL") {
+		sendMail(to: params.email, subject: "RatesTools error.", body: "RatesTools pipeline encountered an error. Error message: $workflow.errorMessage.")
+	}
+}
+workflow.onComplete {
+	// workflow.onComplete is also run when an error is encountered, but is triggered when all processes finish.
+	// Running error messages using onError so that the user gets them at first possible opportunity
+	if (workflow.success) {
+		println "RatesTools pipeline completed successfully at $workflow.complete!"
+		if (params.email != "NULL") {
+			sendMail(to: params.email, subject: 'RatesTools successful completion', body: "RatesTools pipeline completed successfully at $workflow.complete!")
+		}
+	} else {
+		println "RatesTools pipeline completed with errors at $workflow.complete.\nError message: $workflow.errorMessage"
+		if (params.email != "NULL") {
+			sendMail(to: params.email, subject: 'RatesTools completed with errors', body: "RatesTools pipeline completed with errors at $workflow.complete.\nError message: $workflow.errorMessage")
+		}
+	}
 }

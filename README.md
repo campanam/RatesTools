@@ -31,7 +31,7 @@ Install the scripts: `cd RatesTools; make install`
 *By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory, specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
 
 ### Install the External Dependencies  
-RatesTools requires the following external dependencies. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] version 3.8-1 and Java 1.8 (due to GATK). Currently, RatesTools is not compatible with GATK 4 or other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize modules to simplify deployment on computing clusters and limit dependency conflicts.  
+RatesTools requires the following external dependencies. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] version 3.8-1 or version >= 4.2.3.0 and Java 1.8 (due to GATK). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize modules to simplify deployment on computing clusters and limit dependency conflicts.  
 
 * gzip  
 * awk  
@@ -44,7 +44,7 @@ RatesTools requires the following external dependencies. See the documentation f
 * [Java](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html) v. 1.8  
 * [Picard](https://broadinstitute.github.io/picard/) [7] v. 2.23.8  
 * [Sambamba](https://lomereiter.github.io/sambamba/) [8] v. 0.7.1  
-* [Genome Analysis Toolkit](https://github.com/broadgsa/gatk) v. 3.8-1  
+* [Genome Analysis Toolkit](https://github.com/broadgsa/gatk) v. 3.8-1 and 4.2.3.0  
 * [VCFtools](https://vcftools.github.io/index.html) [9] v.0.1.16  
 * [GenMap](https://github.com/cpockrandt/genmap) [10] v.1.2.0 with [SeqAn](https://github.com/seqan/seqan/tree/f548b50705be3f824a65a696943ea90a390564ce) [11] v. 2.4.1  
 * [RepeatMasker](http://www.repeatmasker.org/) [12] v. 4.0.9  

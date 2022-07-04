@@ -89,7 +89,7 @@ end
 def filter_exit(message, snp_record) # Method to exit program if tag missing or data unsuited to specified filter
 	$stderr.puts message
 	$stderr.puts snp_record
-	exit
+	exit 1
 end
 #-----------------------------------------------------------------------------------------
 def format_splash(cmd, version, cmdline) # Format output for basic script help screens

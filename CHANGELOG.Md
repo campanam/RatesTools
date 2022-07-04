@@ -239,6 +239,7 @@ GATK4 compatibility
 Improved use of symbolic links/writing to disk  
 Completion messages and emailing of completion status/errors  
 Variable indel padding  
+Use path rather than file qualifiers  
 
 ### Version 0.4.0  
 Updated plotDPGQ output PNGs  

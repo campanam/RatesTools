@@ -36,7 +36,7 @@ process prepareRef {
 	path refseq from params.refseq
 	
 	output:
-	file "${refseq.baseName}*.{amb,ann,bwt,pac,sa,fai,dict}" into bwa_index_ch // Channel to find these files again
+	path "${refseq.baseName}*.{amb,ann,bwt,pac,sa,fai,dict}" into bwa_index_ch // Channel to find these files again
 	
 	"""
 	bwa index ${bwa_alg}${refseq}
@@ -58,10 +58,10 @@ process alignSeqs {
 	path refseq from params.refseq
 	tuple val(pair_id), path(reads) from readpairs_ch
 	val bwa_threads from params.bwa_threads
-	file "*" from bwa_index_ch
+	path "*" from bwa_index_ch
 	
 	output:
-	file "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
+	path "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
 	val pair_id into filt_sample_ch, stats_sample_ch // sample name for downstream use
 	val samtools_extra_threads into samtools_threads_ch
 	
@@ -82,11 +82,11 @@ process sortBAM {
 	errorStrategy 'finish'
 
 	input:
-	file raw_bam from raw_bam_ch
+	path raw_bam from raw_bam_ch
 	val samtools_extra_threads from samtools_threads_ch
 	
 	output:
-	file "${raw_bam.simpleName}.srt.bam" into sorted_bam_ch
+	path "${raw_bam.simpleName}.srt.bam" into sorted_bam_ch
 	
 	"""
 	samtools sort -@ ${samtools_extra_threads} ${raw_bam} > ${raw_bam.simpleName}.srt.bam
@@ -103,13 +103,13 @@ process markDuplicates {
 	errorStrategy 'finish'
 	
 	input:
-	file sorted_bam from sorted_bam_ch
+	path sorted_bam from sorted_bam_ch
 	val markDuplicates from params.markDuplicates
 	path picard from params.picard
 	val picard_java from params.picard_java
 	
 	output:
-	file "${sorted_bam.simpleName}.markdup.bam" into markdup_bam_ch
+	path "${sorted_bam.simpleName}.markdup.bam" into markdup_bam_ch
 	
 	script:
 	if ( markDuplicates == "sambamba" )
@@ -137,7 +137,7 @@ process fixReadGroups {
 	path refseq from params.refseq
 	
 	output:
-	file "${markdup_bam.simpleName}.rg.bam" into rg_bam_ch
+	path "${markdup_bam.simpleName}.rg.bam" into rg_bam_ch
 	
 	script:
 	pair_id = "${markdup_bam.simpleName}".minus("_${refseq.simpleName}")
@@ -162,12 +162,12 @@ process realignIndels {
 	val picard_java from params.picard_java
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
-	file "*" from bwa_index_ch
+	path "*" from bwa_index_ch
 	
 	output:
-	file "${rg_bam.simpleName}.realn.bam" into realn_bam_ch
-	file "${rg_bam.simpleName}.realn.bai" into realn_bai_ch
-	file "${rg_bam.baseName}.bai"
+	path "${rg_bam.simpleName}.realn.bam" into realn_bam_ch
+	path "${rg_bam.simpleName}.realn.bai" into realn_bai_ch
+	path "${rg_bam.baseName}.bai"
 	
 	script:
 	if (params.gatk_build == 3)
@@ -198,11 +198,11 @@ process filterBAMs {
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
 	val gatk_nct from params.gatk_nct
-	file "*" from bwa_index_ch
+	path "*" from bwa_index_ch
 	
 	output:
-	file "${realn_bam.simpleName}.filt.bam" into filt_bam_ch
-	file "${realn_bam.simpleName}.filt.bai" into filt_bai_ch
+	path "${realn_bam.simpleName}.filt.bam" into filt_bam_ch
+	path "${realn_bam.simpleName}.filt.bai" into filt_bai_ch
 	
 	script:
 	if (params.gatk_build == 3)
@@ -230,8 +230,8 @@ process fixMate {
 	val picard_java from params.picard_java
 	
 	output:
-	file "${filt_bam.simpleName}.fix.bam" into fix_bam_ch
-	file "${filt_bam.simpleName}.fix.bai" into fix_bai_ch
+	path "${filt_bam.simpleName}.fix.bam" into fix_bam_ch
+	path "${filt_bam.simpleName}.fix.bai" into fix_bai_ch
 	
 	"""
 	java ${picard_java} -jar ${picard} FixMateInformation I=${filt_bam} O=${filt_bam.simpleName}.fix.bam ADD_MATE_CIGAR=true
@@ -257,10 +257,10 @@ process callVariants {
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
 	val gatk_nct from params.gatk_nct
-	file "*" from bwa_index_ch
+	path "*" from bwa_index_ch
 	
 	output:
-	file "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch
+	path "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch
 	
 	script:
 	if (params.gatk_build == 3)
@@ -286,15 +286,15 @@ process genotypegVCFs {
 	
 	input:
 	path refseq from params.refseq
-	file "*" from bwa_index_ch
-	file "*" from var_vcf_ch.collect()
+	path "*" from bwa_index_ch
+	path "*" from var_vcf_ch.collect()
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
 	val prefix from params.prefix
 	
 	output:
-	file "${prefix}_combined.vcf*"
-	file "${prefix}_combined.vcf.gz" into combined_vcf_ch, combined_indels_ch
+	path "${prefix}_combined.vcf*"
+	path "${prefix}_combined.vcf.gz" into combined_vcf_ch, combined_indels_ch
 	
 	script:
 	if (params.gatk_build == 3)
@@ -327,7 +327,7 @@ process genMapIndex {
 	
 	output:
 	path "${refseq.simpleName}_index" into genmap_index_ch
-	file "${refseq.simpleName}_index/*" into genmap_index_files_ch
+	path "${refseq.simpleName}_index/*" into genmap_index_files_ch
 	
 	"""
 	export TMPDIR=${gm_tmpdir}
@@ -349,10 +349,10 @@ process genMapMap {
 	path refseq from params.refseq
 	val gm_threads from params.gm_threads
 	path genmap_index from genmap_index_ch
-	file '*' from genmap_index_files_ch
+	path '*' from genmap_index_files_ch
 	
 	output:
-	file "${refseq.simpleName}_genmap.1.0.bed" into genmap_ch
+	path "${refseq.simpleName}_genmap.1.0.bed" into genmap_ch
 	
 	"""
 	genmap map -K 30 -E 2 -T ${gm_threads} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
@@ -375,8 +375,8 @@ process repeatMask {
 	val rm_pa from params.rm_pa
 	
 	output:
-	file "${refseq}.masked" into rm_ref_ch
-	file "${refseq}.out" into rm_out_ch
+	path "${refseq}.masked" into rm_ref_ch
+	path "${refseq}.out" into rm_out_ch
 	
 	"""
 	RepeatMasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
@@ -397,12 +397,12 @@ process repeatModeler {
 	
 	input:
 	path refseq from params.refseq
-	file refseq_masked from rm_ref_ch
+	path refseq_masked from rm_ref_ch
 	val rm_pa from params.rm_pa
 	
 	output:
-	file "**consensi.fa.classified" into rm_lib_ch
-	file refseq_masked into rm_ref_ch2
+	path "**consensi.fa.classified" into rm_lib_ch
+	path refseq_masked into rm_ref_ch2
 	
 	"""
 	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
@@ -426,14 +426,14 @@ process repeatMaskRM {
 	
 	input:
 	path refseq from params.refseq
-	file rm_lib from rm_lib_ch
-	file rm_out from rm_out_ch
-	file refseq_masked from rm_ref_ch2
+	path rm_lib from rm_lib_ch
+	path rm_out from rm_out_ch
+	path refseq_masked from rm_ref_ch2
 	val rm_pa from params.rm_pa
 	
 	output:
-	file "${refseq}.masked.*" optional true
-	file "${refseq}.RM.bed" into rm_bed_ch
+	path "${refseq}.masked.*" optional true
+	path "${refseq}.RM.bed" into rm_bed_ch
 	
 	"""
 	if [ "\$(wc -l < consensi.fa.classified)" -eq 0 ]; then
@@ -456,11 +456,11 @@ process maskIndels {
 	errorStrategy 'finish'
 	
 	input:
-	file combo_vcf from combined_indels_ch
+	path combo_vcf from combined_indels_ch
 	val indelpad from params.indelpad
 	
 	output:
-	file "${combo_vcf.simpleName}_indels.bed" into indels_ch
+	path "${combo_vcf.simpleName}_indels.bed" into indels_ch
 	
 	"""
 	indels2bed.rb ${combo_vcf} $indelpad > ${combo_vcf.simpleName}_indels.bed
@@ -477,13 +477,13 @@ process simplifyBed {
 	publishDir "$params.outdir/05_ExcludedRegions", mode: 'copy'
 	
 	input:
-	file indel_bed from indels_ch
-	file rm_bed from rm_bed_ch
-	file gm_bed from genmap_ch
+	path indel_bed from indels_ch
+	path rm_bed from rm_bed_ch
+	path gm_bed from genmap_ch
 	val prefix from params.prefix
 	
 	output:
-	file "${prefix}_excluded_reduced.bed" into exclude_bed_ch
+	path "${prefix}_excluded_reduced.bed" into exclude_bed_ch
 	
 	"""
 	if [ ! "\$(wc -l < ${indel_bed})" -eq 0 ]; then
@@ -520,13 +520,13 @@ process filterChr {
 	errorStrategy 'finish'
 	
 	input:
-	file comb_vcf from combined_vcf_ch
+	path comb_vcf from combined_vcf_ch
 	val prefix from params.prefix
-	file chrs from chr_file
+	path chrs from chr_file
 	
 	output:
-	file "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
-	file 'chrfilt.log' optional true into chrfilt_log_ch 
+	path "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
+	path 'chrfilt.log' optional true into chrfilt_log_ch 
 	
 	script:
 	if (chrs.name == "NULL")
@@ -552,16 +552,16 @@ process splitTrios {
 	errorStrategy 'finish'
 	
 	input:
-	file chr_vcf from chrfilt_vcf_ch
+	path chr_vcf from chrfilt_vcf_ch
 	val dam from params.dam
 	val sire from params.sire
 	val prefix from params.prefix
 	val pair_id from filt_sample_ch2
-	file chrs from chr_file
+	path chrs from chr_file
 	
 	output:
-	file "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
-	file "${prefix}_offspring${pair_id}_trio.log" into triosplit_log_ch
+	path "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
+	path "${prefix}_offspring${pair_id}_trio.log" into triosplit_log_ch
 	
 	"""
 	vcftools --gzvcf $chr_vcf --recode -c --indv ${dam} --indv ${sire} --indv ${pair_id} | gzip > ${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz
@@ -603,9 +603,9 @@ process plotDPGQ {
 	path "*.txt" from dp_gq_ch.collect()
 	
 	output:
-	file "${params.prefix}_*.png"
-	file "${params.prefix}_depth_ratestools.csv"
-	file "${params.prefix}_qual_ratestools.csv"
+	path "${params.prefix}_*.png"
+	path "${params.prefix}_depth_ratestools.csv"
+	path "${params.prefix}_qual_ratestools.csv"
 	
 	"""
 	plotDPGQ.R $params.prefix
@@ -623,10 +623,10 @@ process splitVCFs {
 	errorStrategy 'finish'
 	
 	input:
-	file chr_vcf from triosplit_vcf_ch
+	path chr_vcf from triosplit_vcf_ch
 	
 	output:
-	file "${chr_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten
+	path "${chr_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten
 	
 	"""
 	nextflow_split.rb -i ${chr_vcf} -o ${chr_vcf.simpleName}_split
@@ -647,17 +647,17 @@ process vcftoolsFilterSites {
 	errorStrategy 'finish'
 	
 	input:
-	file split_vcf from split_vcfs_ch
+	path split_vcf from split_vcfs_ch
 	val site_filters from params.vcftools_site_filters
 	
 	output:
-	file "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
-	file "${split_vcf.simpleName}_sitefilt.log" into sitefilt_log_ch
+	path "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
+	path "${split_vcf.simpleName}_sitefilt.log" into sitefilt_log_ch
 	
 	script:
 	if (site_filters == "NULL")
 		"""
-		ln -s $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
+		cp -P $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
 		vcftools --gzvcf $split_vcf
 		tail -n2 .command.log | head -n1 >  ${split_vcf.simpleName}_sitefilt.log
 		"""
@@ -681,15 +681,15 @@ process gatkFilterSites {
 	
 	input:
 	path refseq from params.refseq
-	file "*" from bwa_index_ch
-	file site_vcf from sitefilt_vcf_ch
+	path "*" from bwa_index_ch
+	path site_vcf from sitefilt_vcf_ch
 	val site_filters from params.gatk_site_filters
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
 	
 	output:
-	file "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
-	file "${site_vcf.simpleName}_gatksitefilt.log" into gatk_sitefilt_log_ch
+	path "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
+	path "${site_vcf.simpleName}_gatksitefilt.log" into gatk_sitefilt_log_ch
 	
 	script:
 	if (site_filters == "NULL")
@@ -733,11 +733,11 @@ process filterRegions {
 	
 	input:
 	path site_vcf from gatk_sitefilt_vcf_ch
-	file exclude_bed from exclude_bed_ch
+	path exclude_bed from exclude_bed_ch
 	
 	output:
-	file "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
-	file "${site_vcf.simpleName}_regionfilt.log" into regionfilt_log_ch
+	path "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
+	path "${site_vcf.simpleName}_regionfilt.log" into regionfilt_log_ch
 	
 	script:
 	chr = site_vcf.simpleName.split('_chr')[1]
@@ -784,13 +784,13 @@ process calcDNMRate {
 	errorStrategy 'finish'
 	
 	input:
-	file splitvcf from regionfilt_vcf_ch
+	path splitvcf from regionfilt_vcf_ch
 	val sire from params.sire
 	val dam from params.dam
 	val dnm_opts from params.dnm_opts
 	
 	output:
-	file "${splitvcf.simpleName}.log" into split_logs_ch
+	path "${splitvcf.simpleName}.log" into split_logs_ch
 	
 	"""
 	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} ${dnm_opts} > ${splitvcf.simpleName}.log
@@ -807,10 +807,10 @@ process summarizeDNM {
 	errorStrategy 'finish'
 	
 	input:
-	file "*" from split_logs_ch.collect()
+	path "*" from split_logs_ch.collect()
 	
 	output:
-	file "${params.prefix}*_summary.log" into summary_log_ch
+	path "${params.prefix}*_summary.log" into summary_log_ch
 	
 	"""
 	for file in ${params.prefix}*.log; do 
@@ -833,10 +833,10 @@ process generateSummaryStats {
 	errorStrategy 'finish'
 	
 	input:
-	file "*" from all_logs_ch.collect()
+	path "*" from all_logs_ch.collect()
 	
 	output:
-	file "summary_stats.csv"
+	path "summary_stats.csv"
 	
 	"""
 	dnm_summary_stats.rb . ${params.prefix} > summary_stats.csv

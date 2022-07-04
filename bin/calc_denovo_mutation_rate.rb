@@ -234,7 +234,7 @@ def read_vcf # Method to read vcf
 								filter_exit("PL tag required for Koch_DNp filter. Exiting.\nError found here:", line)
 							else
 								pl_array = snp_array[i].split(":")[pl].split(',')
-								filter_exit("Biallelic SNPs required for Koch_DNp filter. Exiting.\nError found here:", snp_record) if pl_array.size != 3
+								filter_exit("Biallelic SNPs required for Koch_DNp filter. Exiting.\nError found here:", line) if pl_array.size != 3
 							end
 						end
 						if i == sire_index

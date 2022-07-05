@@ -281,6 +281,7 @@ process genotypegVCFs {
 	// Also uncompressed combined VCF because GATK4 cannot generate index with gzipped output
 	
 	label 'gatk'
+	label 'gzip'
 	publishDir "$params.outdir/03_CombinedVCF", mode: 'copy'
 	errorStrategy 'finish'
 	
@@ -516,6 +517,7 @@ process filterChr {
 	// Optionally include only specific chromsomes
 	
 	label 'vcftools'
+	label  'gzip'
 	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
@@ -548,6 +550,7 @@ process splitTrios {
 	// Split samples into trios for analysis
 	
 	label 'vcftools'
+	label 'gzip'
 	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
@@ -727,6 +730,7 @@ process filterRegions {
 	label 'bcftools'
 	label 'vcftools'
 	label 'tabix'
+	label 'gzip'
 	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'retry'
 	maxRetries 3

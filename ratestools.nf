@@ -859,7 +859,7 @@ workflow.onComplete {
 			sendMail(to: params.email, subject: 'RatesTools successful completion', body: "RatesTools pipeline completed successfully at $workflow.complete!")
 		}
 	} else {
-		println "RatesTools pipeline completed with errors at $workflow.complete.\nError message: $workflow.errorMessage"
+		println "RatesTools pipeline terminated with errors at $workflow.complete.\nError message: $workflow.errorMessage"
 		if (params.email != "NULL") {
 			sendMail(to: params.email, subject: 'RatesTools terminated with errors', body: "RatesTools pipeline terminated with errors at $workflow.complete.\nError message: $workflow.errorMessage")
 		}

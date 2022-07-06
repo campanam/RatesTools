@@ -517,6 +517,7 @@ process filterChr {
 	// Optionally include only specific chromsomes
 	
 	label 'vcftools'
+	label 'bcftools'
 	label  'gzip'
 	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
@@ -539,7 +540,7 @@ process filterChr {
 		"""
 		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
 		vcftools --gzvcf $comb_vcf --recode -c \$chr_line | gzip > ${prefix}.chrfilt.recode.vcf.gz
-		tail -n2 .command.log | head -n1 > chrfilt.log
+		logstats.sh $comb_vcf ${prefix}.chrfilt.recode.vcf.gz > chrfilt.log
 		"""
 }
 
@@ -551,6 +552,7 @@ process splitTrios {
 	
 	label 'vcftools'
 	label 'gzip'
+	label 'bcftools'
 	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
@@ -568,7 +570,7 @@ process splitTrios {
 	
 	"""
 	vcftools --gzvcf $chr_vcf --recode -c --indv ${dam} --indv ${sire} --indv ${pair_id} | gzip > ${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz
-	tail -n2 .command.log | head -n1 >  ${prefix}_offspring${pair_id}_trio.log
+	logstats.sh $chr_vcf ${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz >  ${prefix}_offspring${pair_id}_trio.log
 	"""
 
 }
@@ -645,6 +647,7 @@ process vcftoolsFilterSites {
 	// Filter sites using VCFtools
 	
 	label 'vcftools'
+	label 'bcftools'
 	label 'bgzip'
 	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
@@ -662,12 +665,12 @@ process vcftoolsFilterSites {
 		"""
 		cp -P $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
 		vcftools --gzvcf $split_vcf
-		tail -n2 .command.log | head -n1 >  ${split_vcf.simpleName}_sitefilt.log
+		logstats.sh $split_vcf $split_vcf > ${split_vcf.simpleName}_sitefilt.log
 		"""
 	else
 		"""
 		vcftools --gzvcf ${split_vcf} --recode -c ${site_filters} | bgzip > ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
-		tail -n2 .command.log | head -n1 >  ${split_vcf.simpleName}_sitefilt.log
+		logstats.sh $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz > ${split_vcf.simpleName}_sitefilt.log
 		"""
 
 }
@@ -679,6 +682,7 @@ process gatkFilterSites {
 	label 'gatk'
 	label 'tabix'
 	label 'vcftools'
+	label 'bcftools'
 	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
 	errorStrategy 'finish'
 	
@@ -699,7 +703,7 @@ process gatkFilterSites {
 		"""
 		ln -s $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		vcftools --gzvcf $site_vcf
-		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_gatksitefilt.log
+		logstats.sh $site_vcf $site_vcf >  ${site_vcf.simpleName}_gatksitefilt.log
 		"""
 	else if (params.gatk_build == 3)
 		"""
@@ -707,7 +711,7 @@ process gatkFilterSites {
 		java ${gatk_java} -jar ${gatk} -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
 		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R $refseq --excludeFiltered
 		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
-		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_gatksitefilt.log
+		logstats.sh $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz > ${site_vcf.simpleName}_gatksitefilt.log
 		"""
 	else if (params.gatk_build == 4)
 		"""
@@ -715,7 +719,7 @@ process gatkFilterSites {
 		java ${gatk_java} -jar ${gatk} VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters
 		java ${gatk_java} -jar ${gatk} SelectVariants -R $refseq -V $site_vcf -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
 		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
-		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_gatksitefilt.log
+		logstats.sh $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz > ${site_vcf.simpleName}_gatksitefilt.log
 		"""
 
 }
@@ -749,13 +753,13 @@ process filterRegions {
 		"""
 		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
+		logstats.sh $site_vcf ${site_vcf.simpleName}.regionfilt.vcf.gz >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 	else if (task.attempt == 2)
 		"""
 		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
+		logstats.sh $site_vcf ${site_vcf.simpleName}.regionfilt.vcf.gz >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 	else if (task.attempt == 3)
 		"""
@@ -768,13 +772,13 @@ process filterRegions {
 		# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
 		bcftools view -T ${site_vcf.simpleName}.targets -Ov ${site_vcf} | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
+		logstats.sh $site_vcf ${site_vcf.simpleName}.regionfilt.vcf.gz >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 	else
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed 
 		vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
-		tail -n2 .command.log | head -n1 >  ${site_vcf.simpleName}_regionfilt.log
+		logstats.sh $site_vcf ${site_vcf.simpleName}.regionfilt.vcf.gz >  ${site_vcf.simpleName}_regionfilt.log
 		"""
 
 }

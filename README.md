@@ -17,12 +17,12 @@ We politely request that this work be cited as:
 Campana, M.G. & E.E. Armstrong. 2020. RatesTools: Pipeline to calculate de novo mutation rates from parent-offspring trios. Smithsonian Institution and Stanford University. (https://github.com/campanam/RatesTools).  
 
 ## Installation and Configuration  
-### Install Nextflow and Ruby  
+### Install Nextflow, Ruby and R  
 RatesTools requires [Nextflow](https://www.nextflow.io/) [1] v. 20.10.0, [Ruby](http://www.ruby-lang.org) v. 2.6.3 and [R](https://www.r-project.org/) [2] v. 4.0.2. Basic instructions for installing these languages are copied below. We recommend installing Ruby using the [Ruby Version Manager](https://rvm.io). See the official language documentation should you need help installing these languages.  
 
-Install Nextflow: `curl -s https://get.nextflow.io | bash`  
-Install R: Use the appropriate precompiled binary/installer available at the [Comprehensive R Archive Network (CRAN)](https://cran.r-project.org).  
+Install Nextflow: `curl -s https://get.nextflow.io | bash`   
 Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.io | bash -s stable --ruby`  
+Install R: Use the appropriate precompiled binary/installer available at the [Comprehensive R Archive Network (CRAN)](https://cran.r-project.org).  
 
 ### Install the RatesTools Scripts  
 Clone the repository: `git clone https://github.com/campanam/RatesTools`  

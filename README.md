@@ -18,7 +18,7 @@ Campana, M.G. & E.E. Armstrong. 2020. RatesTools: Pipeline to calculate de novo 
 
 ## Installation and Configuration  
 ### Install Nextflow, Ruby and R  
-RatesTools requires [Nextflow](https://www.nextflow.io/) [1] v. 20.10.0, [Ruby](http://www.ruby-lang.org) v. 2.6.3 and [R](https://www.r-project.org/) [2] v. 4.0.2. Basic instructions for installing these languages are copied below. We recommend installing Ruby using the [Ruby Version Manager](https://rvm.io). See the official language documentation should you need help installing these languages.  
+RatesTools requires [Nextflow](https://www.nextflow.io/) [1] v. >= 20.10.0, [Ruby](http://www.ruby-lang.org) v. >= 2.6.3, [R](https://www.r-project.org/) [2] v. >= 4.0.2 and [Bash](https://www.gnu.org/software/bash/) v. >= 4.2.46(2)-release. Basic instructions for installing these languages are copied below. We recommend installing Ruby using the [Ruby Version Manager](https://rvm.io). See the official language documentation should you need help installing these languages.  
 
 Install Nextflow: `curl -s https://get.nextflow.io | bash`   
 Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.io | bash -s stable --ruby`  
@@ -31,7 +31,7 @@ Install the scripts: `cd RatesTools; make install`
 *By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory, specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
 
 ### Install the External Dependencies  
-RatesTools requires the following external dependencies. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] version 3.8-1 or version >= 4.2.3.0 and Java 1.8 (due to GATK). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize modules to simplify deployment on computing clusters and limit dependency conflicts.  
+RatesTools requires the following external dependencies. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] v. 3.8-1 or v. >= 4.2.3.0 and Java v. 1.8 (due to GATK). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize modules to simplify deployment on computing clusters and limit dependency conflicts.  
 
 * gzip  
 * awk  

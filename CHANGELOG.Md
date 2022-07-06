@@ -9,15 +9,16 @@ Stanford University
 3. [filterGM](#filtergm)  
 4. [indels2bed](#indels2bed)  
 5. [kochDNp](#kochdnp)  
-6. [nextflow_split](#nextflow_split)  
-7. [nextflow.config](#nextflowconfig)  
-8. [plotDPGQ](#plotDPGQ)  
-9. [ratestools](#ratestools)  
-10. [RM2bed](#rm2bed)  
-11. [simplify_bed](#simplify_bed)  
-12. [simplify_sorted_bed](#simplify_sorted_bed)  
-13. [summarize_denovo](#summarize_denovo)  
-14. [Deprecated](#deprecated)  
+6. [logstats](#logstats)
+7. [nextflow_split](#nextflow_split)  
+8. [nextflow.config](#nextflowconfig)  
+9. [plotDPGQ](#plotDPGQ)  
+10. [ratestools](#ratestools)  
+11. [RM2bed](#rm2bed)  
+12. [simplify_bed](#simplify_bed)  
+13. [simplify_sorted_bed](#simplify_sorted_bed)  
+14. [summarize_denovo](#summarize_denovo)  
+15. [Deprecated](#deprecated)  
 
 
 ## calc_denovo_mutation_rate  
@@ -207,7 +208,15 @@ Requires denovolib rather than split_vcf
 ### Version 0.1.0  
 Accessor script for split_vcf for nextflow   
 
+## logstats  
+### Version 0.1.0  
+Script to correct vcftools site overflow glitch using bcftools stats  
+
 ## nextflow.config  
+### Version 0.5.1  
+Modules updated for logstats  
+Fixed local profile RepeatModeler -> repeatModeler  
+
 ### Version 0.5.0  
 GATK4 compatibility  
 Email errors/completion status  
@@ -236,12 +245,16 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.1  
+Site count logging uses logstats.sh to address VCFtools overflow  
+
 ### Version 0.5.0  
 GATK4 compatibility  
 Improved use of symbolic links/writing to disk  
 Completion messages and emailing of completion status/errors  
 Variable indel padding  
 Use path rather than file qualifiers  
+Site count logging and summary statistics  
 
 ### Version 0.4.0  
 Updated plotDPGQ output PNGs  

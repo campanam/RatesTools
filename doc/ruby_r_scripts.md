@@ -76,6 +76,9 @@ Program information options (Do not use other options with the following):
 `-v, --version`: Show program version.  
 `-h, --help`: Show help.  
 
+# logstats.sh  
+The logstats.sh script extracts the VCFtools retained site counts from Nextflow's log file (.command.log) and checks the value for sanity. If VCFtools returns a non-sensical value (typically due to an overflow of sites causing VCFtools to report a negative site count), logstats.sh calculates these values using BCFtools [3] stats.  
+
 ## nextflow_split.rb  
 The nextflow_split.rb script splits an all-sites VCF by chromosomes/contigs for parallelization of filtering and de novo mutation rate calculations using the RatesTools pipeline.  
 
@@ -88,12 +91,12 @@ Options available:
 `-h, --help`: Show help (Do not use with other options).  
 
 ## plotDPGQ.R  
-plotDPGQ.R summarizes extracted variant site DP and GQ values extracted using BCFtools [4] query. It also plots the distributions of these statistics.  
+plotDPGQ.R summarizes extracted variant site DP and GQ values extracted using BCFtools [3] query. It also plots the distributions of these statistics.  
 
 Usage is: `plotDPGQ.R <outfile_prefix>`.  
 
 ## RM2bed.rb  
-RM2bed.rb converts a RepeatMasker [3] out file into a bed for later exclusion of repeat regions. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
+RM2bed.rb converts a RepeatMasker [4] out file into a bed for later exclusion of repeat regions. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
 
 Usage: `RM2bed.rb <in_RM.txt[.gz]> > <out.bed>`.  
 
@@ -115,5 +118,5 @@ Usage: `summarize_denovo.rb <directory> > <out.txt>`.
 ## References  
 1. Koch, E.M., Schweizer, R.M., Schweizer, T.M., Stahler, D.R., Smith, D.W., Wayne, R.K., Novembre, J. (2019). De novo mutation rate estimation in wolves of known pedigree. *Mol Biol Evol*, __36__, 2536-2547, doi: [10.1093/molbev/msz159](https://academic.oup.com/mbe/article/36/11/2536/5531468?login=true).  
 2. Pockrandt, C., Alzamel, M., Iliopoulos, C.S., Reinert, K. (2020) GenMap: ultra-fast computation of genome mappability. *Bioinformatics*, __36__, 3687–3692, doi: [10.1093/bioinformatics/btaa222](https://academic.oup.com/bioinformatics/article/36/12/3687/5815974?login=true).  
-3. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  
-4. Danecek, P., Bonfield, J.K., Liddle, J., Marshall, J., Ohan, V., Pollard, M.O., Whitwham, A., Keane, T., McCarthy, S.A., Davies, R.M., Li, H. (2021) Twelves years of SAMtools and BCFtools. *GigaScience*, __10__, giab008. DOI: [10.1093/gigascience/giab008](https://academic.oup.com/gigascience/article/10/2/giab008/6137722).  
+3. Danecek, P., Bonfield, J.K., Liddle, J., Marshall, J., Ohan, V., Pollard, M.O., Whitwham, A., Keane, T., McCarthy, S.A., Davies, R.M., Li, H. (2021) Twelve years of SAMtools and BCFtools. *GigaScience*, __10__, giab008. DOI: [10.1093/gigascience/giab008](https://academic.oup.com/gigascience/article/10/2/giab008/6137722).  
+4. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  

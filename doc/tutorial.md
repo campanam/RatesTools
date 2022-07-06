@@ -24,6 +24,22 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2h. `gatk` specifies the path to the GATK jar file.  
 2i. `gatk_build` specifies whether the GATK jar is major version 3 or 4.  
 2j. `gatk_java` specifies additional Java parameters for GATK operations. Enter the command-line Java options as a string.  
+2k. `gatk_nct` specifies the number of GATK parallelization nct threads. *NB: this parameters has no effect on GATK 4*.  
+2l. `gm_tmpdir` specifies the path to a temporary directory for GenMap [9].  
+2m. `gm_threads` specifies the number of threads for GenMap.  
+2o. `rm_species` specifies the species library for RepeatMasker [10].  
+2p. `rm_pa` specifies the number of threads for RepeatMasker and RepeatModeler [11].  
+2q. `indelpad` specifies the number of bases up- and downstream of an indel to remove.  
+2r. `prefix` specifies the file prefix for output files.  
+2s. `outdir` specifies the name of the output directory.  
+2t. `dam` specifies the name of the dam. This must match the name derivied from file globbing of the reads.  
+2u. `sire` specifies the name of the sire. This must match the name derivied from file globbing of the reads.  
+2v. `vcftools_site_filters` specifies the site-specific filters using VCFtools [12] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2w. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2x. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
+2y. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
+2z. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
+
 4. Place the final configuration file into the run base directory.  
 
 ## References  
@@ -35,3 +51,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 6.  Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., Marth, G., Abecasis, G., Durbin, R., 1000 Genome Project Data Processing Subgroup (2009) The Sequence Alignment/Map format and SAMtools. *Bioinformatics*, 25, 2078-2079. DOI: [10.1093/bioinformatics/btp352](https://academic.oup.com/bioinformatics/article/25/16/2078/204688).  
 7.  Broad Institute (2020). Picard v. 2.23.8 (https://broadinstitute.github.io/picard/).  
 8. Tarasov, A., Vilella, A.J., Cuppen, E., Nijman, I.J., Prins, P. (2015) Sambamba: fast processing of NGS alignment formats. *Bioinformatics*, __31__, 2032–2034. DOI: [10.1093/bioinformatics/btv098](https://academic.oup.com/bioinformatics/article/31/12/2032/214758).  
+9. Pockrandt, C., Alzamel, M., Iliopoulos, C.S., Reinert, K. (2020) GenMap: ultra-fast computation of genome mappability. *Bioinformatics*, __36__, 3687–3692, doi: [10.1093/bioinformatics/btaa222](https://academic.oup.com/bioinformatics/article/36/12/3687/5815974).  
+10. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  
+11. Flynn, J.M., Hubley, R., Goubert, C., Rosen, J. Clark,. A.G., Feschotte, C., Smit, A.F. (2020) RepeatModeler2 for automated genomic discovery of transposable element families. *Proc Natl Acad Sci U S A*, __117__, 9451-9457. DOI: [10.1073/pnas.1921046117](https://www.pnas.org/content/117/17/9451.short).  
+12. Danecek, P., Auton, A., Abecasis, G., Albers, C.A., Banks, E., DePristo, M.A., Handsaker, R.E., Lunter, G., Marth, G.T., Sherry, S.T., McVean, G., Durbin, R. (2011) The variant call format and VCFtools. *Bioinformatics*, __27__, 2156–2158. DOI: [10.1093/bioinformatics/btr330](https://academic.oup.com/bioinformatics/article/27/15/2156/402296).  

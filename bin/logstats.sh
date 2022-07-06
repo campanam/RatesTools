@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #----------------------------------------------------------------------------------------
 # logstats.sh 0.1.0
 # Michael G. Campana and Ellie E. Armstrong, 2020-2022
@@ -17,8 +19,8 @@
 
 logval=`tail -n2 .command.log | head -n1`
 if [[ $logval == 'File does not contain any sites' ]]; then
-	bcftools stats $0 > tmp.txt
-	bcftools stats $1 > tmp2.txt
+	bcftools stats <(gunzip -c $1) > tmp.txt
+	bcftools stats <(gunzip -c $2) > tmp2.txt
 	allval=`grep "number of records:" tmp.txt | cut -f 4`
 	filtval=`grep "number of records:" tmp2.txt | cut -f 4`
 	echo 'After filtering, kept '$filtval' out of a possible '$allval' Sites'

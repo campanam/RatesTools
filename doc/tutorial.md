@@ -12,7 +12,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 3. Place the directory `RawData` within the base directory and the FASTQ sequence files within it into the base directory.  
 
 ## Configure the Run  
-1. We provide two example configurations for running the test dataset: one using the Genome Analysis Toolkit (GATK) [4] v. 3.8-1 [wolf_test_gatk3.config](wolf_test_gatk3.config) and the other for GATK v. >= 4.2.3.0 [wolf_test_gatk4.config](wolf_test_gatk4.config). A custom configuration can be made by executing the `configure.sh` script and completing the prompts (See [here](https://github.com/campanam/RatesTools/blob/main/README.md#configure-the-pipeline)).  
+1. We provide two example configurations for running the test dataset: one using the Genome Analysis Toolkit (GATK) [4] v. 3.8-1 [wolf_gatk3.config](wolf_gatk3.config) and the other for GATK v. >= 4.2.3.0 [wolf_gatk4.config](wolf_gatk4.config). A custom configuration can be made by executing the `configure.sh` script and completing the prompts (See [here](https://github.com/campanam/RatesTools/blob/main/README.md#configure-the-pipeline)).  
 2. Place the final configuration file into the run base directory.  
 
 ## References  

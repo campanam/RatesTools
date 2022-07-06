@@ -215,6 +215,7 @@ Script to correct vcftools site overflow glitch using bcftools stats
 ## nextflow.config  
 ### Version 0.5.1  
 Modules updated for logstats  
+Fixed local profile RepeatModeler -> repeatModeler  
 
 ### Version 0.5.0  
 GATK4 compatibility  

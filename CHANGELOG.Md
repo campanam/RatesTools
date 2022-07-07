@@ -209,6 +209,9 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## logstats  
+### Version 0.1.1  
+Improved sanity checks  
+
 ### Version 0.1.0  
 Script to correct vcftools site overflow glitch using bcftools stats  
 

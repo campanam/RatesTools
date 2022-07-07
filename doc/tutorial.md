@@ -64,6 +64,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2m. `13_SplitCalcDNMLogs`: De novo mutations (DNMs) and DNM rates calculated per chromosome for each trio.  
 2n. `14_SummarizeDNMLogs`: Summarized DNMs and DNM rates for all chromosomes for each trio.  
 2o. `15_SummaryStats`: Summary statistics of the total number of sites retained after each filtration step and the number of each single-forward mutation class.  
+3. We provide example output of the `14_SummarizeDNMLogs` and `15_SummaryStats` files. A successful run should produce complete versions of these files with similar results.  
 
 ## References  
 1. Fan, Z., Silva, P., Gronau, I., Wang, S., Serres Armero, A., Schweizer, R.M., Ramirez, O., Pollinger, J., Galaverni, M., Ortega Del-Vecchyo, D., Du, L., Zhang, W., Zhang, Z., Xing, J., Vilà, C., Marques-Bonet, T., Godinho, R., Yue, B., Wayne, R.K. (2016) Worldwide patterns of genomic variation and admixture in gray wolves. *Genome Res*, __26__, 163-173. DOI:[10.1101/gr.197517.115](https://genome.cshlp.org/content/26/2/163.short).  

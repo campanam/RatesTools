@@ -9,7 +9,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 ## File Setup  
 1. Create a base directory for the run, e.g. `mkdir test`.  
 2. Decompress the reference genome (`dog_test.fna.gz`) (`gunzip dog_test.fna.gz`). Place the reference genome and the list of required chromosomes (`dog_test_chr.csv`) within the base directory.  
-3. Place the directory `RawData` within the base directory and the FASTQ sequence files within it into the base directory.  
+3. Decompress the `RawData.tar.gz` archive (`tar xvfz RawData.tar.gz`). Place the directory `RawData` within the base directory and the FASTQ sequence files within it into the base directory.  
 
 ## Configure the Run  
 1. We provide two example configurations for running the test dataset: one using the Genome Analysis Toolkit (GATK) [4] v. 3.8-1 (`wolf_gatk3.config`) and the other for GATK v. >= 4.2.3.0 (`wolf_gatk4.config`). A custom configuration can be made by executing the `configure.sh` script and completing the prompts (See [here](https://github.com/campanam/RatesTools/blob/main/README.md#configure-the-pipeline)).  

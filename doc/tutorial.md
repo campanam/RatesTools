@@ -40,7 +40,30 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2y. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
 2z. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
 
-4. Place the final configuration file into the run base directory.  
+3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any module files needed for each program. If no modules are needed, leave the value as an empty string.  
+
+4. Configure the executor profiles for your system. If you are running locally, the standard local profile provided should be sufficient (but may need some adaptation depending on your hardware). If you are running on a cluster or a cloud service, consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and your system administrators to optimize the parameter profile.  
+
+5. Place the final configuration file into the run base directory.  
+
+## Run the Analysis  
+1. Execute the analysis using the command: `ratestools.nf -c <config_file.config>`. You can use the `-bg` option to send the Nextflow process to the background (useful for cluster systems) and the `-profile <profile_name>` option to specify your custom parameter profile.  
+2. The pipeline will generate the following files in the output directory:  
+2a. `01_FinalBams`: The final BAM alignments used in the analysis.  
+2b. `02_gVCFs`: Individual gVCFs for each sample.  
+2c. `03_CombinedVCF`: Combined joint-genotyped all-sites VCF for all samples in the analysis.  
+2d. `04_RepeatMasking`: Output of RepeatMasker and RepeatModeler.  
+2e. `05_ExcludedRegions`: A BED file of all genomic regions containining indels, repetitive sequence and low-mappability sequence. These regions are excluded from the analysis.  
+2f. `06_FilterChrVCFs`: All-sites VCF including only the chromosomes listed in the chromosome file specified in `params.chr_list`.  
+2g. `07_SplitTrioVCFs`: VCFs of all parent-offspring trios after splitting the all-sample joint-genotyping VCF.  
+2h. `08_gVCFs_GP_DQ`: Summary statistics and graphs of DP and GQ for all individuals.  
+2i. `09_SplitVCFs`: Trio VCFs split by chromosome for parallelization.  
+2j. `10_VCFtoolsSiteFilteredVCFs`: Trio chromosome VCFs filtered at the site level by VCFtools.  
+2k. `11_GATKSiteFilteredVCFs`: Trio chromosome VCFs filtered at the site level by GATK.  
+2l. `12_RegionFilteredVCFs`: Trio chromosome VCFs after removal of unreliable regions.  
+2m. `13_SplitCalcDNMLogs`: De novo mutations (DNMs) and DNM rates calculated per chromosome for each trio.  
+2n. `14_SummarizeDNMLogs`: Summarized DNMs and DNM rates for all chromosomes for each trio.  
+2o. `15_SummaryStats`: Summary statistics of the total number of sites retained after each filtration step and the number of each single-forward mutation class.  
 
 ## References  
 1. Fan, Z., Silva, P., Gronau, I., Wang, S., Serres Armero, A., Schweizer, R.M., Ramirez, O., Pollinger, J., Galaverni, M., Ortega Del-Vecchyo, D., Du, L., Zhang, W., Zhang, Z., Xing, J., Vilà, C., Marques-Bonet, T., Godinho, R., Yue, B., Wayne, R.K. (2016) Worldwide patterns of genomic variation and admixture in gray wolves. *Genome Res*, __26__, 163-173. DOI:[10.1101/gr.197517.115](https://genome.cshlp.org/content/26/2/163.short).  

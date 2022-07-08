@@ -33,8 +33,10 @@ install:
 	if [ ! -d $(INSTALLDIR) ]; then mkdir $(INSTALLDIR); fi
 	chmod +x $(BINDIR)/*.rb
 	chmod +x $(BINDIR)/*.R
+	chmod +x $(BINDIR)/*.sh
 	mv $(BINDIR)/*.rb $(INSTALLDIR)/
 	mv $(BINDIR)/*.R $(INSTALLDIR)/
+	mv $(BINDIR)/*.sh $(INSTALLDIR)/
 	chmod +x ratestools.nf
 	mv ratestools.nf $(INSTALLDIR)/
 	if [ ! -d ${HOME}/.profile ]; then mkfile -n 0 ${HOME}/.profile}; fi

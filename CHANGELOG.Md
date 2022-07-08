@@ -209,12 +209,18 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## logstats  
+### Version 0.1.1  
+Improved sanity checks  
+
 ### Version 0.1.0  
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 0.5.2  
+process sanityCheckLogs for logstats.sh  
+
 ### Version 0.5.1  
-Modules updated for logstats  
+Modules updated for logstats.sh  
 Fixed local profile RepeatModeler -> repeatModeler  
 Closures rather that objects for Nextflow 22.04.04 compatibility  
 
@@ -246,6 +252,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.2  
+process sanityCheckLogs for logstats.sh  
+
 ### Version 0.5.1  
 Site count logging uses logstats.sh to address VCFtools overflow  
 

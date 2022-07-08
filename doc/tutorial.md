@@ -13,7 +13,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 
 ## Configure the Run  
 1. We provide two example configurations for running the test dataset: one using the Genome Analysis Toolkit (GATK) [4] v. 3.8-1 (`wolf_gatk3.config`) and the other for GATK v. >= 4.2.3.0 (`wolf_gatk4.config`). A custom configuration can be made by executing the `configure.sh` script and completing the prompts (See [here](https://github.com/campanam/RatesTools/blob/main/README.md#configure-the-pipeline)).  
-2. Set the run parameters. The parameters are located in the `params` directive. Take careful notice of the value enclosure of the strings (either '' or ""). Values enclosed in '' do not perform variable substitution, while those using "" do. Note the special variable $baseDir indicates the base directory of the run.    
+2. Set the run parameters. The parameters are located in the `params` directive. Take careful notice of the value enclosure of the strings (either '' or ""). Values enclosed in '' do not perform variable substitution, while those using "" do. Note the special variable $launchDir indicates the launch directory of the run.  
 2a. `refseq` specifies the path to the reference sequence (in FASTA format).  
 2b. `reads` specifies the path to the sequence FASTQ files and the globbing pattern to determine read pairs (See the [Nextflow documentation](https://www.nextflow.io/docs/latest/channel.html#fromfilepairs) for a thorough description of globbing). Each individual is expected to be represented by a file containing forward reads and another containing the corresponding reverse reads.  
 2c. `bwa_alg` specifies the BWA [5] index algorithm. Setting this value to an empty string ("") instructs BWA to infer the indexing algorithm.  

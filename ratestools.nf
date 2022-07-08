@@ -529,7 +529,7 @@ process filterChr {
 	
 	output:
 	path "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
-	tuple path 'chrfilt.tmp', path "$comb_vcf", path "${prefix}.chrfilt.recode.vcf.gz" optional true into chrfilt_log_ch 
+	tuple path('chrfilt.tmp'), path(comb_vcf), path("${prefix}.chrfilt.recode.vcf.gz") optional true into chrfilt_log_ch 
 	
 	script:
 	if (chrs.name == "NULL")
@@ -540,7 +540,7 @@ process filterChr {
 		"""
 		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
 		vcftools --gzvcf $comb_vcf --recode -c \$chr_line | gzip > ${prefix}.chrfilt.recode.vcf.gz
-		cp .comand.log chrfilt.tmp
+		cp .command.log chrfilt.tmp
 		"""
 }
 
@@ -566,7 +566,7 @@ process splitTrios {
 	
 	output:
 	path "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
-	tuple path "${prefix}_offspring${pair_id}_trio.tmp", path "chr_vcf", path "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_log_ch
+	tuple path("${prefix}_offspring${pair_id}_trio.tmp"), path(chr_vcf), path("${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz") into triosplit_log_ch
 	
 	"""
 	vcftools --gzvcf $chr_vcf --recode -c --indv ${dam} --indv ${sire} --indv ${pair_id} | gzip > ${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz
@@ -658,7 +658,7 @@ process vcftoolsFilterSites {
 	
 	output:
 	path "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
-	tuple path "${split_vcf.simpleName}_sitefilt.tmp", path "$split_vcf", path "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_log_ch
+	tuple path("${split_vcf.simpleName}_sitefilt.tmp"), path(split_vcf), path("${split_vcf.simpleName}.sitefilt.recode.vcf.gz") into sitefilt_log_ch
 	
 	script:
 	if (site_filters == "NULL")
@@ -696,7 +696,7 @@ process gatkFilterSites {
 	
 	output:
 	path "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
-	tuple path "${site_vcf.simpleName}_gatksitefilt.tmp", path "$site_vcf", path "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_log_ch
+	tuple path("${site_vcf.simpleName}_gatksitefilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.gatksitefilt.vcf.gz") into gatk_sitefilt_log_ch
 	
 	script:
 	if (site_filters == "NULL")
@@ -745,7 +745,7 @@ process filterRegions {
 	
 	output:
 	path "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
-	tuple path "${site_vcf.simpleName}_regionfilt.tmp", path "$site_vcf", path "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_log_ch
+	tuple path("${site_vcf.simpleName}_regionfilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.regionfilt.vcf.gz") into regionfilt_log_ch
 	
 	script:
 	chr = site_vcf.simpleName.split('_chr')[1]
@@ -840,10 +840,10 @@ process sanityCheckLogs {
 	errorStrategy 'finish'
 
 	input:
-	tuple path logfile, path allvcflog, path filtvcflog from all_logs_ch
+	tuple path(logfile), path(allvcflog), path(filtvcflog) from all_logs_ch
 	
 	output:
-	path '${logfile.simpleName}.log' into logs_sanity_ch
+	path "${logfile.simpleName}.log" into logs_sanity_ch
 	
 	"""
 	logstats.sh $logfile $allvcflog $filtvcflog > ${logfile.simpleName}.log

@@ -22,6 +22,9 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.12.0  
+Applying both --minAD1 and --minAF no longer defaults to --minAD1. --minAD1 is applied to parents, --minAF to offspring.  
+
 ### Version 0.11.2  
 Fixed GATK4 total AD = 0 bug  
 More accurate minAD1 help description  

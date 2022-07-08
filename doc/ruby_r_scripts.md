@@ -20,8 +20,8 @@ The following calc_denovo_mutation_rate.rb options are available:
 `-t, --theta [VALUE]`: Heterozygosity (theta) for Koch DNp (Default = 0.008)  
 `-c, --cutoff [VALUE]`: Koch DNp cutoff (Default = 0.3)  
 `--parhom`: Require parents to be homozygous at candidate DNM sites. Parental heterozygosity forces the candidate site(s) to be discarded.  
-`--minAD1`: Call all alleles at a site with an allelic depth of at least 1 (even if not called by the genotyper). Requires the 'AD' tag to be specified in the VCF. If the total allelic depth is 0 (e.g. if no informative reads are included but the total read depth is greater than the required threshold), the site is discarded as a potential DNM.  
-`--minAF [VALUE]`: Filter alleles by minimum frequency.  
+`--minAD1`: Call all alleles at a site with an allelic depth of at least 1 (even if not called by the genotyper). Requires the 'AD' tag to be specified in the VCF. If the total allelic depth is 0 (e.g. if no informative reads are included but the total read depth is greater than the required threshold), the site is discarded as a potential DNM. If both `--minAD1` and `--minAF` options specified, `--minAD1` is applied to the parents and `--minAF` is applied to the offspring for maximally conservative DNM calling.  
+`--minAF [VALUE]`: Filter alleles by minimum frequency. Requires the 'AD' tag to be specified in the VCF. If both `--minAD1` and `--minAF` options specified, `--minAD1` is applied to the parents and `--minAF` is applied to the offspring for maximally conservative DNM calling.  
 `-w, --window [VALUE]`: Sequence window length (bp) for bootstrapping (Default = 1000000).  
 `-S, --step [VALUE]`: Window step (bp) for bootstrapping (Default = 1000000).  
 `-b, --bootstrap [VALUE]`: Number of bootstrap replicates (Default = 0).  

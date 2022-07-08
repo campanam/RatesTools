@@ -89,8 +89,10 @@ flowchart TD
     p87([collect])
     p88[summarizeDNM]
     p89([mix])
-    p90([collect])
-    p91[generateSummaryStats]
+    p90[sanityCheckLogs]
+    p91([mix])
+    p92([collect])
+    p93[generateSummaryStats]
     p0 -->|readpairs_ch| p5
     p1 -->|refseq| p2
     p2 -->|bwa_index_ch| p5
@@ -199,6 +201,8 @@ flowchart TD
     p85 -->|dnm_opts| p86
     p86 -->|split_logs_ch| p87
     p87 --> p88
-    p88 -->|summary_log_ch| p89
+    p88 -->|summary_log_ch| p91
     p89 -->|all_logs_ch| p90
-    p90 --> p91
+    p90 -->|logs_sanity_ch| p91
+    p91 -->|all_logs_sanity_ch| p92
+    p92 --> p93

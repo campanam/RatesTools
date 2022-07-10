@@ -65,7 +65,7 @@ The kochDNp.rb script calculates the Koch et al. DNp statistic [1] for candidate
 Basic usage is: `kochDNp.rb [options]`. Help is available using `kochDNp.rb -h`.  
 
 The following kochDNp.rb options are available:  
-`-i, --input [FILE]`: Input file of candidate denovo mutations (Required). Input file can either be a VCF or a log previously generated using calc_denovo-mutation_rate or summarize_denovo. Files with the final extension '.gz' are assumed to be gzip-compressed.  
+`-i, --input [FILE]`: Input file of candidate denovo mutations (Required). Input file can either be a VCF or a log previously generated using calc_denovo_mutation_rate or summarize_denovo. Files with the final extension '.gz' are assumed to be gzip-compressed.  
 `-s, --sire [NAME]`: Sire's name in VCF (Required).  
 `-d, --dam [NAME]`: Dam's name in VCF (Required).  
 `-m, --mu [VALUE]`: Mutation rate (mu) for Koch DNp (Default = 1e-6)  

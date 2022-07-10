@@ -20,8 +20,8 @@ The following calc_denovo_mutation_rate.rb options are available:
 `-t, --theta [VALUE]`: Heterozygosity (theta) for Koch DNp (Default = 0.008)  
 `-c, --cutoff [VALUE]`: Koch DNp cutoff (Default = 0.3)  
 `--parhom`: Require parents to be homozygous at candidate DNM sites. Parental heterozygosity forces the candidate site(s) to be discarded.  
-`--minAD1`: Call all alleles at a site with an allelic depth of at least 1 (even if not called by the genotyper). Requires the 'AD' tag to be specified in the VCF. If the total allelic depth is 0 (e.g. if no informative reads are included but the total read depth is greater than the required threshold), the site is discarded as a potential DNM.  
-`--minAF [VALUE]`: Filter alleles by minimum frequency.  
+`--minAD1`: Call all alleles at a site with an allelic depth of at least 1 (even if not called by the genotyper). Requires the 'AD' tag to be specified in the VCF. If the total allelic depth is 0 (e.g. if no informative reads are included but the total read depth is greater than the required threshold), the site is discarded as a potential DNM. If both `--minAD1` and `--minAF` options specified, `--minAD1` is applied to the parents and `--minAF` is applied to the offspring for maximally conservative DNM calling.  
+`--minAF [VALUE]`: Filter alleles by minimum frequency. Requires the 'AD' tag to be specified in the VCF. If both `--minAD1` and `--minAF` options specified, `--minAD1` is applied to the parents and `--minAF` is applied to the offspring for maximally conservative DNM calling.  
 `-w, --window [VALUE]`: Sequence window length (bp) for bootstrapping (Default = 1000000).  
 `-S, --step [VALUE]`: Window step (bp) for bootstrapping (Default = 1000000).  
 `-b, --bootstrap [VALUE]`: Number of bootstrap replicates (Default = 0).  
@@ -65,7 +65,7 @@ The kochDNp.rb script calculates the Koch et al. DNp statistic [1] for candidate
 Basic usage is: `kochDNp.rb [options]`. Help is available using `kochDNp.rb -h`.  
 
 The following kochDNp.rb options are available:  
-`-i, --input [FILE]`: Input file of candidate denovo mutations (Required). Input file can either be a VCF or a log previously generated using calc_denovo-mutation_rate or summarize_denovo. Files with the final extension '.gz' are assumed to be gzip-compressed.  
+`-i, --input [FILE]`: Input file of candidate denovo mutations (Required). Input file can either be a VCF or a log previously generated using calc_denovo_mutation_rate or summarize_denovo. Files with the final extension '.gz' are assumed to be gzip-compressed.  
 `-s, --sire [NAME]`: Sire's name in VCF (Required).  
 `-d, --dam [NAME]`: Dam's name in VCF (Required).  
 `-m, --mu [VALUE]`: Mutation rate (mu) for Koch DNp (Default = 1e-6)  

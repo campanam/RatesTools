@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.11.2"
+CALCDENOVOVER = "0.12.0"
 # Michael G. Campana and Ellie E. Armstrong, 2019-2022
 # Smithsonian Institution and Stanford University
 
@@ -213,9 +213,19 @@ def read_vcf # Method to read vcf
 						if $options.minAD1
 							if ad.nil?
 								filter_exit("AD tag required for minAD1 filter. Exiting.\nError found here:", line)
-							else
+							elsif $options.minAF.nil?
 								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
 								genotype = depth_to_alleles(adepth, 1.0)
+							else
+								adepth = snp_array[i].split(":")[ad].split(",") # Convert allele coverages to alleles
+								if i == sire_index || i == dam_index
+									genotype = depth_to_alleles(adepth, 1.0)
+								else
+									adepth.map! { |x| x.to_f }
+									total_depth = adepth.sum
+									adepth.map! { |x| x/total_depth } # Convert allele coverages to frequencies
+									genotype = depth_to_alleles(adepth, $options.minAF)
+								end
 							end
 						elsif !$options.minAF.nil?
 							if ad.nil?

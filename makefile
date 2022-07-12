@@ -39,9 +39,21 @@ install:
 	mv $(BINDIR)/*.sh $(INSTALLDIR)/
 	chmod +x ratestools.nf
 	mv ratestools.nf $(INSTALLDIR)/
-	if [ ! -d ${HOME}/.profile ]; then mkfile -n 0 ${HOME}/.profile}; fi
+	if [ ! -d ${HOME}/.profile ]; then echo '' > ${HOME}/.profile}; fi
+	if [ ! -d ${HOME}/.bash_profile ]; then echo '' > ${HOME}/.bash_profile}; fi
+	if [ ! -d ${HOME}/.bashrc ]; then echo '' > ${HOME}/.bashrc}; fi
+	if [ ! -d ${HOME}/.zprofile ]; then echo '' > ${HOME}/.zprofile}; fi
+	if [ ! -d ${HOME}/.zshrc ]; then echo '' > ${HOME}/.zshrc}; fi
 	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.profile; fi
+	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bash_profile; fi
+	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bashrc; fi
+	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.zprofile; fi
+	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.zshrc; fi
 	source "${HOME}/.profile"
+	source "${HOME}/.zprofile"
+	source "${HOME}/.bash_profile"
+	source "${HOME}/.bashrc"
+	source "${HOME}/.zshrc"
 	
 .PHONY: test install
 

@@ -42,8 +42,6 @@ install:
 	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bash_profile; fi
 	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bashrc; fi
 	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.zshrc; fi
-	source "${HOME}/.profile"
-	source "${HOME}/.zprofile"
 	source "${HOME}/.bash_profile"
 	source "${HOME}/.bashrc"
 	source "${HOME}/.zshrc"

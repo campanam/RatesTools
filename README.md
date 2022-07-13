@@ -27,6 +27,7 @@ Install R: Use the appropriate precompiled binary/installer available at the [Co
 ### Install the RatesTools Scripts  
 Clone the repository: `git clone https://github.com/campanam/RatesTools`  
 Install the scripts: `cd RatesTools; make install` 
+Afterwards, restart your terminal.
 
 *By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory, specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
 

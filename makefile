@@ -64,9 +64,6 @@ install:
 		else \
 			echo 'export PATH="$$PATH:$(INSTALLDIR)"' >> ${HOME}/.zshrc; \
 		fi; \
-		source "${HOME}/.bash_profile"; \
-		source "${HOME}/.bashrc"; \
-		source "${HOME}/.zshrc"; \
 	fi
 	
 .PHONY: test install

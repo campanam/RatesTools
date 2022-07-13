@@ -2,6 +2,8 @@
 # Michael G. Campana and Ellie E. Armstrong, 2020-2022
 # Smithsonian Institution and Stanford University
 
+# RatesTools Makefile 0.5.3
+
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
 # University have waived all copyright and related or neighboring rights to RatesTools;
 # this work is published from the United States. You should have received a copy of the

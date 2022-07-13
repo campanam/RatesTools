@@ -39,10 +39,8 @@ install:
 	mv $(BINDIR)/*.sh $(INSTALLDIR)/
 	chmod +x ratestools.nf
 	mv ratestools.nf $(INSTALLDIR)/
-	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.profile; fi
 	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bash_profile; fi
 	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bashrc; fi
-	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.zprofile; fi
 	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.zshrc; fi
 	source "${HOME}/.profile"
 	source "${HOME}/.zprofile"

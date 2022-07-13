@@ -39,12 +39,14 @@ install:
 	mv $(BINDIR)/*.sh $(INSTALLDIR)/
 	chmod +x ratestools.nf
 	mv ratestools.nf $(INSTALLDIR)/
-	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bash_profile; fi
-	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bashrc; fi
-	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.zshrc; fi
-	source "${HOME}/.bash_profile"
-	source "${HOME}/.bashrc"
-	source "${HOME}/.zshrc"
+	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)":* ]]; then \
+		echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bash_profile; \
+		echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.bashrc; \
+		echo 'export PATH="${PATH}:$(INSTALLDIR)"' >> ${HOME}/.zshrc; \
+		source "${HOME}/.bash_profile"; \
+		source "${HOME}/.bashrc"; \
+		source "${HOME}/.zshrc"; \
+	fi
 	
 .PHONY: test install
 

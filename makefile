@@ -34,11 +34,11 @@ install:
 	chmod +x $(BINDIR)/*.rb
 	chmod +x $(BINDIR)/*.R
 	chmod +x $(BINDIR)/*.sh
-	#mv $(BINDIR)/*.rb $(INSTALLDIR)/
-	#mv $(BINDIR)/*.R $(INSTALLDIR)/
-	#mv $(BINDIR)/*.sh $(INSTALLDIR)/
+	mv $(BINDIR)/*.rb $(INSTALLDIR)/
+	mv $(BINDIR)/*.R $(INSTALLDIR)/
+	mv $(BINDIR)/*.sh $(INSTALLDIR)/
 	chmod +x ratestools.nf
-	#mv ratestools.nf $(INSTALLDIR)/
+	mv ratestools.nf $(INSTALLDIR)/
 	if [[ ! ":${PATH}:" == *":$(INSTALLDIR)"* ]]; then \
 		if [[ -f ${HOME}/.bash_profile ]]; then \
 			if [[ `grep 'export PATH="$$PATH' ${HOME}/.bash_profile | wc -l` -gt 0 ]]; then \

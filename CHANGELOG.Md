@@ -263,6 +263,7 @@ Initial script (plotDPGQ-clean.R)
 ### Version 0.5.4  
 Fixed logging glitches that copied VCF output into downstream results  
 Fixed glitch in BCFtools region-filtering that removed sites unexpectedly  
+bedtools subtract rather than intersect -v  
 
 ### Version 0.5.2  
 process sanityCheckLogs for logstats.sh  

@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.3
+/* RatesTools version 0.5.4
 Michael G. Campana and Ellie E. Armstrong, 2020-2022
 Smithsonian Institution and Stanford University
 
@@ -683,7 +683,7 @@ process gatkFilterSites {
 	label 'tabix'
 	label 'vcftools'
 	label 'bcftools'
-	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
+	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy', pattern: '*gatksitefilt.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
@@ -735,7 +735,7 @@ process filterRegions {
 	label 'vcftools'
 	label 'tabix'
 	label 'gzip'
-	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
+	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy', pattern: '*regionfilt.vcf.gz'
 	errorStrategy 'retry'
 	maxRetries 3
 	
@@ -768,7 +768,7 @@ process filterRegions {
 		bcftools view -R tmp.bed -Ob -o tmp.bcf ${site_vcf}
 		tabix tmp.bcf
 		# bcftools isec gives the target sites not included in the bed
-		bcftools isec -C -O v -o ${site_vcf.simpleName}.targets ${site_vcf} tmp.bcf
+		bcftools isec -C -O v ${site_vcf} tmp.bcf | cut -f1,2 > ${site_vcf.simpleName}.targets
 		# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
 		bcftools view -T ${site_vcf.simpleName}.targets -Ov ${site_vcf} | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz

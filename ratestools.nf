@@ -751,7 +751,7 @@ process filterRegions {
 	chr = site_vcf.simpleName.split('_chr')[1]
 	if (task.attempt == 1)
 		"""
-		bedtools intersect -a ${site_vcf} -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+		bedtools subtract -a ${site_vcf} -b ${exclude_bed} -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
 		cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
 		"""

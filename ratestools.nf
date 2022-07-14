@@ -519,7 +519,7 @@ process filterChr {
 	label 'vcftools'
 	label 'bcftools'
 	label  'gzip'
-	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*.vcf.gz'
+	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*chrfilt.recode.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
@@ -553,7 +553,7 @@ process splitTrios {
 	label 'vcftools'
 	label 'gzip'
 	label 'bcftools'
-	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: '*.vcf.gz'
+	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: "${params.prefix}_offspring*.chrfilt.recode.vcf.gz"
 	errorStrategy 'finish'
 	
 	input:
@@ -649,7 +649,7 @@ process vcftoolsFilterSites {
 	label 'vcftools'
 	label 'bcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*.vcf.gz'
+	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*sitefilt.recode.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:

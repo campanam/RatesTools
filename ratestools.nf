@@ -752,14 +752,22 @@ process filterRegions {
 	if (task.attempt == 1)
 		"""
 		bedtools subtract -a ${site_vcf} -b ${exclude_bed} -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-		cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0]] ; then
+			vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		else
+			rm ${site_vcf.simpleName}.regionfilt.vcf.gz
+		fi
 		"""
 	else if (task.attempt == 2)
 		"""
 		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-		cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0]] ; then
+			vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		else
+			rm ${site_vcf.simpleName}.regionfilt.vcf.gz
+		fi
 		"""
 	else if (task.attempt == 3)
 		"""

@@ -839,7 +839,11 @@ process summarizeDNM {
 		fi
 		mv \$file \${file%_chr*.log}/
 	done
-	for outdir in ${params.prefix}*; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
+	for outdir in ${params.prefix}*; do 
+		if [ -d \$outdir ]; then
+			summarize_denovo.rb \$outdir > \${outdir}_summary.log
+		fi
+	done
 	for sumlog in *summary.log; do
 		bcftools view -h \${sumlog/_summary.log/.chrfilt.recode.vcf.gz} > header.txt
 		val=`grep -n \'#CHROM\' \$sumlog | cut -d \':\' -f 1`

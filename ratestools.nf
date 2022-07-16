@@ -847,7 +847,7 @@ process summarizeDNM {
 		let lncount=\$total-\$val
 		tail -n \$lncount \$sumlog > tmp.txt
 		cat header.txt tmp.txt | gzip > \${sumlog/_summary.log/_candidates.vcf.gz}
-	fi
+	done
 	"""
 
 }

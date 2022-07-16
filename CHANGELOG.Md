@@ -224,6 +224,9 @@ Script to correct vcftools site overflow glitch using bcftools stats
 Updated makefile for Linux and macOS  
 
 ## nextflow.config  
+### Version 0.5.5  
+Updated summarizeDNM modules for VCF output  
+
 ### Version 0.5.2  
 process sanityCheckLogs for logstats.sh  
 
@@ -260,6 +263,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.5  
+summarizeDNM outputs VCF of candidate DNMs  
+
 ### Version 0.5.4  
 Fixed logging glitches that copied VCF output into downstream results  
 Fixed glitch in BCFtools region-filtering that removed sites unexpectedly  

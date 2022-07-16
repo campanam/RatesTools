@@ -87,12 +87,14 @@ flowchart TD
     p85(( ))
     p86[calcDNMRate]
     p87([collect])
-    p88[summarizeDNM]
-    p89([mix])
-    p90[sanityCheckLogs]
+    p88([collect])
+    p89[summarizeDNM]
+    p90(( ))
     p91([mix])
-    p92([collect])
-    p93[generateSummaryStats]
+    p92[sanityCheckLogs]
+    p93([mix])
+    p94([collect])
+    p95[generateSummaryStats]
     p0 -->|readpairs_ch| p5
     p1 -->|refseq| p2
     p2 -->|bwa_index_ch| p5
@@ -173,36 +175,39 @@ flowchart TD
     p63 -->|chrs| p64
     p64 -->|chrfilt_vcf_ch| p70
     p64 -->|chrfilt_stats_ch| p71
-    p64 -->|chrfilt_log_ch| p89
+    p64 -->|chrfilt_log_ch| p91
     p65 -->|filt_sample_ch2| p70
     p66 -->|dam| p70
     p67 -->|sire| p70
     p68 -->|prefix| p70
     p69 -->|chrs| p70
     p70 -->|triosplit_vcf_ch| p74
-    p70 -->|triosplit_log_ch| p89
+    p70 -->|candidate_dnms_header_ch| p88
+    p70 -->|triosplit_log_ch| p91
     p71 -->|dp_gq_ch| p72
     p72 --> p73
     p74 -->|split_vcfs_ch| p76
     p75 -->|site_filters| p76
     p76 -->|sitefilt_vcf_ch| p81
-    p76 -->|sitefilt_log_ch| p89
+    p76 -->|sitefilt_log_ch| p91
     p77 -->|refseq| p81
     p2 -->|bwa_index_ch| p81
     p78 -->|site_filters| p81
     p79 -->|gatk| p81
     p80 -->|gatk_java| p81
     p81 -->|gatk_sitefilt_vcf_ch| p82
-    p81 -->|gatk_sitefilt_log_ch| p89
+    p81 -->|gatk_sitefilt_log_ch| p91
     p82 -->|regionfilt_vcf_ch| p86
-    p82 -->|regionfilt_log_ch| p89
+    p82 -->|regionfilt_log_ch| p91
     p83 -->|sire| p86
     p84 -->|dam| p86
     p85 -->|dnm_opts| p86
     p86 -->|split_logs_ch| p87
-    p87 --> p88
-    p88 -->|summary_log_ch| p91
-    p89 -->|all_logs_ch| p90
-    p90 -->|logs_sanity_ch| p91
-    p91 -->|all_logs_sanity_ch| p92
-    p92 --> p93
+    p87 --> p89
+    p88 --> p89
+    p89 -->|summary_log_ch| p93
+    p89 -->|candidates_vcf_ch| p90
+    p91 -->|all_logs_ch| p92
+    p92 -->|logs_sanity_ch| p93
+    p93 -->|all_logs_sanity_ch| p94
+    p94 --> p95

@@ -830,7 +830,7 @@ process summarizeDNM {
 	
 	output:
 	path "${params.prefix}*_summary.log" into summary_log_ch
-	path "${params.prefix)*_candidates.vcf.gz into candidates_vcf_ch
+	path "${params.prefix)*_candidates.vcf.gz" into candidates_vcf_ch
 	
 	"""
 	for file in ${params.prefix}*.log; do 

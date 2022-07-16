@@ -85,7 +85,7 @@ The filterRegions process removes low-reliability regions (repeat regions, indel
 Using the region-filtered VCFs output from the filterRegions process, the calcDNMRate process calculates the per-chromosome mutation rate using [`calc_denovo_mutation_rate.rb`](ruby_r_scripts.md#calc_denovo_mutation_raterb) and the options specified in the config file (`calc_denovo_mutation_rate.rb -i <chr.vcf> -s <sire> -d <dam> <denovo_mutation_options> > chr.log)`).  
 
 ## summarizeDNM  
-Using [`summarize_denovo.rb`](ruby_r_scripts.md#summarize_denovorb), the summarizeDNM process combines the per-chromosome mutation rate results from the calcDNMRate process to obtain the genomic mutation rate.  
+Using [`summarize_denovo.rb`](ruby_r_scripts.md#summarize_denovorb), the summarizeDNM process combines the per-chromosome mutation rate results from the calcDNMRate process to obtain the genomic mutation rate. It outputs both a log summarizing the candidate DNMs and mutation rate estimates and a VCF of the candidate DNMs.  
 
 ## sanityCheckLogs  
 Retained site counts are sanity-checked and logged after each filtration step using [logstats.sh](ruby_r_scripts.md#logstatssh).  

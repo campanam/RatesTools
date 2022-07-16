@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.4
+/* RatesTools version 0.5.5
 Michael G. Campana and Ellie E. Armstrong, 2020-2022
 Smithsonian Institution and Stanford University
 
@@ -565,7 +565,7 @@ process splitTrios {
 	path chrs from chr_file
 	
 	output:
-	path "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch
+	path "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch, candidate_dnms_header_ch
 	tuple path("${prefix}_offspring${pair_id}_trio.tmp"), path(chr_vcf), path("${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz") into triosplit_log_ch
 	
 	"""
@@ -819,14 +819,18 @@ process summarizeDNM {
 	// Calculate genome-wide DNM rate using summarize_denovo
 	
 	label 'ruby'
+	label 'bcftools'
+	label 'gzip'
 	publishDir "$params.outdir/14_SummarizeDNMLogs", mode: 'copy'
 	errorStrategy 'finish'
 	
 	input:
 	path "*" from split_logs_ch.collect()
+	path "*" from candidate_dnms_header_ch.collect()
 	
 	output:
 	path "${params.prefix}*_summary.log" into summary_log_ch
+	path "${params.prefix)*_candidates.vcf.gz into candidates_vcf_ch
 	
 	"""
 	for file in ${params.prefix}*.log; do 
@@ -836,6 +840,14 @@ process summarizeDNM {
 		mv \$file \${file%_chr*.log}/
 	done
 	for outdir in ${params.prefix}*; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
+	for sumlog in *summary.log; do
+		bcftools header \${sumlog/_summary.log/.chrfilt.recode.vcf.gz} > header.txt
+		val=`grep -n '#CHROM' \$sumlog | cut -d ":" -f 1`
+		total=`wc -l $sumlog`
+		let lncount=\$total-\$val
+		tail -n \$lncount \$sumlog > tmp.txt
+		cat header.txt tmp.txt | gzip > \${sumlog/_summary.log/_candidates.vcf.gz}
+	fi
 	"""
 
 }

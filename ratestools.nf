@@ -842,7 +842,7 @@ process summarizeDNM {
 	for outdir in ${params.prefix}*; do summarize_denovo.rb \$outdir > \${outdir}_summary.log; done
 	for sumlog in *summary.log; do
 		bcftools view -h \${sumlog/_summary.log/.chrfilt.recode.vcf.gz} > header.txt
-		val=`grep -n \'\#CHROM\' \$sumlog | cut -d \':\' -f 1`
+		val=`grep -n \'#CHROM\' \$sumlog | cut -d \':\' -f 1`
 		total=`wc -l $sumlog`
 		let lncount=\$total-\$val
 		tail -n \$lncount \$sumlog > tmp.txt

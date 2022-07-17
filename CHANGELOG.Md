@@ -263,6 +263,10 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.6  
+Fixed bug in region filtration when empty region bed  
+bedtools subtract rather than interact for second attempt  
+
 ### Version 0.5.5  
 summarizeDNM outputs VCF of candidate DNMs  
 

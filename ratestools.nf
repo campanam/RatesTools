@@ -752,7 +752,7 @@ process filterRegions {
 	if (task.attempt == 1)
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed
-		if [[ `wc -l tmp.bed | cut -d \' \' -f 1` -gt 0 ]]; then
+		if [  "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			bedtools subtract -a ${site_vcf} -b tmp.bed -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 			if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0 ]]; then
 				vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
@@ -768,7 +768,7 @@ process filterRegions {
 	else if (task.attempt == 2)
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed
-		if [[ `wc -l tmp.bed | cut -d \' \' -f 1` -gt 0 ]]; then
+		if [  "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			zcat ${site_vcf} | bedtools subtract -a stdin -b tmp.bed -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 			if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0 ]]; then
 				vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
@@ -784,7 +784,7 @@ process filterRegions {
 	else if (task.attempt == 3)
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed
-		if [[ `wc -l tmp.bed | cut -d \' \' -f 1` -gt 0 ]]; then
+		if [  "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			tabix ${site_vcf}
 			bcftools view -R tmp.bed -Ob -o tmp.bcf ${site_vcf}
 			tabix tmp.bcf
@@ -802,7 +802,7 @@ process filterRegions {
 	else
 		"""
 		grep ${chr} ${exclude_bed} > tmp.bed
-		if [[ `wc -l tmp.bed | cut -d \' \' -f 1` -gt 0 ]]; then
+		if [  "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
 			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
 		else

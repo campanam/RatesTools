@@ -751,42 +751,64 @@ process filterRegions {
 	chr = site_vcf.simpleName.split('_chr')[1]
 	if (task.attempt == 1)
 		"""
-		bedtools subtract -a ${site_vcf} -b ${exclude_bed} -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-		if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0]] ; then
-			vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		grep ${chr} ${exclude_bed} > tmp.bed
+		if [[ `wc -l tmp.bed | cut -d \' \' -f 1`` -gt 0 ]]; then
+			bedtools subtract -a ${site_vcf} -b tmp.bed -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+			if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0]] ; then
+				vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+				cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			else
+				rm ${site_vcf.simpleName}.regionfilt.vcf.gz
+			fi
 		else
-			rm ${site_vcf.simpleName}.regionfilt.vcf.gz
-		fi
+			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		fi	
 		"""
 	else if (task.attempt == 2)
 		"""
-		zcat ${site_vcf} | bedtools intersect -a stdin -b ${exclude_bed} -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-		if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0]] ; then
-			vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		grep ${chr} ${exclude_bed} > tmp.bed
+		if [[ `wc -l tmp.bed | cut -d \' \' -f 1`` -gt 0 ]]; then
+			zcat ${site_vcf} | bedtools subtract -a stdin -b tmp.bed -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+			if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0]] ; then
+				vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+				cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			else
+				rm ${site_vcf.simpleName}.regionfilt.vcf.gz
+			fi
 		else
-			rm ${site_vcf.simpleName}.regionfilt.vcf.gz
-		fi
+			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		fi	
 		"""
 	else if (task.attempt == 3)
 		"""
-		grep ${chr} ${exclude_bed} > tmp.bed 
-		tabix ${site_vcf}
-		bcftools view -R tmp.bed -Ob -o tmp.bcf ${site_vcf}
-		tabix tmp.bcf
-		# bcftools isec gives the target sites not included in the bed
-		bcftools isec -C -O v ${site_vcf} tmp.bcf | cut -f1,2 > ${site_vcf.simpleName}.targets
-		# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
-		bcftools view -T ${site_vcf.simpleName}.targets -Ov ${site_vcf} | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-		vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-		cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		grep ${chr} ${exclude_bed} > tmp.bed
+		if [[ `wc -l tmp.bed | cut -d \' \' -f 1`` -gt 0 ]]; then
+			tabix ${site_vcf}
+			bcftools view -R tmp.bed -Ob -o tmp.bcf ${site_vcf}
+			tabix tmp.bcf
+			# bcftools isec gives the target sites not included in the bed
+			bcftools isec -C -O v ${site_vcf} tmp.bcf | cut -f1,2 > ${site_vcf.simpleName}.targets
+			# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
+			bcftools view -T ${site_vcf.simpleName}.targets -Ov ${site_vcf} | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+			vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
+			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		else
+			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		fi
 		"""
 	else
 		"""
-		grep ${chr} ${exclude_bed} > tmp.bed 
-		vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
-		cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		grep ${chr} ${exclude_bed} > tmp.bed
+		if [[ `wc -l tmp.bed | cut -d \' \' -f 1`` -gt 0 ]]; then
+			vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
+			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		else
+			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
+			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+		fi
 		"""
 
 }

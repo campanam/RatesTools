@@ -487,6 +487,7 @@ process simplifyBed {
 	path "${prefix}_excluded_reduced.bed" into exclude_bed_ch
 	
 	"""
+	#!/usr/bin/env bash
 	if [ ! "\$(wc -l < ${indel_bed})" -eq 0 ]; then
 		simplify_sorted_bed.rb ${indel_bed} > ${indel_bed.baseName}_sorted.bed
 	else
@@ -751,6 +752,7 @@ process filterRegions {
 	chr = site_vcf.simpleName.split('_chr')[1]
 	if (task.attempt == 1)
 		"""
+		#!/usr/bin/env bash
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			bedtools subtract -a ${site_vcf} -b tmp.bed -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
@@ -767,6 +769,7 @@ process filterRegions {
 		"""
 	else if (task.attempt == 2)
 		"""
+		#!/usr/bin/env bash
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			zcat ${site_vcf} | bedtools subtract -a stdin -b tmp.bed -v -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
@@ -783,6 +786,7 @@ process filterRegions {
 		"""
 	else if (task.attempt == 3)
 		"""
+		#!/usr/bin/env bash
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			tabix ${site_vcf}
@@ -801,6 +805,7 @@ process filterRegions {
 		"""
 	else
 		"""
+		#!/usr/bin/env bash
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz

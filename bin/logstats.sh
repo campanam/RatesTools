@@ -35,4 +35,5 @@ else
 		filtval=`grep "number of records:" tmp2.txt | cut -f 4`
 	fi
 fi
+# Mimic VCFtools output (Danecek et al. 2011. Bioinformatics. 27(15):2156-8. doi: 10.1093/bioinformatics/btr330).
 echo 'After filtering, kept '$filtval' out of a possible '$allval' Sites'

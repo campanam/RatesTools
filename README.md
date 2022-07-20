@@ -14,7 +14,7 @@ To the extent possible under law, the Smithsonian Institution and Stanford Unive
 
 ## Citation  
 We politely request that this work be cited as:  
-Campana, M.G. & E.E. Armstrong. 2020. RatesTools: Pipeline to calculate de novo mutation rates from parent-offspring trios. Smithsonian Institution and Stanford University. (https://github.com/campanam/RatesTools).  
+Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting de novo germline mutations in pedigree sequence data. *bioRxiv*. doi: [10.1101/2022.07.18.500472](https://doi.org/10.1101/2022.07.18.500472).  
 
 ## Installation and Configuration  
 ### Install Nextflow, Ruby and R  

@@ -13,9 +13,9 @@ KOCHDNPVER = "0.1.1"
 # <http://creativecommons.org/publicdomain/zero/1.0/>.
  
 # We politely request that this work be cited as:
-# Campana, M.G. & E.E. Armstrong. 2020. RatesTools: Pipeline to calculate de novo
-# mutation rates from parent-offspring trios. Smithsonian Institution and Stanford
-# University. <https://github.com/campanam/RatesTools>.
+# Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting
+# de novo germline mutations in pedigree sequence data. *bioRxiv*.
+# doi: 10.1101/2022.07.18.500472.
 #----------------------------------------------------------------------------------------
 
 require 'bigdecimal'

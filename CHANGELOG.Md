@@ -10,16 +10,15 @@ Stanford University
 4. [indels2bed](#indels2bed)  
 5. [kochDNp](#kochdnp)  
 6. [logstats](#logstats)  
-7. [makefile](#makefile)  
-8. [nextflow_split](#nextflow_split)  
-9. [nextflow.config](#nextflowconfig)  
-10. [plotDPGQ](#plotDPGQ)  
-11. [ratestools](#ratestools)  
-12. [RM2bed](#rm2bed)  
-13. [simplify_bed](#simplify_bed)  
-14. [simplify_sorted_bed](#simplify_sorted_bed)  
-15. [summarize_denovo](#summarize_denovo)  
-16. [Deprecated](#deprecated)  
+7. [nextflow_split](#nextflow_split)  
+8. [nextflow.config](#nextflowconfig)  
+9. [plotDPGQ](#plotDPGQ)  
+10. [ratestools](#ratestools)  
+11. [RM2bed](#rm2bed)  
+12. [simplify_bed](#simplify_bed)  
+13. [simplify_sorted_bed](#simplify_sorted_bed)  
+14. [summarize_denovo](#summarize_denovo)  
+15. [Deprecated](#deprecated)  
 
 
 ## calc_denovo_mutation_rate  
@@ -219,10 +218,6 @@ Improved sanity checks
 ### Version 0.1.0  
 Script to correct vcftools site overflow glitch using bcftools stats  
 
-## makefile  
-### Version 0.5.3  
-Updated makefile for Linux and macOS  
-
 ## nextflow.config  
 ### Version 0.5.5  
 Updated summarizeDNM modules for VCF output  
@@ -396,7 +391,14 @@ Concatenates headerless VCF results of identified de novo mutations
 ### Version 0.1.0  
 Initial script to summarize parallelized de novo rate calculations  
 
-## Deprecated 
+## Deprecated  
+
+## makefile  
+Removed in RatesTools version 0.5.7  
+
+### Version 0.5.3  
+Updated makefile for Linux and macOS  
+
 ## parallel_denovo  
 Removed in RatesTools pipeline version 0.3  
 

@@ -402,7 +402,7 @@ process repeatModeler {
 	
 	script:
 	// RepeatModeler adds an extra thread for each core for rmblastn
-	rm_pa = $task.cpus / 2
+	rm_pa = task.cpus / 2
 	"""
 	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
 	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft

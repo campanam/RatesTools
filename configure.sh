@@ -81,7 +81,7 @@ get_jar_path () {
 			stem='chr_file'
 			default_file=chr.txt
 		fi
-		sed -i '' "s/$stem = \"\$baseDir\/$default_file\"/$stem = \"$jar_path\"/" $filename
+		sed -i '' "s/$stem = \"\$launchDir\/$default_file\"/$stem = \"$jar_path\"/" $filename
 	fi
 }
 
@@ -97,7 +97,7 @@ echo 'Enter path and file pattern for reads (See documentation).'
 read reads
 reads=${reads//\//\\\/} # Escape slashes
 reads=${reads//\*/\\\*} # Escape asterisks
-sed -i '' "s/reads = \"\$baseDir\/\*{R1,R2}_001.fastq\*/reads = \"$reads/" $filename
+sed -i '' "s/reads = \"\$launchDir\/\*{R1,R2}_001.fastq\*/reads = \"$reads/" $filename
 echo 'Sire name?'
 read sire
 sed -i '' "s/sire = \"SRR2\"/sire = \"$sire\"/" $filename
@@ -117,7 +117,7 @@ get_jar_path Refseq $refseq
 echo 'Remove variants not assigned to specified chromosomes? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
-	sed -i '' "s/chr_file = \"\$baseDir\/chr.txt\"/chr_file = \"NULL\"/" $filename
+	sed -i '' "s/chr_file = \"\$launchDir\/chr.txt\"/chr_file = \"NULL\"/" $filename
 else
 	echo "Enter list of retained chromosomes."
 	read chr_file

@@ -46,7 +46,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2y. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
 2z. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
 
-3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any module files needed for each program. If no modules are needed, leave the value as an empty string.  
+3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
 
 4. Configure the executor profiles for your system. If you are running locally, the standard local profile provided should be sufficient (but may need some adaptation depending on your hardware). Executor profiles are passed to the pipeline using the config file specified at runtime using the `-c` option. If you are running on a cluster or a cloud service, consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and your system administrators to optimize the parameter profile.  
 

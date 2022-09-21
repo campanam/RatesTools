@@ -25,11 +25,8 @@ Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.i
 Install R: Use the appropriate precompiled binary/installer available at the [Comprehensive R Archive Network (CRAN)](https://cran.r-project.org).  
 
 ### Install the RatesTools Scripts  
-Clone the repository: `git clone https://github.com/campanam/RatesTools`  
-Install the scripts: `cd RatesTools; make install` 
-Afterwards, restart your terminal.
-
-*By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory, specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
+Pull the current version of the pipeline: `nextflow pull campanam/RatesTools -r main`  
+To specify another RatesTools release, replace `main` with the RatesTools release version (e.g. `v0.5.7`).  
 
 ### Install the External Dependencies  
 RatesTools requires the following external dependencies. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] v. 3.8-1 or v. >= 4.2.3.0 and Java v. 1.8 (due to GATK). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize modules to simplify deployment on computing clusters and limit dependency conflicts.  

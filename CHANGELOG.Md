@@ -271,6 +271,7 @@ Initial script (plotDPGQ-clean.R)
 ## ratestools  
 ### Version 0.5.7  
 DSL1 specified  
+Used task.cpus rather than thread parameters  
 
 ### Version 0.5.6  
 Fixed bug in region filtration when empty region bed  

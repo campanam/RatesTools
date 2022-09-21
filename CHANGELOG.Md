@@ -5,20 +5,21 @@ Stanford University
 
 ## Table of Contents  
 1. [calc_denovo_mutation_rate](#calc_denovo_mutation_rate)  
-2. [denovolib](#denovolib)  
-3. [filterGM](#filtergm)  
-4. [indels2bed](#indels2bed)  
-5. [kochDNp](#kochdnp)  
-6. [logstats](#logstats)  
-7. [nextflow_split](#nextflow_split)  
-8. [nextflow.config](#nextflowconfig)  
-9. [plotDPGQ](#plotDPGQ)  
-10. [ratestools](#ratestools)  
-11. [RM2bed](#rm2bed)  
-12. [simplify_bed](#simplify_bed)  
-13. [simplify_sorted_bed](#simplify_sorted_bed)  
-14. [summarize_denovo](#summarize_denovo)  
-15. [Deprecated](#deprecated)  
+2. [configure.sh](#configuresh)  
+3. [denovolib](#denovolib)  
+4. [filterGM](#filtergm)  
+5. [indels2bed](#indels2bed)  
+6. [kochDNp](#kochdnp)  
+7. [logstats](#logstats)  
+8. [nextflow_split](#nextflow_split)  
+9. [nextflow.config](#nextflowconfig)  
+10. [plotDPGQ](#plotDPGQ)  
+11. [ratestools](#ratestools)  
+12. [RM2bed](#rm2bed)  
+13. [simplify_bed](#simplify_bed)  
+14. [simplify_sorted_bed](#simplify_sorted_bed)  
+15. [summarize_denovo](#summarize_denovo)  
+16. [Deprecated](#deprecated)  
 
 
 ## calc_denovo_mutation_rate  
@@ -144,7 +145,11 @@ print_results moved to denovolib
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 gz_open_file improved to version in BaitsTools 1.6.6  
 
-dnm_summary_stats
+## configure.sh  
+### Version 0.5.7  
+$launchDir instead of $baseDir  
+
+## dnm_summary_stats
 ### Version 0.1.0  
 First script to calculate summary statistics  
 
@@ -223,6 +228,7 @@ Script to correct vcftools site overflow glitch using bcftools stats
 Removed 'hydra' example profile  
 Removed storeDir and maxForks from local profile  
 Removal of thread parameters  
+$launchDir instead of $baseDir  
 
 ### Version 0.5.5  
 Updated summarizeDNM modules for VCF output  

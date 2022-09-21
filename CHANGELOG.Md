@@ -94,6 +94,11 @@ Bootstrapping
 ### Version 0.1.0  
 Initial script to calculate point estimate de novo mutation rate  
 
+## configure.sh  
+### Version 0.5.7  
+$launchDir instead of $baseDir  
+Removed thread parameters  
+
 ## denovolib  
 ### Version 0.8.1  
 split_vcf now uses bgzip rather than gzip for GATK site filtering  
@@ -144,10 +149,6 @@ print_results moved to denovolib
 ### Version 0.1.0  
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 gz_open_file improved to version in BaitsTools 1.6.6  
-
-## configure.sh  
-### Version 0.5.7  
-$launchDir instead of $baseDir  
 
 ## dnm_summary_stats
 ### Version 0.1.0  

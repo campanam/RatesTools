@@ -400,9 +400,12 @@ process repeatModeler {
 	path "**consensi.fa.classified" into rm_lib_ch
 	path refseq_masked into rm_ref_ch2
 	
+	script:
+	// RepeatModeler adds an extra thread for each core for rmblastn
+	rm_pa = $task.cpus / 2
 	"""
 	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
-	RepeatModeler -pa ${task.cpus} -database ${refseq.baseName}-soft
+	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
 	if [ ! -f */consensi.fa.classified ]; then 
 		mkdir dummy # For fake library
 		mkfile -n 0 dummy/consensi.fa.classified

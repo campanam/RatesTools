@@ -27,7 +27,7 @@ The following document provides detailed descriptions of the steps included in t
 18. [filterChr](#filterchr)  
 19. [splitTrios](#splitTrios)  
 20. [pullDPGQ](#pulldpgq)  
-21. [plotdpgq](#plotdpgq)  
+21. [plotDPGQ](#plotdpgq)  
 22. [splitVCFs](#splitVCFs)  
 23. [vcftoolsFilterSites](#vcftoolsfiltersites)  
 24. [gatkfiltersites](#gatkfiltersites)  

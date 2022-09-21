@@ -53,7 +53,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 5. Place the final configuration file into the run base directory.  
 
 ## Run the Analysis  
-1. Execute the analysis using the command: `ratestools.nf -c <config_file.config>`. You can use the `-bg` option to send the Nextflow process to the background (useful for cluster systems) and the `-profile <profile_name>` option to specify your custom parameter profile.  
+1. Execute the analysis using the command: `nextflow run campanam/RatesTools -r <version> -c <config_file.config>`. You can use the `-bg` option to send the Nextflow process to the background (useful for cluster systems) and the `-profile <profile_name>` option to specify your custom parameter profile.  
 2. The pipeline will generate the following files in the output directory:  
 2a. `01_FinalBams`: The final BAM alignments used in the analysis.  
 2b. `02_gVCFs`: Individual gVCFs for each sample.  

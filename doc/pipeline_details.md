@@ -34,7 +34,7 @@ The following document provides detailed descriptions of the steps included in t
 25. [filterRegions](#filterregions)  
 26. [calcDNMRate](#calcdnmrate)  
 27. [summarizeDNM](#summarizednm)  
-28. [sanitychecklogs](#sanitychecklogs)  
+28. [sanityCheckLogs](#sanitychecklogs)  
 29. [generateSummaryStats](#generatesummarystats)  
 30. [References](#references)  
 

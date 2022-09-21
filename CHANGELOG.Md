@@ -219,6 +219,10 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 0.5.7  
+Removed 'hydra' example profile  
+Removed storeDir and maxForks from local profile  
+
 ### Version 0.5.5  
 Updated summarizeDNM modules for VCF output  
 

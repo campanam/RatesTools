@@ -8,6 +8,13 @@ Pipeline to calculate de novo mutation rates from parent-offspring trios
 
 This README provides basic details for installing, configuring and running the pipeline. Detailed documentation is available for the [Ruby and R scripts](doc/ruby_r_scripts.md) included in this package and for the [pipeline's operation](doc/pipeline_details.md). Test data are provided in the [Smithsonian Institution Figshare repository](https://dx.doi.org/10.25573/data.20250288) and a tutorial is available [here](doc/tutorial.md).  
 
+## Table of Contents  
+1. [Creative Commons 0 Waiver](#creative-commons-0-waiver)  
+2. [Citation](#citation)  
+3. [Installation and Configuration](#installation-and-configuration)  
+4. [Running the Pipeline](#running-the-pipeline)  
+5. [References](#references)  
+
 ## Creative Commons 0 Waiver  
 ![image](https://user-images.githubusercontent.com/19614608/118704084-bf02f280-b7e4-11eb-8d59-0ce648313d9e.png)  
 To the extent possible under law, the Smithsonian Institution and Stanford University have waived all copyright and related or neighboring rights to RatesTools; this work is published from the United States.  

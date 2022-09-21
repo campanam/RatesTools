@@ -222,6 +222,7 @@ Script to correct vcftools site overflow glitch using bcftools stats
 ### Version 0.5.7  
 Removed 'hydra' example profile  
 Removed storeDir and maxForks from local profile  
+Removal of thread parameters  
 
 ### Version 0.5.5  
 Updated summarizeDNM modules for VCF output  

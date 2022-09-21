@@ -5,6 +5,21 @@ Smithsonian's National Zoo and Conservation Biology Institute
 Stanford University  
 
 Here we document the usage and functions of the Ruby scripts included in the RatesTools package.  
+## Table of Contents  
+1. [calc_denovo_mutation_rate.rb](#calc-denovo-mutation-rate-rb)  
+2. [denovolib.rb](#denovolib-rb)  
+3. [dnm_summary_stats.rb](#dnm-summary-stats-rb)  
+4. [filterGM.rb](#filterGM-rb)  
+5. [indels2bed.rb](#indels2bed-rb)  
+6. [kochDNp.rb](#kochdnp-rb)  
+7. [logstats.sh](#logstats-sh)  
+8. [nextflow_split.rb](#nextflow_split-rb)  
+9. [plotDPGQ.R](#plotdpgq-r)  
+10. [RM2bed.rb](#rm2bed-rb)  
+11. [simplify_bed.rb](#simplify-bed.rb)  
+12. [simplify_sorted_bed.rb](#simplify-sorted-bed-rb)  
+13. [summarize_denovo.rb](#summarize-denovo-rb)  
+14. [References](#references)  
 
 ## calc_denovo_mutation_rate.rb  
 The calc_denovo_mutation_rate.rb script calculates the genomic de novo mutation (DNM) rate from a multi-individual all-sites VCF. The script can optionally perform block bootstrapping to estimate the confidence interval for the estimated DNM rates. All individuals that are not specified as either the 'sire' or 'dam' are assumed to be offspring of the specified individuals. Results are printed to STDOUT.  

@@ -95,6 +95,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 0.5.8  
+Conda installation handling  
+
 ### Version 0.5.7  
 $launchDir instead of $baseDir  
 Removed thread parameters  

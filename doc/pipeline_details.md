@@ -6,6 +6,38 @@ Stanford University
 
 The following document provides detailed descriptions of the steps included in the RatesTools pipeline. A directed acyclic graph of the RatesTools pipeline is available [here](ratestools-dag.mmd). Please note that the commands shown below only list non-standard options for clarity. We omit basic input/output required for these commands. See the documentation for these programs for operation details.  
 
+## Table of Contents  
+1. [prepareRef](#prepareref)  
+2. [alignSeqs](#alignseqs)  
+3. [sortBAM](#sortbam)  
+4. [markDuplicates](#markduplicates)  
+5. [fixReadGroups](#fixreadgroups)  
+6. [realignIndels](#realignIndels)  
+7. [filterBAMs](#filterbams)  
+8. [fixMate](#fixmate)  
+9. [callVariants](#callvariants)
+10. [genotypegVCFs](#genotypegvcfs)  
+11. [genMapIndex](#genmapindex)  
+12. [genmapmap](#genmapmap)  
+13. [repeatMask](#repeatmask)  
+14. [repeatModeler](#repeatmodeler)  
+15. [repeatMaskRM](#repeatmaskrm)  
+16. [maskIndels](#maskindels)  
+17. [simplifyBed](#simplifybed)  
+18. [filterChr](#filterchr)  
+19. [splitTrios](#splitTrios)  
+20. [pullDPGQ](#pulldpgq)  
+21. [plotDPGQ](#plotdpgq)  
+22. [splitVCFs](#splitVCFs)  
+23. [vcftoolsFilterSites](#vcftoolsfiltersites)  
+24. [gatkfiltersites](#gatkfiltersites)  
+25. [filterRegions](#filterregions)  
+26. [calcDNMRate](#calcdnmrate)  
+27. [summarizeDNM](#summarizednm)  
+28. [sanityCheckLogs](#sanitychecklogs)  
+29. [generateSummaryStats](#generatesummarystats)  
+30. [References](#references)  
+
 ## prepareRef  
 The prepareRef process indexes the reference sequence using `bwa index` [1] (and optionally the specified indexing algorithm) and `samtools faidx` [2]. It also generates a sequence dictionary using `samtools dict`.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.6
+/* RatesTools version 0.5.7
 Michael G. Campana and Ellie E. Armstrong, 2020-2022
 Smithsonian Institution and Stanford University
 
@@ -14,6 +14,8 @@ We politely request that this work be cited as:
 Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting
 de novo germline mutations in pedigree sequence data. *bioRxiv*.
 doi: 10.1101/2022.07.18.500472. */
+
+nextflow.enable.dsl=1
 
 readpairs_ch = Channel.fromFilePairs(params.reads) // Group read pairs
 // algorithm for BWA index. Next lines make into command-line option for prepareRef
@@ -57,19 +59,16 @@ process alignSeqs {
 	input:
 	path refseq from params.refseq
 	tuple val(pair_id), path(reads) from readpairs_ch
-	val bwa_threads from params.bwa_threads
 	path "*" from bwa_index_ch
 	
 	output:
 	path "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
 	val pair_id into filt_sample_ch, stats_sample_ch // sample name for downstream use
-	val samtools_extra_threads into samtools_threads_ch
-	
 	
 	script:
-	samtools_extra_threads = bwa_threads - 1
+	samtools_extra_threads = task.cpus - 1
 	"""
-	bwa mem -t ${bwa_threads} ${refseq} ${reads} | samtools view -@ ${samtools_extra_threads} -bS -o ${pair_id}_${refseq.simpleName}.bam -  
+	bwa mem -t ${task.cpus} ${refseq} ${reads} | samtools view -@ ${samtools_extra_threads} -bS -o ${pair_id}_${refseq.simpleName}.bam -  
 	"""
 	
 }
@@ -83,11 +82,12 @@ process sortBAM {
 
 	input:
 	path raw_bam from raw_bam_ch
-	val samtools_extra_threads from samtools_threads_ch
 	
 	output:
 	path "${raw_bam.simpleName}.srt.bam" into sorted_bam_ch
 	
+	script:
+	samtools_extra_threads = task.cpus - 1
 	"""
 	samtools sort -@ ${samtools_extra_threads} ${raw_bam} > ${raw_bam.simpleName}.srt.bam
 	"""
@@ -197,7 +197,6 @@ process filterBAMs {
 	path realn_bai from realn_bai_ch
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
-	val gatk_nct from params.gatk_nct
 	path "*" from bwa_index_ch
 	
 	output:
@@ -207,7 +206,7 @@ process filterBAMs {
 	script:
 	if (params.gatk_build == 3)
 		"""
-		java ${gatk_java} -jar ${gatk} -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${gatk_nct} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
+		java ${gatk_java} -jar ${gatk} -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${task.cpus} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
 		"""
 	else if (params.gatk_build == 4)
 		"""
@@ -256,7 +255,6 @@ process callVariants {
 	val picard_java from params.picard_java
 	val gatk from params.gatk
 	val gatk_java from params.gatk_java
-	val gatk_nct from params.gatk_nct
 	path "*" from bwa_index_ch
 	
 	output:
@@ -265,7 +263,7 @@ process callVariants {
 	script:
 	if (params.gatk_build == 3)
 		"""
-		java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${gatk_nct} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
+		java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${task.cpus} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
 		"""
 	else if (params.gatk_build == 4)
 		"""
@@ -348,7 +346,6 @@ process genMapMap {
 	
 	input:
 	path refseq from params.refseq
-	val gm_threads from params.gm_threads
 	path genmap_index from genmap_index_ch
 	path '*' from genmap_index_files_ch
 	
@@ -356,7 +353,7 @@ process genMapMap {
 	path "${refseq.simpleName}_genmap.1.0.bed" into genmap_ch
 	
 	"""
-	genmap map -K 30 -E 2 -T ${gm_threads} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
+	genmap map -K 30 -E 2 -T ${task.cpus} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
 	filterGM.rb ${refseq.simpleName}_genmap.bed 1.0 exclude > ${refseq.simpleName}_genmap.1.0.bed
 	"""
 }
@@ -373,14 +370,13 @@ process repeatMask {
 	input:
 	path refseq from params.refseq
 	val rm_species from params.rm_species
-	val rm_pa from params.rm_pa
 	
 	output:
 	path "${refseq}.masked" into rm_ref_ch
 	path "${refseq}.out" into rm_out_ch
 	
 	"""
-	RepeatMasker -pa ${rm_pa} -gccalc -nolow -species ${rm_species} ${refseq}
+	RepeatMasker -pa ${task.cpus} -gccalc -nolow -species ${rm_species} ${refseq}
 	if [ ! -f ${refseq}.masked ]; then # Handling for no repeats detected
 		ln -s ${refseq} ${refseq}.masked
 	fi
@@ -399,12 +395,14 @@ process repeatModeler {
 	input:
 	path refseq from params.refseq
 	path refseq_masked from rm_ref_ch
-	val rm_pa from params.rm_pa
 	
 	output:
 	path "**consensi.fa.classified" into rm_lib_ch
 	path refseq_masked into rm_ref_ch2
 	
+	script:
+	// RepeatModeler adds an extra thread for each core for rmblastn
+	rm_pa = task.cpus / 2
 	"""
 	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
 	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
@@ -430,7 +428,6 @@ process repeatMaskRM {
 	path rm_lib from rm_lib_ch
 	path rm_out from rm_out_ch
 	path refseq_masked from rm_ref_ch2
-	val rm_pa from params.rm_pa
 	
 	output:
 	path "${refseq}.masked.*" optional true
@@ -441,7 +438,7 @@ process repeatMaskRM {
 	# If no output from RepeatModeler, use original RepeatMasker results
 		RM2bed.rb ${refseq}.out > ${refseq}.RM.bed
 	else
-		RepeatMasker -pa ${rm_pa} -gccalc -nolow -lib consensi.fa.classified ${refseq_masked}
+		RepeatMasker -pa ${task.cpus} -gccalc -nolow -lib consensi.fa.classified ${refseq_masked}
 		# Convert out file into BED for downstream
 		RM2bed.rb ${refseq_masked}.out > ${refseq}.RM.bed
 	fi

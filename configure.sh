@@ -1,5 +1,7 @@
 #! /bin/bash
 
+# configure.sh script for RatesTools v0.5.7
+
 #----------------------------------------------------------------------------------------
 # Michael G. Campana and Ellie E. Armstrong, 2020-2022
 # Smithsonian Institution and Stanford University
@@ -81,7 +83,7 @@ get_jar_path () {
 			stem='chr_file'
 			default_file=chr.txt
 		fi
-		sed -i '' "s/$stem = \"\$baseDir\/$default_file\"/$stem = \"$jar_path\"/" $filename
+		sed -i '' "s/$stem = \"\$launchDir\/$default_file\"/$stem = \"$jar_path\"/" $filename
 	fi
 }
 
@@ -97,7 +99,7 @@ echo 'Enter path and file pattern for reads (See documentation).'
 read reads
 reads=${reads//\//\\\/} # Escape slashes
 reads=${reads//\*/\\\*} # Escape asterisks
-sed -i '' "s/reads = \"\$baseDir\/\*{R1,R2}_001.fastq\*/reads = \"$reads/" $filename
+sed -i '' "s/reads = \"\$launchDir\/\*{R1,R2}_001.fastq\*/reads = \"$reads/" $filename
 echo 'Sire name?'
 read sire
 sed -i '' "s/sire = \"SRR2\"/sire = \"$sire\"/" $filename
@@ -117,7 +119,7 @@ get_jar_path Refseq $refseq
 echo 'Remove variants not assigned to specified chromosomes? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
-	sed -i '' "s/chr_file = \"\$baseDir\/chr.txt\"/chr_file = \"NULL\"/" $filename
+	sed -i '' "s/chr_file = \"\$launchDir\/chr.txt\"/chr_file = \"NULL\"/" $filename
 else
 	echo "Enter list of retained chromosomes."
 	read chr_file
@@ -127,12 +129,9 @@ echo 'SAMtools configuration...'
 get_path_module samtools
 echo 'BWA configuration...'
 get_path_module bwa
-echo 'Use default BWA and SAMtools options? (20 threads, BWA auto-infers index algorithm)? (Y/N)'
+echo 'Use default BWA index algorithm? (BWA auto-infers index algorithm)? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
-	echo 'Enter number of BWA/SAMtools threads.'
-	read bwa_threads
-	sed -i '' "s/bwa_threads = 20/bwa_threads = $bwa_threads/" $filename
 	echo 'Enter BWA index algorithm (bwtsw, is, rb2, auto-infer).'
 	read bwa_alg
 	while [[ $bwa_alg != 'bwtsw' && $bwa_alg != 'is' && $bwa_alg != 'rb2' && $bwa_alg != 'auto-infer' ]]; do
@@ -160,12 +159,9 @@ echo 'tabix configuration...'
 get_path_module tabix
 echo 'GenMap configuration...'
 get_path_module genmap
-echo 'Use defaults for GenMap (8 threads, Temporary directory: /tmp)? (Y/N)'
+echo 'Use default temporary directory for GenMap (/tmp)? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
-	echo 'Enter number of GenMap threads.'
-	read gm_threads
-	sed -i '' "s/gm_threads = 8/gm_threads = $gm_threads/" $filename
 	echo 'Enter path for GenMap temporary files.'
 	read gm_tmpdir
 	gm_tmpdir=${gm_tmpdir//\//\\\/} # Escape slashes
@@ -178,9 +174,6 @@ read species
 sed -i '' "s/species = \"Felidae\"/species = \"$species\"/" $filename
 echo 'RepeatModeler configuration...'
 get_path_module RepeatModeler
-echo 'Enter number of threads for RepeatMasker/RepeatModeler.'
-read rm_pa
-sed -i '' "s/rm_pa = 24/rm_pa = $rm_pa/" $filename
 echo 'Enter number of bases to remove on each side of an indel.'
 read indelpad
 sed -i '' "s/indelpad = 5/indelpad = $indelpad/" $filename
@@ -223,9 +216,6 @@ if [ $answer == 'N' ]; then
 	read java_opts
 	sed -i '' "s/gatk_java = \"\"/gatk_java = \"$java_opts\"/" $filename
 fi
-echo 'Enter number of nct threads for GATK.'
-read gatk_nct
-sed -i '' "s/gatk_nct = 16/gatk_nct = $gatk_nct/" $filename
 echo 'Java configuration...'
 get_path_module java
 if `command -v java 2>&1 >/dev/null`; then # If java found, identify version

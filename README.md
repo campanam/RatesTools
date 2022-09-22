@@ -8,6 +8,13 @@ Pipeline to calculate de novo mutation rates from parent-offspring trios
 
 This README provides basic details for installing, configuring and running the pipeline. Detailed documentation is available for the [Ruby and R scripts](doc/ruby_r_scripts.md) included in this package and for the [pipeline's operation](doc/pipeline_details.md). Test data are provided in the [Smithsonian Institution Figshare repository](https://dx.doi.org/10.25573/data.20250288) and a tutorial is available [here](doc/tutorial.md).  
 
+## Table of Contents  
+1. [Creative Commons 0 Waiver](#creative-commons-0-waiver)  
+2. [Citation](#citation)  
+3. [Installation and Configuration](#installation-and-configuration)  
+4. [Running the Pipeline](#running-the-pipeline)  
+5. [References](#references)  
+
 ## Creative Commons 0 Waiver  
 ![image](https://user-images.githubusercontent.com/19614608/118704084-bf02f280-b7e4-11eb-8d59-0ce648313d9e.png)  
 To the extent possible under law, the Smithsonian Institution and Stanford University have waived all copyright and related or neighboring rights to RatesTools; this work is published from the United States.  
@@ -25,14 +32,11 @@ Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.i
 Install R: Use the appropriate precompiled binary/installer available at the [Comprehensive R Archive Network (CRAN)](https://cran.r-project.org).  
 
 ### Install the RatesTools Scripts  
-Clone the repository: `git clone https://github.com/campanam/RatesTools`  
-Install the scripts: `cd RatesTools; make install` 
-Afterwards, restart your terminal.
-
-*By default, RatesTools scripts will be installed into the ~/ratestools directory. If you wish to change the default directory, specify the INSTALL parameter, e.g.:* `make INSTALL=/path/to/some/dir install`  
+Pull the current version of the pipeline: `nextflow pull campanam/RatesTools -r main`  
+To specify another RatesTools release, replace `main` with the RatesTools release version (e.g. `v0.5.7`).  
 
 ### Install the External Dependencies  
-RatesTools requires the following external dependencies. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] v. 3.8-1 or v. >= 4.2.3.0 and Java v. 1.8 (due to GATK). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize modules to simplify deployment on computing clusters and limit dependency conflicts.  
+RatesTools requires the following external dependencies. We explicitly list software dependencies here as no installation system (e.g. containerization) is universally supported across all computing architectures. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] v. 3.8-1 or v. >= 4.2.3.0 and Java v. 1.8 (due to GATK). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize [Environment Modules](http://modules.sourceforge.net/) modulefiles to simplify deployment on computing clusters and limit dependency conflicts (See the [tutorial](doc/tutorial.md)).  
 
 * gzip  
 * awk  
@@ -45,7 +49,7 @@ RatesTools requires the following external dependencies. See the documentation f
 * [Java](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html) v. 1.8  
 * [Picard](https://broadinstitute.github.io/picard/) [7] v. 2.23.8  
 * [Sambamba](https://lomereiter.github.io/sambamba/) [8] v. 0.7.1  
-* [Genome Analysis Toolkit](https://github.com/broadgsa/gatk) v. 3.8-1 and 4.2.3.0  
+* [Genome Analysis Toolkit](https://github.com/broadgsa/gatk) v. 3.8-1 or 4.2.3.0  
 * [VCFtools](https://vcftools.github.io/index.html) [9] v.0.1.16  
 * [GenMap](https://github.com/cpockrandt/genmap) [10] v.1.2.0 with [SeqAn](https://github.com/seqan/seqan/tree/f548b50705be3f824a65a696943ea90a390564ce) [11] v. 2.4.1  
 * [RepeatMasker](http://www.repeatmasker.org/) [12] v. 4.0.9  
@@ -66,10 +70,10 @@ Read pairs `LION1_S01_L001_R1_001.fastq.gz` and `LION1_S01_L001_R2_001.fastq.gz`
 Renaming the files to `LION1R1_001.fastq.gz` and `LION1R2_001.fastq.gz` will match these reads with the cleaner name `LION1`.  
 
 ### Platform-Specific Configuration  
-Given the wide-variety of computing architectures and operating systems, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes two example [configuration profiles](https://www.nextflow.io/docs/latest/config.html#config-profiles): a default 'standard' profile for a local installation and a 'hydra' profile optimized for the SI/HPC Univa Grid Engine (UGE) computing cluster 'Hydra'. Please consult your computing staff to optimize the profile settings for your hardware. Additionally, by default, RatesTools stores process output in a directory named 'chkpnt' and limits the number of concurrent process forks to 1000. These settings can be changed by modifying the lines `process.storeDir = 'chkpnt'` and `process.maxForks = 1000` in the config file.  
+Given the wide-variety of computing architectures and operating systems, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes an example of a 'standard' [configuration profile](https://www.nextflow.io/docs/latest/config.html#config-profiles) for a local installation. Example configuration profiles for the analyses described in [Armstrong & Campana 2022](https://doi.org/10.1101/2022.07.18.500472) are provided in the [figshare repository](https://dx.doi.org/10.25573/data.20250288). Please consult your computing staff to optimize the profile settings for your hardware. We recommend storing configuration profiles in a system-wide central location for access by all users.  
 
 ## Running the Pipeline  
-Enter `ratestools.nf -c <config_file>` to run the pipeline. Append `-resume` to restart a previous run or `-bg` to run RatesTools in the background. If you developed platform-specific configuration profiles, you can specify this using the `-profile <PROFILE>` option. See the Nextflow documentation for details. Final data are written to the specified output directory and its subdirectories.  
+Enter `nextflow run campanam/RatesTools -r <version> -c <config_file>` to run the pipeline, where `version` is the installed RatesTools release. Append `-resume` to restart a previous run or `-bg` to run RatesTools in the background. If you developed platform-specific configuration profiles, you can specify this using the `-profile <PROFILE>` option. See the Nextflow documentation for details. Final data are written to the specified output directory and its subdirectories.  
 
 ## References  
 1. Di Tommaso, P., Chatzou, M., Floden, E.W., Prieto Barja, P., Palumbo, E., Notredame, C. (2017) Nextflow enables reproducible computational workflows. *Nat Biotechnol*, __35__, 316–319. DOI: [10.1038/nbt.3820](https://www.nature.com/articles/nbt.3820).  

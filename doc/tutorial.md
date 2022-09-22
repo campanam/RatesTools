@@ -6,48 +6,50 @@ Stanford University
 
 Here we provide a brief tutorial for running RatesTools. This tutorial assumes that you have already installed the RatesTools pipeline and its dependencies (See [here](https://github.com/campanam/RatesTools#installation-and-configuration) for details). The dataset (available [here](https://dx.doi.org/10.25573/data.20250288)) can be used to test your RatesTools installation and configuration. Please note that results will vary slightly from the provided final example output files due to the random number generators used by the software dependencies. The wolf sequencing reads are subset from SRA accessions SRR1518530-SRR1518532 from [BioProject PRJNA255370](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA255370) [1] and SRR9095635-SRR9095636,SRR9095638 from [BioProject PRJNA543877](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA543877/) [2]. The reference genome chromosomes derive from the domestic dog genome assembly [canFam3.1](https://www.ncbi.nlm.nih.gov/assembly/GCF_000002285.3/) [3].  
 
+## Table of Contents  
+1. [File Setup](#file-setup)  
+2. [Configure the Run](#configure-the-run)  
+3. [Run the Analysis](#run-the-analysis)  
+4. [References](#references)  
+
 ## File Setup  
 1. Create a base directory for the run, e.g. `mkdir test`.  
 2. Decompress the reference genome (`dog_test.fna.gz`) (`gunzip dog_test.fna.gz`). Place the reference genome and the list of required chromosomes (`dog_test_chr.csv`) within the base directory.  
 3. Decompress the `RawData.tar.gz` archive (`tar xvfz RawData.tar.gz`). Place the directory `RawData` within the base directory and the FASTQ sequence files within it into the base directory.  
 
 ## Configure the Run  
-1. We provide two example configurations for running the test dataset: one using the Genome Analysis Toolkit (GATK) [4] v. 3.8-1 (`wolf_gatk3.config`) and the other for GATK v. >= 4.2.3.0 (`wolf_gatk4.config`). A custom configuration can be made by executing the `configure.sh` script and completing the prompts (See [here](https://github.com/campanam/RatesTools/blob/main/README.md#configure-the-pipeline)).  
-2. Set the run parameters. The parameters are located in the `params` directive. Take careful notice of the value enclosure of the strings (either '' or ""). Values enclosed in '' do not perform variable substitution, while those using "" do. Note the special variable $launchDir indicates the launch directory of the run.  
+1. We provide two example configurations for running the test dataset: one using the Genome Analysis Toolkit (GATK) [4] v. 3.8-1 (`wolf_gatk3.config`) and the other for GATK v. >= 4.2.3.0 (`wolf_gatk4.config`). A custom configuration can be made by executing the `configure.sh` script and completing the prompts (See [here](https://github.com/campanam/RatesTools/blob/main/README.md#configure-the-pipeline)). Please note that, in the following steps, we describe how to configure the run manually using a text editor. The `configure.sh` script automates the setting of these values except for the final configuration of the executor profile, as this is highly variable across systems.  
+2. Set the run parameters. These The parameters are located in the `params` directive. Take careful notice of the value enclosure of the strings (either `' '` or `" "`). Values enclosed in `' '` do not perform variable substitution, while those using `" "` do. Note the special variable $launchDir indicates the launch directory of the run.  
 2a. `refseq` specifies the path to the reference sequence (in FASTA format).  
 2b. `reads` specifies the path to the sequence FASTQ files and the globbing pattern to determine read pairs (See the [Nextflow documentation](https://www.nextflow.io/docs/latest/channel.html#fromfilepairs) for a thorough description of globbing). Each individual is expected to be represented by a file containing forward reads and another containing the corresponding reverse reads.  
 2c. `bwa_alg` specifies the BWA [5] index algorithm. Setting this value to an empty string ("") instructs BWA to infer the indexing algorithm.  
-2d. `bwa_threads` specifies the number of threads for BWA and SAMtools [6].  
-2e. `markDuplicates` specifies whether duplicate marking should use Picard [7] (value "picard") or Sambamba [8] (value "sambamba").  
-2f. `picard` specifies the path to the Picard jar file.  
-2g. `picard_java` specifies additional Java parameters for Picard operations. Enter the command-line Java options as a string.  
-2h. `gatk` specifies the path to the GATK jar file.  
-2i. `gatk_build` specifies whether the GATK jar is major version 3 or 4.  
-2j. `gatk_java` specifies additional Java parameters for GATK operations. Enter the command-line Java options as a string.  
-2k. `gatk_nct` specifies the number of GATK parallelization nct threads. *NB: this parameters has no effect on GATK 4*.  
-2l. `gm_tmpdir` specifies the path to a temporary directory for GenMap [9].  
-2m. `gm_threads` specifies the number of threads for GenMap.  
-2o. `rm_species` specifies the species library for RepeatMasker [10].  
-2p. `rm_pa` specifies the number of threads for RepeatMasker and RepeatModeler [11].  
-2q. `indelpad` specifies the number of bases up- and downstream of an indel to remove.  
-2r. `prefix` specifies the file prefix for output files.  
-2s. `outdir` specifies the name of the output directory.  
-2t. `dam` specifies the name of the dam. This must match the name derivied from file globbing of the reads.  
-2u. `sire` specifies the name of the sire. This must match the name derivied from file globbing of the reads.  
-2v. `vcftools_site_filters` specifies the site-specific filters using VCFtools [12] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
-2w. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
-2x. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
-2y. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
-2z. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
+2d. `markDuplicates` specifies whether duplicate marking should use Picard [7] (value "picard") or Sambamba [8] (value "sambamba").  
+2e. `picard` specifies the path to the Picard jar file.  
+2f. `picard_java` specifies additional Java parameters for Picard operations. Enter the command-line Java options as a string.  
+2g. `gatk` specifies the path to the GATK jar file.  
+2h. `gatk_build` specifies whether the GATK jar is major version 3 or 4.  
+2i. `gatk_java` specifies additional Java parameters for GATK operations. Enter the command-line Java options as a string.  
+2j. `gm_tmpdir` specifies the path to a temporary directory for GenMap [9].  
+2k. `rm_species` specifies the species library for RepeatMasker [10].  
+2l. `indelpad` specifies the number of bases up- and downstream of an indel to remove.  
+2m. `prefix` specifies the file prefix for output files.  
+2n. `outdir` specifies the name of the output directory.  
+2o. `dam` specifies the name of the dam. This must match the name derivied from file globbing of the reads.  
+2p. `sire` specifies the name of the sire. This must match the name derivied from file globbing of the reads.  
+2q. `vcftools_site_filters` specifies the site-specific filters using VCFtools [12] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2r. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2s. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
+2t. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
+2u. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
 
-3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any module files needed for each program. If no modules are needed, leave the value as an empty string.  
+3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
 
-4. Configure the executor profiles for your system. If you are running locally, the standard local profile provided should be sufficient (but may need some adaptation depending on your hardware). If you are running on a cluster or a cloud service, consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and your system administrators to optimize the parameter profile.  
+4. Configure the executor profiles for your system. If you are running locally, the standard local profile provided should be sufficient (but may need some adaptation depending on your hardware). The number of threads for parallelizable software (BWA, SAMtools, GATK, GenMap, RepeatMasker, RepeatModeler) can be controlled using the $task.cpu variable for each process. Executor profiles are passed to the pipeline using the config file specified at runtime using the `-c` option. If you are running on a cluster or a cloud service, consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and your system administrators to optimize the parameter profile.  
 
 5. Place the final configuration file into the run base directory.  
 
 ## Run the Analysis  
-1. Execute the analysis using the command: `ratestools.nf -c <config_file.config>`. You can use the `-bg` option to send the Nextflow process to the background (useful for cluster systems) and the `-profile <profile_name>` option to specify your custom parameter profile.  
+1. Execute the analysis using the command: `nextflow run campanam/RatesTools -r <version> -c <config_file.config>`. You can use the `-bg` option to send the Nextflow process to the background (useful for cluster systems) and the `-profile <profile_name>` option to specify your custom parameter profile.  
 2. The pipeline will generate the following files in the output directory:  
 2a. `01_FinalBams`: The final BAM alignments used in the analysis.  
 2b. `02_gVCFs`: Individual gVCFs for each sample.  

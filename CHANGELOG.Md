@@ -5,12 +5,12 @@ Stanford University
 
 ## Table of Contents  
 1. [calc_denovo_mutation_rate](#calc_denovo_mutation_rate)  
-2. [denovolib](#denovolib)  
-3. [filterGM](#filtergm)  
-4. [indels2bed](#indels2bed)  
-5. [kochDNp](#kochdnp)  
-6. [logstats](#logstats)  
-7. [makefile](#makefile)  
+2. [configure.sh](#configuresh)  
+3. [denovolib](#denovolib)  
+4. [filterGM](#filtergm)  
+5. [indels2bed](#indels2bed)  
+6. [kochDNp](#kochdnp)  
+7. [logstats](#logstats)  
 8. [nextflow_split](#nextflow_split)  
 9. [nextflow.config](#nextflowconfig)  
 10. [plotDPGQ](#plotDPGQ)  
@@ -94,6 +94,11 @@ Bootstrapping
 ### Version 0.1.0  
 Initial script to calculate point estimate de novo mutation rate  
 
+## configure.sh  
+### Version 0.5.7  
+$launchDir instead of $baseDir  
+Removed thread parameters  
+
 ## denovolib  
 ### Version 0.8.1  
 split_vcf now uses bgzip rather than gzip for GATK site filtering  
@@ -145,7 +150,7 @@ print_results moved to denovolib
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 gz_open_file improved to version in BaitsTools 1.6.6  
 
-dnm_summary_stats
+## dnm_summary_stats
 ### Version 0.1.0  
 First script to calculate summary statistics  
 
@@ -219,11 +224,13 @@ Improved sanity checks
 ### Version 0.1.0  
 Script to correct vcftools site overflow glitch using bcftools stats  
 
-## makefile  
-### Version 0.5.3  
-Updated makefile for Linux and macOS  
-
 ## nextflow.config  
+### Version 0.5.7  
+Removed 'hydra' example profile  
+Removed storeDir and maxForks from local profile  
+Removal of thread parameters  
+$launchDir instead of $baseDir  
+
 ### Version 0.5.5  
 Updated summarizeDNM modules for VCF output  
 
@@ -263,6 +270,10 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.7  
+DSL1 specified  
+Used task.cpus rather than thread parameters  
+
 ### Version 0.5.6  
 Fixed bug in region filtration when empty region bed  
 bedtools subtract rather than interact for second attempt  
@@ -396,7 +407,14 @@ Concatenates headerless VCF results of identified de novo mutations
 ### Version 0.1.0  
 Initial script to summarize parallelized de novo rate calculations  
 
-## Deprecated 
+## Deprecated  
+
+## makefile  
+Removed in RatesTools version 0.5.7  
+
+### Version 0.5.3  
+Updated makefile for Linux and macOS  
+
 ## parallel_denovo  
 Removed in RatesTools pipeline version 0.3  
 

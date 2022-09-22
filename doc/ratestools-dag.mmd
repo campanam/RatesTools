@@ -3,211 +3,196 @@ flowchart TD
     p1(( ))
     p2[prepareRef]
     p3(( ))
-    p4(( ))
-    p5[alignSeqs]
-    p6[sortBAM]
+    p4[alignSeqs]
+    p5[sortBAM]
+    p6(( ))
     p7(( ))
     p8(( ))
-    p9(( ))
-    p10[markDuplicates]
+    p9[markDuplicates]
+    p10(( ))
     p11(( ))
     p12(( ))
-    p13(( ))
-    p14[fixReadGroups]
+    p13[fixReadGroups]
+    p14(( ))
     p15(( ))
     p16(( ))
     p17(( ))
     p18(( ))
-    p19(( ))
-    p20[realignIndels]
+    p19[realignIndels]
+    p20(( ))
     p21(( ))
     p22(( ))
-    p23(( ))
+    p23[filterBAMs]
     p24(( ))
-    p25[filterBAMs]
-    p26(( ))
+    p25(( ))
+    p26[fixMate]
     p27(( ))
-    p28[fixMate]
+    p28(( ))
     p29(( ))
     p30(( ))
     p31(( ))
-    p32(( ))
-    p33(( ))
+    p32[callVariants]
+    p33([collect])
     p34(( ))
-    p35[callVariants]
-    p36([collect])
+    p35(( ))
+    p36(( ))
     p37(( ))
-    p38(( ))
+    p38[genotypegVCFs]
     p39(( ))
     p40(( ))
-    p41[genotypegVCFs]
+    p41[genMapIndex]
     p42(( ))
-    p43(( ))
-    p44[genMapIndex]
+    p43[genMapMap]
+    p44(( ))
     p45(( ))
-    p46(( ))
-    p47[genMapMap]
-    p48(( ))
+    p46[repeatMask]
+    p47(( ))
+    p48[repeatModeler]
     p49(( ))
-    p50(( ))
-    p51[repeatMask]
-    p52(( ))
+    p50[repeatMaskRM]
+    p51(( ))
+    p52[maskIndels]
     p53(( ))
-    p54[repeatModeler]
+    p54[simplifyBed]
     p55(( ))
     p56(( ))
-    p57[repeatMaskRM]
-    p58(( ))
-    p59[maskIndels]
+    p57[filterChr]
+    p58([filter])
+    p59(( ))
     p60(( ))
-    p61[simplifyBed]
+    p61(( ))
     p62(( ))
-    p63(( ))
-    p64[filterChr]
-    p65([filter])
-    p66(( ))
-    p67(( ))
+    p63[splitTrios]
+    p64[pullDPGQ]
+    p65([collect])
+    p66[plotDPGQ]
+    p67[splitVCFs]
     p68(( ))
-    p69(( ))
-    p70[splitTrios]
-    p71[pullDPGQ]
-    p72([collect])
-    p73[plotDPGQ]
-    p74[splitVCFs]
-    p75(( ))
-    p76[vcftoolsFilterSites]
+    p69[vcftoolsFilterSites]
+    p70(( ))
+    p71(( ))
+    p72(( ))
+    p73(( ))
+    p74[gatkFilterSites]
+    p75[filterRegions]
+    p76(( ))
     p77(( ))
     p78(( ))
-    p79(( ))
-    p80(( ))
-    p81[gatkFilterSites]
-    p82[filterRegions]
+    p79[calcDNMRate]
+    p80([collect])
+    p81([collect])
+    p82[summarizeDNM]
     p83(( ))
-    p84(( ))
-    p85(( ))
-    p86[calcDNMRate]
+    p84([mix])
+    p85[sanityCheckLogs]
+    p86([mix])
     p87([collect])
-    p88([collect])
-    p89[summarizeDNM]
-    p90(( ))
-    p91([mix])
-    p92[sanityCheckLogs]
-    p93([mix])
-    p94([collect])
-    p95[generateSummaryStats]
-    p0 -->|readpairs_ch| p5
+    p88[generateSummaryStats]
+    p0 -->|readpairs_ch| p4
     p1 -->|refseq| p2
-    p2 -->|bwa_index_ch| p5
-    p3 -->|refseq| p5
-    p4 -->|bwa_threads| p5
-    p5 -->|raw_bam_ch| p6
-    p5 -->|filt_sample_ch| p65
-    p5 -->|stats_sample_ch| p71
-    p5 -->|samtools_threads_ch| p6
-    p6 -->|sorted_bam_ch| p10
-    p7 -->|markDuplicates| p10
-    p8 -->|picard| p10
-    p9 -->|picard_java| p10
-    p10 -->|markdup_bam_ch| p14
-    p11 -->|picard| p14
-    p12 -->|picard_java| p14
-    p13 -->|refseq| p14
-    p14 -->|rg_bam_ch| p20
-    p15 -->|refseq| p20
-    p16 -->|picard| p20
-    p17 -->|picard_java| p20
-    p18 -->|gatk| p20
-    p19 -->|gatk_java| p20
-    p2 -->|bwa_index_ch| p20
-    p20 -->|realn_bam_ch| p25
-    p20 -->|realn_bai_ch| p25
-    p21 -->|refseq| p25
-    p22 -->|gatk| p25
-    p23 -->|gatk_java| p25
-    p24 -->|gatk_nct| p25
-    p2 -->|bwa_index_ch| p25
-    p25 -->|filt_bam_ch| p28
-    p25 -->|filt_bai_ch| p28
-    p26 -->|picard| p28
-    p27 -->|picard_java| p28
-    p28 -->|fix_bam_ch| p35
-    p28 -->|fix_bai_ch| p35
-    p29 -->|refseq| p35
-    p30 -->|picard| p35
-    p31 -->|picard_java| p35
-    p32 -->|gatk| p35
-    p33 -->|gatk_java| p35
-    p34 -->|gatk_nct| p35
-    p2 -->|bwa_index_ch| p35
-    p35 -->|var_vcf_ch| p36
-    p36 --> p41
-    p37 -->|refseq| p41
-    p2 -->|bwa_index_ch| p41
-    p38 -->|gatk| p41
-    p39 -->|gatk_java| p41
-    p40 -->|prefix| p41
-    p41 -->|combined_vcf_ch| p64
-    p41 -->|combined_indels_ch| p59
-    p42 -->|refseq| p44
-    p43 -->|gm_tmpdir| p44
-    p44 -->|genmap_index_ch| p47
-    p44 -->|genmap_index_files_ch| p47
-    p45 -->|refseq| p47
-    p46 -->|gm_threads| p47
-    p47 -->|genmap_ch| p61
-    p48 -->|refseq| p51
-    p49 -->|rm_species| p51
-    p50 -->|rm_pa| p51
-    p51 -->|rm_ref_ch| p54
-    p51 -->|rm_out_ch| p57
-    p52 -->|refseq| p54
-    p53 -->|rm_pa| p54
-    p54 -->|rm_lib_ch| p57
-    p54 -->|rm_ref_ch2| p57
-    p55 -->|refseq| p57
-    p56 -->|rm_pa| p57
-    p57 -->|rm_bed_ch| p61
-    p58 -->|indelpad| p59
-    p59 -->|indels_ch| p61
-    p60 -->|prefix| p61
-    p61 -->|exclude_bed_ch| p82
-    p62 -->|prefix| p64
-    p63 -->|chrs| p64
-    p64 -->|chrfilt_vcf_ch| p70
-    p64 -->|chrfilt_stats_ch| p71
-    p64 -->|chrfilt_log_ch| p91
-    p65 -->|filt_sample_ch2| p70
-    p66 -->|dam| p70
-    p67 -->|sire| p70
-    p68 -->|prefix| p70
-    p69 -->|chrs| p70
-    p70 -->|triosplit_vcf_ch| p74
-    p70 -->|candidate_dnms_header_ch| p88
-    p70 -->|triosplit_log_ch| p91
-    p71 -->|dp_gq_ch| p72
-    p72 --> p73
-    p74 -->|split_vcfs_ch| p76
-    p75 -->|site_filters| p76
-    p76 -->|sitefilt_vcf_ch| p81
-    p76 -->|sitefilt_log_ch| p91
-    p77 -->|refseq| p81
-    p2 -->|bwa_index_ch| p81
-    p78 -->|site_filters| p81
-    p79 -->|gatk| p81
-    p80 -->|gatk_java| p81
-    p81 -->|gatk_sitefilt_vcf_ch| p82
-    p81 -->|gatk_sitefilt_log_ch| p91
-    p82 -->|regionfilt_vcf_ch| p86
-    p82 -->|regionfilt_log_ch| p91
-    p83 -->|sire| p86
-    p84 -->|dam| p86
-    p85 -->|dnm_opts| p86
-    p86 -->|split_logs_ch| p87
-    p87 --> p89
-    p88 --> p89
-    p89 -->|summary_log_ch| p93
-    p89 -->|candidates_vcf_ch| p90
-    p91 -->|all_logs_ch| p92
-    p92 -->|logs_sanity_ch| p93
-    p93 -->|all_logs_sanity_ch| p94
-    p94 --> p95
+    p2 -->|bwa_index_ch| p4
+    p3 -->|refseq| p4
+    p4 -->|raw_bam_ch| p5
+    p4 -->|filt_sample_ch| p58
+    p4 -->|stats_sample_ch| p64
+    p5 -->|sorted_bam_ch| p9
+    p6 -->|markDuplicates| p9
+    p7 -->|picard| p9
+    p8 -->|picard_java| p9
+    p9 -->|markdup_bam_ch| p13
+    p10 -->|picard| p13
+    p11 -->|picard_java| p13
+    p12 -->|refseq| p13
+    p13 -->|rg_bam_ch| p19
+    p14 -->|refseq| p19
+    p15 -->|picard| p19
+    p16 -->|picard_java| p19
+    p17 -->|gatk| p19
+    p18 -->|gatk_java| p19
+    p2 -->|bwa_index_ch| p19
+    p19 -->|realn_bam_ch| p23
+    p19 -->|realn_bai_ch| p23
+    p20 -->|refseq| p23
+    p21 -->|gatk| p23
+    p22 -->|gatk_java| p23
+    p2 -->|bwa_index_ch| p23
+    p23 -->|filt_bam_ch| p26
+    p23 -->|filt_bai_ch| p26
+    p24 -->|picard| p26
+    p25 -->|picard_java| p26
+    p26 -->|fix_bam_ch| p32
+    p26 -->|fix_bai_ch| p32
+    p27 -->|refseq| p32
+    p28 -->|picard| p32
+    p29 -->|picard_java| p32
+    p30 -->|gatk| p32
+    p31 -->|gatk_java| p32
+    p2 -->|bwa_index_ch| p32
+    p32 -->|var_vcf_ch| p33
+    p33 --> p38
+    p34 -->|refseq| p38
+    p2 -->|bwa_index_ch| p38
+    p35 -->|gatk| p38
+    p36 -->|gatk_java| p38
+    p37 -->|prefix| p38
+    p38 -->|combined_vcf_ch| p57
+    p38 -->|combined_indels_ch| p52
+    p39 -->|refseq| p41
+    p40 -->|gm_tmpdir| p41
+    p41 -->|genmap_index_ch| p43
+    p41 -->|genmap_index_files_ch| p43
+    p42 -->|refseq| p43
+    p43 -->|genmap_ch| p54
+    p44 -->|refseq| p46
+    p45 -->|rm_species| p46
+    p46 -->|rm_ref_ch| p48
+    p46 -->|rm_out_ch| p50
+    p47 -->|refseq| p48
+    p48 -->|rm_lib_ch| p50
+    p48 -->|rm_ref_ch2| p50
+    p49 -->|refseq| p50
+    p50 -->|rm_bed_ch| p54
+    p51 -->|indelpad| p52
+    p52 -->|indels_ch| p54
+    p53 -->|prefix| p54
+    p54 -->|exclude_bed_ch| p75
+    p55 -->|prefix| p57
+    p56 -->|chrs| p57
+    p57 -->|chrfilt_vcf_ch| p63
+    p57 -->|chrfilt_stats_ch| p64
+    p57 -->|chrfilt_log_ch| p84
+    p58 -->|filt_sample_ch2| p63
+    p59 -->|dam| p63
+    p60 -->|sire| p63
+    p61 -->|prefix| p63
+    p62 -->|chrs| p63
+    p63 -->|triosplit_vcf_ch| p67
+    p63 -->|candidate_dnms_header_ch| p81
+    p63 -->|triosplit_log_ch| p84
+    p64 -->|dp_gq_ch| p65
+    p65 --> p66
+    p67 -->|split_vcfs_ch| p69
+    p68 -->|site_filters| p69
+    p69 -->|sitefilt_vcf_ch| p74
+    p69 -->|sitefilt_log_ch| p84
+    p70 -->|refseq| p74
+    p2 -->|bwa_index_ch| p74
+    p71 -->|site_filters| p74
+    p72 -->|gatk| p74
+    p73 -->|gatk_java| p74
+    p74 -->|gatk_sitefilt_vcf_ch| p75
+    p74 -->|gatk_sitefilt_log_ch| p84
+    p75 -->|regionfilt_vcf_ch| p79
+    p75 -->|regionfilt_log_ch| p84
+    p76 -->|sire| p79
+    p77 -->|dam| p79
+    p78 -->|dnm_opts| p79
+    p79 -->|split_logs_ch| p80
+    p80 --> p82
+    p81 --> p82
+    p82 -->|summary_log_ch| p86
+    p82 -->|candidates_vcf_ch| p83
+    p84 -->|all_logs_ch| p85
+    p85 -->|logs_sanity_ch| p86
+    p86 -->|all_logs_sanity_ch| p87
+    p87 --> p88

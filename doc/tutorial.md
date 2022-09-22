@@ -44,7 +44,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 
 3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
 
-4. Configure the executor profiles for your system. If you are running locally, the standard local profile provided should be sufficient (but may need some adaptation depending on your hardware). The number of threads for parallelizable software (BWA, SAMtools, GATK, GenMap, RepeatMasker, RepeatModeler) can be controlled using the $task.cpu variable for each process. Executor profiles are passed to the pipeline using the config file specified at runtime using the `-c` option. If you are running on a cluster or a cloud service, consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and your system administrators to optimize the parameter profile.  
+4. Configure the executor profiles for your system. If you are running locally, the standard local profile provided should be sufficient (but may need some adaptation depending on your hardware). The number of threads for parallelizable software (BWA, SAMtools, GATK, GenMap, RepeatMasker, RepeatModeler) can be controlled using the $task.cpus variable for each process. Executor profiles are passed to the pipeline using the config file specified at runtime using the `-c` option. If you are running on a cluster or a cloud service, consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and your system administrators to optimize the parameter profile.  
 
 5. Place the final configuration file into the run base directory.  
 

@@ -189,7 +189,7 @@ echo 'R configuration...'
 get_path_module R
 echo 'Ruby configuration...'
 get_path_module ruby
-echo 'Use Picard through Nextflow\'s Conda handling?'
+echo "Use Picard through Nextflow's Conda handling?"
 yes_no_answer
 if [ $answer == 'N' ]; then
 	echo 'Testing for Picard...'
@@ -204,7 +204,7 @@ if [ $answer == 'N' ]; then
 else
 	sed -i '' 's/picard_conda = false/picard_conda = true/' $filename
 fi
-echo 'Use GATK through Nextflow\'s Conda handling?'
+echo "Use GATK through Nextflow's Conda handling?"
 yes_no_answer
 if [ $answer == 'N' ]; then
 	echo 'Testing for GATK...'

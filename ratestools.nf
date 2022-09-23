@@ -30,16 +30,16 @@ chr_file = file(params.chr_file)
 if ( params.picard_conda ) {
 	picard = "picard " + params.picard_java
 } else {
-	picard = "java " + params.picard_java + " -jar" + params.picard
+	picard = "java " + params.picard_java + " -jar " + params.picard
 }
 if ( params.gatk_conda ) {
 	if ( params.gatk_build == 3 ) {
 		gatk = "gatk3 " + params.gatk_java
 	} else if (params.gatk_build == 4 ) {
-		gatk = "gatk --java-options='" + params.gatk_java + "'"
+		gatk = "gatk --java-options='" + params.gatk_java + "' "
 	}
 } else {
-	gatk = "java " + params.gatk_java + " -jar" + params.gatk
+	gatk = "java " + params.gatk_java + " -jar " + params.gatk
 }
 
 println(picard)

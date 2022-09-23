@@ -42,6 +42,9 @@ if ( params.gatk_conda ) {
 	gatk = "java " + params.gatk_java + " -jar" + params.gatk
 }
 
+println(picard)
+println(gatk)
+
 process prepareRef {
 
 	// Prepare reference sequence for downstream processing

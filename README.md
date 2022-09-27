@@ -48,7 +48,7 @@ RatesTools requires the following external dependencies. We explicitly list soft
 * [bgzip and tabix from HTSlib](http://www.htslib.org/) [6] v. 1.9  
 * [Java](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html) v. 1.8  
 * [Picard](https://broadinstitute.github.io/picard/) [7] v. 2.23.8  
-* [Sambamba](https://lomereiter.github.io/sambamba/) [8] v. 0.7.1  
+* [Sambamba](https://lomereiter.github.io/sambamba/) [8] v. 0.7.1 or v. 0.8.2  
 * [Genome Analysis Toolkit](https://github.com/broadgsa/gatk) v. 3.8-1 or 4.2.3.0  
 * [VCFtools](https://vcftools.github.io/index.html) [9] v.0.1.16  
 * [GenMap](https://github.com/cpockrandt/genmap) [10] v.1.2.0 with [SeqAn](https://github.com/seqan/seqan/tree/f548b50705be3f824a65a696943ea90a390564ce) [11] v. 2.4.1  

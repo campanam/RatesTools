@@ -36,7 +36,7 @@ if ( params.gatk_conda ) {
 	if ( params.gatk_build == 3 ) {
 		gatk = "gatk3 " + params.gatk_java
 	} else if (params.gatk_build == 4 ) {
-		gatk = 'gatk --java-options="' + params.gatk_java + '" '
+		gatk = 'gatk --java-options "' + params.gatk_java + '" '
 	}
 } else {
 	gatk = "java " + params.gatk_java + " -jar " + params.gatk

@@ -11,9 +11,11 @@ This README provides basic details for installing, configuring and running the p
 ## Table of Contents  
 1. [Creative Commons 0 Waiver](#creative-commons-0-waiver)  
 2. [Citation](#citation)  
-3. [Installation and Configuration](#installation-and-configuration)  
-4. [Running the Pipeline](#running-the-pipeline)  
-5. [References](#references)  
+3. [Conda-Assisted Installation](#conda-assisted-installation)  
+4. [Manual Pipeline Installation](#manual-pipeline-installation)  
+5. [Configure the Pipeline](#configure-the-pipeline)  
+6. [Running the Pipeline](#running-the-pipeline)  
+7. [References](#references)  
 
 ## Creative Commons 0 Waiver  
 ![image](https://user-images.githubusercontent.com/19614608/118704084-bf02f280-b7e4-11eb-8d59-0ce648313d9e.png)  
@@ -23,7 +25,15 @@ To the extent possible under law, the Smithsonian Institution and Stanford Unive
 We politely request that this work be cited as:  
 Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting de novo germline mutations in pedigree sequence data. *bioRxiv*. doi: [10.1101/2022.07.18.500472](https://doi.org/10.1101/2022.07.18.500472).  
 
-## Installation and Configuration  
+## Conda-Assisted Installation  
+We provide a configuration profile "conda" in the default configuration file (`nextflow.config`) that installs all dependencies using [Conda](https://docs.conda.io/en/latest/). Using this profile, the user only needs to install [Nextflow](https://www.nextflow.io/) [1] and the RatesTools pipeline:  
+
+Install Nextflow: `curl -s https://get.nextflow.io | bash`  
+Pull the current version of the RatesTools pipeline: `nextflow pull campanam/RatesTools -r main`  
+
+## Manual Pipeline Installation  
+We explicitly list software dependencies here as no installation system (e.g. via Conda or containerization) is universally supported across all computing architectures.  
+
 ### Install Nextflow, Ruby and R  
 RatesTools requires [Nextflow](https://www.nextflow.io/) [1] v. >= 20.10.0, [Ruby](http://www.ruby-lang.org) v. >= 2.6.3, [R](https://www.r-project.org/) [2] v. 4.0.2 and [Bash](https://www.gnu.org/software/bash/) v. >= 4.2.46(2)-release. Basic instructions for installing these languages are copied below. We recommend installing Ruby using the [Ruby Version Manager](https://rvm.io). See the official language documentation should you need help installing these languages.  
 
@@ -36,7 +46,7 @@ Pull the current version of the pipeline: `nextflow pull campanam/RatesTools -r 
 To specify another RatesTools release, replace `main` with the RatesTools release version (e.g. `v0.5.7`).  
 
 ### Install the External Dependencies  
-RatesTools requires the following external dependencies. We explicitly list software dependencies here as no installation system (e.g. containerization) is universally supported across all computing architectures. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] v. 3.8-1 or v. >= 4.2.3.0 and Java v. 1.8 (due to GATK). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize [Environment Modules](http://modules.sourceforge.net/) modulefiles to simplify deployment on computing clusters and limit dependency conflicts (See the [tutorial](doc/tutorial.md)).  
+RatesTools requires the following external dependencies. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] v. 3.8-1 or v. >= 4.2.3.0 and Java v. 1.8 (due to GATK). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize [Environment Modules](http://modules.sourceforge.net/) modulefiles to simplify deployment on computing clusters and limit dependency conflicts (See the [tutorial](doc/tutorial.md)).  
 
 * gzip  
 * awk  
@@ -58,9 +68,9 @@ RatesTools requires the following external dependencies. We explicitly list soft
 
 RatesTools requires the following R packages installed in your R environment:  
 * [tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) [16] v. 1.0.7  and [ggplot2](https://ggplot2.tidyverse.org/) [17] v. 3.3.5.
-* [data.table](https://rdatatable.gitlab.io/data.table/) [18] v. 1.14.2 
+* [data.table](https://rdatatable.gitlab.io/data.table/) [18] v. 1.14.2  
 
-### Configure the Pipeline    
+## Configure the Pipeline    
 Assisted configuration of the RatesTools pipeline can be accomplished using the `configure.sh` bash script. The script copies the `nextflow.config` included with this repository and modifies the copy for the target system. The `configure.sh` script detects software installed on the local system and prompts the user to provide modulefiles, paths to undetected files, and program options. The configuration file can also be manually edited using a text editor. However, please note that the `configure.sh` script requires an *unmodified* `nextflow.config` file to work.  
 
 Please note that RatesTools automatically detects read pairs using globbing and the Nextflow Channel.fromFilePairs() method (https://www.nextflow.io/docs/latest/channel.html#fromfilepairs). The user will need to specify a globbing pattern corresponding to the data. RatesTools also assumes that the sample name (e.g. for the sire and dam) is the shared portion of the read pair file name, excluding text after the first difference or specified in the globbing pattern. It may be ideal to rename your reads to minimize the extraneous information in the read name (e.g. lane information). For instance, using a typical Illumina naming scheme:
@@ -70,7 +80,7 @@ Read pairs `LION1_S01_L001_R1_001.fastq.gz` and `LION1_S01_L001_R2_001.fastq.gz`
 Renaming the files to `LION1R1_001.fastq.gz` and `LION1R2_001.fastq.gz` will match these reads with the cleaner name `LION1`.  
 
 ### Platform-Specific Configuration  
-Given the wide-variety of computing architectures and operating systems, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes an example of a 'standard' [configuration profile](https://www.nextflow.io/docs/latest/config.html#config-profiles) for a local installation. Example configuration profiles for the analyses described in [Armstrong & Campana 2022](https://doi.org/10.1101/2022.07.18.500472) are provided in the [figshare repository](https://dx.doi.org/10.25573/data.20250288). Please consult your computing staff to optimize the profile settings for your hardware. We recommend storing configuration profiles in a system-wide central location for access by all users.  
+Given the wide-variety of computing architectures and operating systems, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes an example of a 'standard' [configuration profile](https://www.nextflow.io/docs/latest/config.html#config-profiles) for a local installation using modulefiles and a 'conda' configuration that installs all dependencies using Conda. Example configuration profiles for the analyses described in [Armstrong & Campana 2022](https://doi.org/10.1101/2022.07.18.500472) are provided in the [figshare repository](https://dx.doi.org/10.25573/data.20250288). Please consult your computing staff to optimize the profile settings for your hardware. We recommend storing configuration profiles in a system-wide central location for access by all users.  
 
 ## Running the Pipeline  
 Enter `nextflow run campanam/RatesTools -r <version> -c <config_file>` to run the pipeline, where `version` is the installed RatesTools release. Append `-resume` to restart a previous run or `-bg` to run RatesTools in the background. If you developed platform-specific configuration profiles, you can specify this using the `-profile <PROFILE>` option. See the Nextflow documentation for details. Final data are written to the specified output directory and its subdirectories.  

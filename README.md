@@ -26,9 +26,10 @@ We politely request that this work be cited as:
 Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting de novo germline mutations in pedigree sequence data. *bioRxiv*. doi: [10.1101/2022.07.18.500472](https://doi.org/10.1101/2022.07.18.500472).  
 
 ## Conda-Assisted Installation  
-We provide a configuration profile "conda" in the default configuration file (`nextflow.config`) that installs all dependencies using [Conda](https://docs.conda.io/en/latest/). Using this profile, the user only needs to install [Nextflow](https://www.nextflow.io/) [1] and the RatesTools pipeline:  
+We provide a configuration profile "conda" in the default configuration file (`nextflow.config`) that installs all dependencies using [Conda](https://docs.conda.io/en/latest/). Using this profile, the user only needs to install [Nextflow](https://www.nextflow.io/) [1], Conda and the RatesTools pipeline:  
 
 Install Nextflow: `curl -s https://get.nextflow.io | bash`  
+Install Conda: See installation instructions [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)  
 Pull the current version of the RatesTools pipeline: `nextflow pull campanam/RatesTools -r main`  
 
 ## Manual Pipeline Installation  

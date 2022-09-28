@@ -71,6 +71,9 @@ RatesTools requires the following R packages installed in your R environment:
 * [tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) [16] v. 1.0.7  and [ggplot2](https://ggplot2.tidyverse.org/) [17] v. 3.3.5.
 * [data.table](https://rdatatable.gitlab.io/data.table/) [18] v. 1.14.2  
 
+### Conda-Assisted Installation of Java Dependencies  
+To assist installation and execution of the Java dependencies, we provide built-in options to install GATK and Picard through Conda. See the [tutorial](doc/tutorial.md) for details.  
+
 ## Configure the Pipeline    
 Assisted configuration of the RatesTools pipeline can be accomplished using the `configure.sh` bash script. The script copies the `nextflow.config` included with this repository and modifies the copy for the target system. The `configure.sh` script detects software installed on the local system and prompts the user to provide modulefiles, paths to undetected files, and program options. The configuration file can also be manually edited using a text editor. However, please note that the `configure.sh` script requires an *unmodified* `nextflow.config` file to work.  
 
@@ -81,7 +84,7 @@ Read pairs `LION1_S01_L001_R1_001.fastq.gz` and `LION1_S01_L001_R2_001.fastq.gz`
 Renaming the files to `LION1R1_001.fastq.gz` and `LION1R2_001.fastq.gz` will match these reads with the cleaner name `LION1`.  
 
 ### Platform-Specific Configuration  
-Given the wide-variety of computing architectures and operating systems, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes an example of a 'standard' [configuration profile](https://www.nextflow.io/docs/latest/config.html#config-profiles) for a local installation using modulefiles and a 'conda' configuration that installs all dependencies using Conda. Example configuration profiles for the analyses described in [Armstrong & Campana 2022](https://doi.org/10.1101/2022.07.18.500472) are provided in the [figshare repository](https://dx.doi.org/10.25573/data.20250288). Please consult your computing staff to optimize the profile settings for your hardware. We recommend storing configuration profiles in a system-wide central location for access by all users.  
+Given the wide-variety of computing architectures and operating systems, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes an example of a 'standard' [configuration profile](https://www.nextflow.io/docs/latest/config.html#config-profiles) for a local installation using modulefiles and a 'conda' configuration that installs all dependencies using Conda. Example configuration profiles for the analyses described in [Armstrong & Campana 2022](https://doi.org/10.1101/2022.07.18.500472) are provided in the [Figshare repository](https://dx.doi.org/10.25573/data.20250288). Please consult your computing staff to optimize the profile settings for your hardware. We recommend storing configuration profiles in a system-wide central location for access by all users.  
 
 ## Running the Pipeline  
 Enter `nextflow run campanam/RatesTools -r <version> -c <config_file>` to run the pipeline, where `version` is the installed RatesTools release. Append `-resume` to restart a previous run or `-bg` to run RatesTools in the background. If you developed platform-specific configuration profiles, you can specify this using the `-profile <PROFILE>` option. See the Nextflow documentation for details. Final data are written to the specified output directory and its subdirectories.  

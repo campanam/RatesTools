@@ -276,6 +276,10 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.8  
+Conda handling  
+Use touch rather than mkfile for RepeatModeler dummy file  
+
 ### Version 0.5.7  
 DSL1 specified  
 Used task.cpus rather than thread parameters  

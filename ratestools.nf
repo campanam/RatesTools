@@ -406,7 +406,7 @@ process repeatModeler {
 	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
 	if [ ! -f */consensi.fa.classified ]; then 
 		mkdir dummy # For fake library
-		mkfile -n 0 dummy/consensi.fa.classified
+		touch dummy/consensi.fa.classified
 	fi
 	"""
 

@@ -63,7 +63,7 @@ RatesTools requires the following external dependencies. See the documentation f
 * [Genome Analysis Toolkit](https://github.com/broadgsa/gatk) v. 3.8-1 or 4.2.3.0  
 * [VCFtools](https://vcftools.github.io/index.html) [9] v.0.1.16  
 * [GenMap](https://github.com/cpockrandt/genmap) [10] v.1.2.0 with [SeqAn](https://github.com/seqan/seqan/tree/f548b50705be3f824a65a696943ea90a390564ce) [11] v. 2.4.1  
-* [RepeatMasker](http://www.repeatmasker.org/) [12] v. 4.0.9  
+* [RepeatMasker](http://www.repeatmasker.org/) [12] v. 4.0.9 or v. 4.1.2  
 * [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) [13] v. 2.0.1  
 * [BEDTools](https://bedtools.readthedocs.io/en/latest/) [14] v. 2.28.0  
 

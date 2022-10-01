@@ -75,8 +75,15 @@ RatesTools requires the following R packages installed in your R environment:
 To assist installation and execution of the Java dependencies, we provide built-in options to install GATK and Picard through Conda. See the [tutorial](doc/tutorial.md) for details.  
 
 ## Configure the Pipeline    
-Assisted configuration of the RatesTools pipeline can be accomplished using the `configure.sh` bash script. The script copies the `nextflow.config` included with this repository and modifies the copy for the target system. The `configure.sh` script detects software installed on the local system and prompts the user to provide modulefiles, paths to undetected files, and program options. The configuration file can also be manually edited using a text editor. However, please note that the `configure.sh` script requires an *unmodified* `nextflow.config` file to work.  
+Assisted configuration of the RatesTools pipeline can be accomplished using the `configure.sh` bash script included with this repository. The script copies the `nextflow.config` included with this repository and modifies the copy for the target system. The `configure.sh` script detects software installed on the local system and prompts the user to provide modulefiles, paths to undetected files, and program options. The configuration file can also be manually edited using a text editor. However, please note that the `configure.sh` script requires an *unmodified* `nextflow.config` file to work.  
 
+*NB: The most straightforward method to obtain the `configure.sh` and `nextflow.config` files is to clone this repository and move the files to a desired location:*  
+Clone the repository: `git clone https://github.com/campanam/RatesTools`  
+Move the files: `mv RatesTools/*config* /some/path/`  
+Change to the specified directory: `cd /some/path`  
+Execute the script: `bash configure.sh`  
+
+### Specifying Read Pairs  
 Please note that RatesTools automatically detects read pairs using globbing and the Nextflow Channel.fromFilePairs() method (https://www.nextflow.io/docs/latest/channel.html#fromfilepairs). The user will need to specify a globbing pattern corresponding to the data. RatesTools also assumes that the sample name (e.g. for the sire and dam) is the shared portion of the read pair file name, excluding text after the first difference or specified in the globbing pattern. It may be ideal to rename your reads to minimize the extraneous information in the read name (e.g. lane information). For instance, using a typical Illumina naming scheme:
 
 Using the globbing pattern `*{R1,R2}_001.fastq.gz`:  

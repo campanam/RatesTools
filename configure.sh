@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# configure.sh script for RatesTools v0.5.7
+# configure.sh script for RatesTools v0.5.8
 
 #----------------------------------------------------------------------------------------
 # Michael G. Campana and Ellie E. Armstrong, 2020-2022
@@ -189,17 +189,29 @@ echo 'R configuration...'
 get_path_module R
 echo 'Ruby configuration...'
 get_path_module ruby
-echo 'Testing for Picard...'
-get_jar_path Picard picard.jar
+echo "Use Picard through Nextflow's Conda handling?"
+yes_no_answer
+if [ $answer == 'N' ]; then
+	echo 'Testing for Picard...'
+	get_jar_path Picard picard.jar
+fi
 echo 'Use default Java options for Picard? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
 	echo 'Enter options to pass to Java.'
 	read java_opts
 	sed -i '' "s/picard_java = \"\"/picard_java = \"$java_opts\"/" $filename
+else
+	sed -i '' 's/picard_conda = false/picard_conda = true/' $filename
 fi
-echo 'Testing for GATK...'
-get_jar_path GATK GenomeAnalysisTK.jar
+echo "Use GATK through Nextflow's Conda handling?"
+yes_no_answer
+if [ $answer == 'N' ]; then
+	echo 'Testing for GATK...'
+	get_jar_path GATK GenomeAnalysisTK.jar
+else
+	sed -i '' 's/gatk_conda = false/gatk_conda = true/' $filename
+fi
 echo 'Enter GATK major version number (3 or 4).'
 read gatkver
 while [[ $gatkver != 3 && $gatkver != 4 ]]; do

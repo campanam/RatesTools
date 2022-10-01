@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.7
+/* RatesTools version 0.5.8
 Michael G. Campana and Ellie E. Armstrong, 2020-2022
 Smithsonian Institution and Stanford University
 
@@ -25,6 +25,22 @@ if ( params.bwa_alg == "" ) {
 	bwa_alg = "-a " + params.bwa_alg + " "
 }	
 chr_file = file(params.chr_file)
+
+// Generate Picard and GATK executable commands
+if ( params.picard_conda ) {
+	picard = "picard " + params.picard_java
+} else {
+	picard = "java " + params.picard_java + " -jar " + params.picard
+}
+if ( params.gatk_conda ) {
+	if ( params.gatk_build == 3 ) {
+		gatk = "gatk3 " + params.gatk_java
+	} else if (params.gatk_build == 4 ) {
+		gatk = 'gatk --java-options "' + params.gatk_java + '" '
+	}
+} else {
+	gatk = "java " + params.gatk_java + " -jar " + params.gatk
+}
 
 process prepareRef {
 
@@ -105,8 +121,6 @@ process markDuplicates {
 	input:
 	path sorted_bam from sorted_bam_ch
 	val markDuplicates from params.markDuplicates
-	path picard from params.picard
-	val picard_java from params.picard_java
 	
 	output:
 	path "${sorted_bam.simpleName}.markdup.bam" into markdup_bam_ch
@@ -118,7 +132,7 @@ process markDuplicates {
 		"""
 	else
 		"""
-		java ${picard_java} -jar ${picard} MarkDuplicates I=${sorted_bam} O=${sorted_bam.simpleName}.markdup.bam M=${sorted_bam.simpleName}.markdup.txt MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000
+		$picard MarkDuplicates I=${sorted_bam} O=${sorted_bam.simpleName}.markdup.bam M=${sorted_bam.simpleName}.markdup.txt MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000
 		"""
 		
 }
@@ -132,8 +146,6 @@ process fixReadGroups {
 	
 	input:
 	path markdup_bam from markdup_bam_ch
-	path picard from params.picard
-	val picard_java from params.picard_java
 	path refseq from params.refseq
 	
 	output:
@@ -142,7 +154,7 @@ process fixReadGroups {
 	script:
 	pair_id = "${markdup_bam.simpleName}".minus("_${refseq.simpleName}")
 	"""
-	java ${picard_java} -jar ${picard} AddOrReplaceReadGroups I=${markdup_bam} O=${markdup_bam.simpleName}.rg.bam RGID=$pair_id RGLB=$pair_id RGPL=illumina RGPU=$pair_id RGSM=$pair_id
+	$picard AddOrReplaceReadGroups I=${markdup_bam} O=${markdup_bam.simpleName}.rg.bam RGID=$pair_id RGLB=$pair_id RGPL=illumina RGPU=$pair_id RGSM=$pair_id
 	"""
 
 }
@@ -158,10 +170,6 @@ process realignIndels {
 	input:
 	path rg_bam from rg_bam_ch
 	path refseq from params.refseq
-	path picard from params.picard
-	val picard_java from params.picard_java
-	val gatk from params.gatk
-	val gatk_java from params.gatk_java
 	path "*" from bwa_index_ch
 	
 	output:
@@ -172,14 +180,14 @@ process realignIndels {
 	script:
 	if (params.gatk_build == 3)
 		"""
-		java ${picard_java} -jar ${picard} BuildBamIndex I=${rg_bam}
-		java ${gatk_java} -jar ${gatk} -T RealignerTargetCreator -R ${refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
-		java ${gatk_java} -jar ${gatk} -T IndelRealigner -R ${refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
+		$picard BuildBamIndex I=${rg_bam}
+		$gatk -T RealignerTargetCreator -R ${refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
+		$gatk -T IndelRealigner -R ${refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
 		"""
 	else if (params.gatk_build == 4)
 		"""
-		java ${picard_java} -jar ${picard} BuildBamIndex I=${rg_bam}
-		java ${gatk_java} -jar ${gatk} LeftAlignIndels -R ${refseq} -I $rg_bam -O ${rg_bam.simpleName}.realn.bam
+		$picard BuildBamIndex I=${rg_bam}
+		$gatk LeftAlignIndels -R ${refseq} -I $rg_bam -O ${rg_bam.simpleName}.realn.bam
 		"""
 
 }
@@ -195,8 +203,6 @@ process filterBAMs {
 	path refseq from params.refseq
 	path realn_bam from realn_bam_ch
 	path realn_bai from realn_bai_ch
-	val gatk from params.gatk
-	val gatk_java from params.gatk_java
 	path "*" from bwa_index_ch
 	
 	output:
@@ -206,11 +212,11 @@ process filterBAMs {
 	script:
 	if (params.gatk_build == 3)
 		"""
-		java ${gatk_java} -jar ${gatk} -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${task.cpus} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
+		$gatk -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${task.cpus} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
 		"""
 	else if (params.gatk_build == 4)
 		"""
-		java ${gatk_java} -jar ${gatk} PrintReads -I ${realn_bam} -O ${realn_bam.simpleName}.filt.bam --read-filter GoodCigarReadFilter --read-filter NotDuplicateReadFilter --read-filter PassesVendorQualityCheckReadFilter --read-filter MappingQualityReadFilter --read-filter MappingQualityAvailableReadFilter --read-filter PrimaryLineReadFilter --read-filter MappedReadFilter --read-filter NotOpticalDuplicateReadFilter --read-filter ProperlyPairedReadFilter
+		$gatk PrintReads -I ${realn_bam} -O ${realn_bam.simpleName}.filt.bam --read-filter GoodCigarReadFilter --read-filter NotDuplicateReadFilter --read-filter PassesVendorQualityCheckReadFilter --read-filter MappingQualityReadFilter --read-filter MappingQualityAvailableReadFilter --read-filter PrimaryLineReadFilter --read-filter MappedReadFilter --read-filter NotOpticalDuplicateReadFilter --read-filter ProperlyPairedReadFilter
 		"""
 }
 
@@ -225,16 +231,14 @@ process fixMate {
 	input:
 	path filt_bam from filt_bam_ch
 	path filt_bai from filt_bai_ch
-	path picard from params.picard
-	val picard_java from params.picard_java
 	
 	output:
 	path "${filt_bam.simpleName}.fix.bam" into fix_bam_ch
 	path "${filt_bam.simpleName}.fix.bai" into fix_bai_ch
 	
 	"""
-	java ${picard_java} -jar ${picard} FixMateInformation I=${filt_bam} O=${filt_bam.simpleName}.fix.bam ADD_MATE_CIGAR=true
-	java ${picard_java} -jar ${picard} BuildBamIndex I=${filt_bam.simpleName}.fix.bam
+	$picard FixMateInformation I=${filt_bam} O=${filt_bam.simpleName}.fix.bam ADD_MATE_CIGAR=true
+	$picard BuildBamIndex I=${filt_bam.simpleName}.fix.bam
 	"""
 	
 }
@@ -251,10 +255,6 @@ process callVariants {
 	path refseq from params.refseq
 	path fix_bam from fix_bam_ch
 	path fix_bai from fix_bai_ch
-	path picard from params.picard
-	val picard_java from params.picard_java
-	val gatk from params.gatk
-	val gatk_java from params.gatk_java
 	path "*" from bwa_index_ch
 	
 	output:
@@ -263,11 +263,11 @@ process callVariants {
 	script:
 	if (params.gatk_build == 3)
 		"""
-		java ${gatk_java} -jar ${gatk} -T HaplotypeCaller -nct ${task.cpus} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
+		$gatk -T HaplotypeCaller -nct ${task.cpus} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
 		"""
 	else if (params.gatk_build == 4)
 		"""
-		java ${gatk_java} -jar ${gatk} HaplotypeCaller -R $refseq -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
+		$gatk HaplotypeCaller -R $refseq -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
 		"""
 
 }
@@ -287,8 +287,6 @@ process genotypegVCFs {
 	path refseq from params.refseq
 	path "*" from bwa_index_ch
 	path "*" from var_vcf_ch.collect()
-	val gatk from params.gatk
-	val gatk_java from params.gatk_java
 	val prefix from params.prefix
 	
 	output:
@@ -300,15 +298,15 @@ process genotypegVCFs {
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		java ${gatk_java} -jar ${gatk} -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o ${prefix}_combined.vcf
+		$gatk -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o ${prefix}_combined.vcf
 		gzip ${prefix}_combined.vcf
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		java ${gatk_java} -jar ${gatk} CombineGVCFs -R $refseq -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
-		java ${gatk_java} -jar ${gatk} GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O ${prefix}_combined.vcf
+		$gatk CombineGVCFs -R $refseq -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
+		$gatk GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O ${prefix}_combined.vcf
 		gzip ${prefix}_combined.vcf
 		"""
 }
@@ -408,7 +406,7 @@ process repeatModeler {
 	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
 	if [ ! -f */consensi.fa.classified ]; then 
 		mkdir dummy # For fake library
-		mkfile -n 0 dummy/consensi.fa.classified
+		touch dummy/consensi.fa.classified
 	fi
 	"""
 
@@ -689,8 +687,6 @@ process gatkFilterSites {
 	path "*" from bwa_index_ch
 	path site_vcf from sitefilt_vcf_ch
 	val site_filters from params.gatk_site_filters
-	val gatk from params.gatk
-	val gatk_java from params.gatk_java
 	
 	output:
 	path "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
@@ -706,16 +702,16 @@ process gatkFilterSites {
 	else if (params.gatk_build == 3)
 		"""
 		tabix $site_vcf
-		java ${gatk_java} -jar ${gatk} -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
-		java ${gatk_java} -jar ${gatk} -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R $refseq --excludeFiltered
+		$gatk -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
+		$gatk -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R $refseq --excludeFiltered
 		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		cp .command.log  ${site_vcf.simpleName}_gatksitefilt.tmp
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		tabix $site_vcf
-		java ${gatk_java} -jar ${gatk} VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters
-		java ${gatk_java} -jar ${gatk} SelectVariants -R $refseq -V $site_vcf -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
+		$gatk VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters
+		$gatk SelectVariants -R $refseq -V $site_vcf -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
 		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		cp .command.log  ${site_vcf.simpleName}_gatksitefilt.tmp
 		"""

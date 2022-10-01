@@ -95,6 +95,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 0.5.8  
+Conda installation handling  
+
 ### Version 0.5.7  
 $launchDir instead of $baseDir  
 Removed thread parameters  
@@ -225,6 +228,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 0.5.8  
+Conda profile and handling  
+
 ### Version 0.5.7  
 Removed 'hydra' example profile  
 Removed storeDir and maxForks from local profile  
@@ -270,6 +276,10 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.8  
+Conda handling  
+Use touch rather than mkfile for RepeatModeler dummy file  
+
 ### Version 0.5.7  
 DSL1 specified  
 Used task.cpus rather than thread parameters  

@@ -24,23 +24,25 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2b. `reads` specifies the path to the sequence FASTQ files and the globbing pattern to determine read pairs (See the [Nextflow documentation](https://www.nextflow.io/docs/latest/channel.html#fromfilepairs) for a thorough description of globbing). Each individual is expected to be represented by a file containing forward reads and another containing the corresponding reverse reads.  
 2c. `bwa_alg` specifies the BWA [5] index algorithm. Setting this value to an empty string ("") instructs BWA to infer the indexing algorithm.  
 2d. `markDuplicates` specifies whether duplicate marking should use Picard [7] (value "picard") or Sambamba [8] (value "sambamba").  
-2e. `picard` specifies the path to the Picard jar file.  
-2f. `picard_java` specifies additional Java parameters for Picard operations. Enter the command-line Java options as a string.  
-2g. `gatk` specifies the path to the GATK jar file.  
-2h. `gatk_build` specifies whether the GATK jar is major version 3 or 4.  
-2i. `gatk_java` specifies additional Java parameters for GATK operations. Enter the command-line Java options as a string.  
-2j. `gm_tmpdir` specifies the path to a temporary directory for GenMap [9].  
-2k. `rm_species` specifies the species library for RepeatMasker [10].  
-2l. `indelpad` specifies the number of bases up- and downstream of an indel to remove.  
-2m. `prefix` specifies the file prefix for output files.  
-2n. `outdir` specifies the name of the output directory.  
-2o. `dam` specifies the name of the dam. This must match the name derivied from file globbing of the reads.  
-2p. `sire` specifies the name of the sire. This must match the name derivied from file globbing of the reads.  
-2q. `vcftools_site_filters` specifies the site-specific filters using VCFtools [12] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
-2r. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
-2s. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
-2t. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
-2u. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
+2e. `picard_conda` determines whether to install Picard using Conda. Set the value to true to install using Conda.  
+2f. `picard` specifies the path to the Picard jar file. This can be omitted if `picard_conda` is set to true.  
+2g. `picard_java` specifies additional Java parameters for Picard operations. Enter the command-line Java options as a string.  
+2h. `gatk_conda` determines whether to install GATK using Conda. Set the value to true to install using Conda.  
+2i. `gatk` specifies the path to the GATK jar file. This can be omitted if `gatk_conda` is set to true.  
+2j. `gatk_build` specifies whether the GATK jar is major version 3 or 4.  
+2k. `gatk_java` specifies additional Java parameters for GATK operations. Enter the command-line Java options as a string.  
+2l. `gm_tmpdir` specifies the path to a temporary directory for GenMap [9].  
+2m. `rm_species` specifies the species library for RepeatMasker [10].  
+2n. `indelpad` specifies the number of bases up- and downstream of an indel to remove.  
+2o. `prefix` specifies the file prefix for output files.  
+2p. `outdir` specifies the name of the output directory.  
+2q. `dam` specifies the name of the dam. This must match the name derivied from file globbing of the reads.  
+2r. `sire` specifies the name of the sire. This must match the name derivied from file globbing of the reads.  
+2s. `vcftools_site_filters` specifies the site-specific filters using VCFtools [12] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2t. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2u. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
+2v. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
+2w. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
 
 3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
 

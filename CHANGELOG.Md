@@ -23,6 +23,9 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.12.1  
+Handling for selfing parent  
+
 ### Version 0.12.0  
 Applying both --minAD1 and --minAF no longer defaults to --minAD1. --minAD1 is applied to parents, --minAF to offspring.  
 

@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.12.0"
+CALCDENOVOVER = "0.12.1"
 # Michael G. Campana and Ellie E. Armstrong, 2019-2022
 # Smithsonian Institution and Stanford University
 
@@ -247,7 +247,10 @@ def read_vcf # Method to read vcf
 								filter_exit("Biallelic SNPs required for Koch_DNp filter. Exiting.\nError found here:", line) if pl_array.size != 3
 							end
 						end
-						if i == sire_index
+						if i == sire_index && i == dam_index # Selfing handling
+							snp.sire = snp.dam = genotype
+							snp.sire_pl = snp.dam_pl = genotype
+						elsif i == sire_index
 							snp.sire = genotype
 							snp.sire_pl = pl_array
 						elsif i == dam_index

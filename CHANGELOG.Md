@@ -23,6 +23,9 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.12.1  
+Handling for selfing parent  
+
 ### Version 0.12.0  
 Applying both --minAD1 and --minAF no longer defaults to --minAD1. --minAD1 is applied to parents, --minAF to offspring.  
 
@@ -276,6 +279,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.9  
+Handling for selfing parent in calc_denovo_mutation_rate.rb  
+
 ### Version 0.5.8  
 Conda handling  
 Use touch rather than mkfile for RepeatModeler dummy file  

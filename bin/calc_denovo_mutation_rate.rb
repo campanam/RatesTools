@@ -176,7 +176,7 @@ def read_vcf # Method to read vcf
 				for sample in header_arr[9..-1]
 					if sample == $options.sire
 						sire_index = header_arr.index(sample)
-						dam_index = header_arr.index(sample) if $options.sire == $options.dam # Selfer handling
+						dam_index = sire_index if $options.sire == $options.dam # Selfer handling
 					elsif sample == $options.dam
 						dam_index = header_arr.index(sample)
 					else

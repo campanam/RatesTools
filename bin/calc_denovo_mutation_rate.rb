@@ -247,9 +247,11 @@ def read_vcf # Method to read vcf
 								filter_exit("Biallelic SNPs required for Koch_DNp filter. Exiting.\nError found here:", line) if pl_array.size != 3
 							end
 						end
-						if i == sire_index && i == dam_index # Selfing handling
-							snp.sire = snp.dam = genotype
-							snp.sire_pl = snp.dam_pl = genotype
+						if sire_index == dam_index # Selfing handling
+							snp.sire = genotype
+							snp.dam = genotype
+							snp.sire_pl = snp.dam_pl = pl_array
+							snp.dam_pl = pl_array
 						elsif i == sire_index
 							snp.sire = genotype
 							snp.sire_pl = pl_array

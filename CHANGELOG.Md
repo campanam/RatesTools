@@ -279,6 +279,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.9  
+Handling for selfing parent in calc_denovo_mutation_rate.rb  
+
 ### Version 0.5.8  
 Conda handling  
 Use touch rather than mkfile for RepeatModeler dummy file  

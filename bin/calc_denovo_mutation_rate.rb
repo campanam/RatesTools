@@ -251,7 +251,7 @@ def read_vcf # Method to read vcf
 						if sire_index == dam_index # Selfing handling
 							snp.sire = genotype
 							snp.dam = genotype
-							snp.sire_pl = snp.dam_pl = pl_array
+							snp.sire_pl = pl_array
 							snp.dam_pl = pl_array
 						elsif i == sire_index
 							snp.sire = genotype

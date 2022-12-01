@@ -114,4 +114,4 @@ Enter `nextflow run campanam/RatesTools -r <version> -c <config_file>` to run th
 15. Wickham, H., Averick, M., Bryan, J., Chang, W., D'Agostino McGowan, L., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T.L., Miller, E., Bache, S.M., Müller, K., Ooms, J., Robinson, D., Seidel, D.P., Spinu, V., Takahashi, K., Vaughan, D., Wilke, C., Woo, K. Yutani, H. (2019). Welcome to the Tidyverse. *J Open Source Softw*, __4__, 1686. DOI: [10.21105/joss.01686](https://joss.theoj.org/papers/10.21105/joss.016866).  
 16. Wickham, H., François, R., Henry, L., Müller, K. (2021) dplyr: a grammar of data manipulation. R package version 1.0.7. (https://CRAN.R-project.org/package=dplyr).  
 17. Wickham, H. (2016) *ggplot2: Elegant Graphics for Data Analysis.* Springer-Verlag, New York, USA.  
-18. Dowle, M., Srinivasan, A. (2021) data.table: extension of 'data.frame'. R package version 1.14.2. (https://CRAN.R-project.org/package=data.table).  
+18. Dowle, M., Srinivasan, A. (2021) data.table: extension of 'data.frame'. R package version 1.14.2. (https://r-datatable.com).  

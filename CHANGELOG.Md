@@ -251,6 +251,7 @@ Accessor script for split_vcf for nextflow
 ## logstats  
 ### Version 0.1.2  
 Update file headers  
+Contig length filtration  
 
 ### Version 0.1.1  
 Improved sanity checks  
@@ -316,6 +317,7 @@ Initial script (plotDPGQ-clean.R)
 ## ratestools  
 ### Version 0.5.10  
 Update file headers  
+Contig length filtration  
 
 ### Version 0.5.9  
 Handling for selfing parent in calc_denovo_mutation_rate.rb  

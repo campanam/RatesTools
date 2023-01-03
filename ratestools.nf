@@ -684,7 +684,7 @@ process sanityCheckLogsVcftools {
 	
 	output:
 	path "${logfile.simpleName}.log" into sitefilt_log_sanity_ch
-	path "${filtvcflog.simpleName}*.OK.vcf.gz" optional true into sitefilt_vcf_ch
+	path "${filtvcflog.simpleName}.sitefilt.recode.OK.vcf.gz" optional true into sitefilt_vcf_ch
 	
 	"""
 	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log
@@ -752,7 +752,7 @@ process sanityCheckLogsGatk {
 	
 	output:
 	path "${logfile.simpleName}.log" into gatk_sitefilt_log_sanity_ch
-	path "${filtvcflog.simpleName}*.OK.vcf.gz" optional true into gatk_sitefilt_vcf_ch
+	path "${filtvcflog.simpleName}.gatksitefilt.OK.vcf.gz" optional true into gatk_sitefilt_vcf_ch
 	
 	"""
 	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log
@@ -866,7 +866,7 @@ process sanityCheckLogsRegions {
 	
 	output:
 	path "${logfile.simpleName}.log" into regionfilt_log_sanity_ch
-	path "${filtvcflog.simpleName}*.OK.vcf.gz" optional true into regionfilt_vcf_ch
+	path "${filtvcflog.simpleName}.regionfilt.OK.vcf.gz" optional true into regionfilt_vcf_ch
 	
 	"""
 	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log

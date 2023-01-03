@@ -684,7 +684,7 @@ process sanityCheckLogsVcftools {
 	
 	output:
 	path "${logfile.simpleName}.log" into sitefilt_log_sanity_ch
-	path "${filtvcflog}_OK" optional true into sitefilt_vcf_ch
+	path "${filtvcflog.simpleName}*.OK.vcf.gz" optional true into sitefilt_vcf_ch
 	
 	"""
 	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log
@@ -715,14 +715,12 @@ process gatkFilterSites {
 	script:
 	if (site_filters == "NULL")
 		"""
-		mv $site_vcf ${site_vcf%_OK}
 		ln -s $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		vcftools --gzvcf $site_vcf
 		cp .command.log  ${site_vcf.simpleName}_gatksitefilt.tmp
 		"""
 	else if (params.gatk_build == 3)
 		"""
-		mv $site_vcf ${site_vcf%_OK}
 		tabix $site_vcf
 		$gatk -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
 		$gatk -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R $refseq --excludeFiltered
@@ -731,7 +729,6 @@ process gatkFilterSites {
 		"""
 	else if (params.gatk_build == 4)
 		"""
-		mv $site_vcf ${site_vcf%_OK}
 		tabix $site_vcf
 		$gatk VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters
 		$gatk SelectVariants -R $refseq -V $site_vcf -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
@@ -755,7 +752,7 @@ process sanityCheckLogsGatk {
 	
 	output:
 	path "${logfile.simpleName}.log" into gatk_sitefilt_log_sanity_ch
-	path "${filtvcflog}_OK" optional true into gatk_sitefilt_vcf_ch
+	path "${filtvcflog.simpleName}*.OK.vcf.gz" optional true into gatk_sitefilt_vcf_ch
 	
 	"""
 	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log
@@ -790,7 +787,6 @@ process filterRegions {
 	if (task.attempt == 1)
 		"""
 		#!/usr/bin/env bash
-		mv $site_vcf ${site_vcf%_OK}
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			bedtools subtract -a ${site_vcf} -b tmp.bed -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
@@ -808,7 +804,6 @@ process filterRegions {
 	else if (task.attempt == 2)
 		"""
 		#!/usr/bin/env bash
-		mv $site_vcf ${site_vcf%_OK}
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			zcat ${site_vcf} | bedtools subtract -a stdin -b tmp.bed -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
@@ -826,7 +821,6 @@ process filterRegions {
 	else if (task.attempt == 3)
 		"""
 		#!/usr/bin/env bash
-		mv $site_vcf ${site_vcf%_OK}
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			tabix ${site_vcf}
@@ -846,7 +840,6 @@ process filterRegions {
 	else
 		"""
 		#!/usr/bin/env bash
-		mv $site_vcf ${site_vcf%_OK}
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
@@ -873,7 +866,7 @@ process sanityCheckLogsRegions {
 	
 	output:
 	path "${logfile.simpleName}.log" into regionfilt_log_sanity_ch
-	path "${filtvcflog}_OK" optional true into regionfilt_vcf_ch
+	path "${filtvcflog.simpleName}*.OK.vcf.gz" optional true into regionfilt_vcf_ch
 	
 	"""
 	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log
@@ -967,7 +960,7 @@ process sanityCheckLogs {
 	
 }
 
-all_logs_sanity_ch = logs_sanity_ch.mix(regionfilt_log_sanity_ch, gatk_sitefilt_log_sanity_ch, sitefilt_log_sanity_ch, summary_log_ch)
+all_logs_sanity_ch = logs_sanity_ch.mix(regionfilt_log_sanity_ch, gatk_sitefilt_log_ch, sitefilt_sanity_log_ch, summary_log_ch)
 
 process generateSummaryStats {
 

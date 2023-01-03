@@ -960,7 +960,7 @@ process sanityCheckLogs {
 	
 }
 
-all_logs_sanity_ch = logs_sanity_ch.mix(regionfilt_log_sanity_ch, gatk_sitefilt_log_ch, sitefilt_sanity_log_ch, summary_log_ch)
+all_logs_sanity_ch = logs_sanity_ch.mix(regionfilt_log_sanity_ch, gatk_sitefilt_log_ch, sitefilt_log_sanity_ch, summary_log_ch)
 
 process generateSummaryStats {
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.9
-Michael G. Campana and Ellie E. Armstrong, 2020-2022
+/* RatesTools version 0.5.10
+Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 
 CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -12,8 +12,8 @@ CC0 legal code along with this work. If not, see
  
 We politely request that this work be cited as:
 Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting
-de novo germline mutations in pedigree sequence data. *bioRxiv*.
-doi: 10.1101/2022.07.18.500472. */
+de novo germline mutations in pedigree sequence data. Bioinformatics. btac784.
+doi: 10.1093/bioinformatics/btac784. */
 
 nextflow.enable.dsl=1
 
@@ -653,7 +653,6 @@ process vcftoolsFilterSites {
 	val site_filters from params.vcftools_site_filters
 	
 	output:
-	path "${split_vcf.simpleName}.sitefilt.recode.vcf.gz" into sitefilt_vcf_ch
 	tuple path("${split_vcf.simpleName}_sitefilt.tmp"), path(split_vcf), path("${split_vcf.simpleName}.sitefilt.recode.vcf.gz") into sitefilt_log_ch
 	
 	script:
@@ -669,6 +668,28 @@ process vcftoolsFilterSites {
 		cp .command.log ${split_vcf.simpleName}_sitefilt.tmp
 		"""
 
+}
+
+process sanityCheckLogsVcftools {
+
+	// Sanity check logs for VCFtools site filtering and remove too short contigs
+
+	label 'gzip'
+	errorStrategy 'finish'
+
+	input:
+	tuple path(logfile), path(allvcflog), path(filtvcflog) from sitefilt_log_ch
+	val min_contig_length from params.min_contig_length
+	val min_filt_contig_length from params.min_filt_contig_length
+	
+	output:
+	path "${logfile.simpleName}.log" into sitefilt_log_sanity_ch
+	path "${filtvcflog.simpleName}.sitefilt.recode.OK.vcf.gz" optional true into sitefilt_vcf_ch
+	
+	"""
+	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log
+	"""
+	
 }
 
 process gatkFilterSites {
@@ -689,7 +710,6 @@ process gatkFilterSites {
 	val site_filters from params.gatk_site_filters
 	
 	output:
-	path "${site_vcf.simpleName}.gatksitefilt.vcf.gz" into gatk_sitefilt_vcf_ch
 	tuple path("${site_vcf.simpleName}_gatksitefilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.gatksitefilt.vcf.gz") into gatk_sitefilt_log_ch
 	
 	script:
@@ -718,6 +738,28 @@ process gatkFilterSites {
 
 }
 
+process sanityCheckLogsGatk {
+	
+	// Sanity check logs for GATK site filtering and remove too short contigs
+	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
+
+	label 'gzip'
+	errorStrategy 'finish'
+
+	input:
+	tuple path(logfile), path(allvcflog), path(filtvcflog) from gatk_sitefilt_log_ch
+	val min_filt_contig_length from params.min_filt_contig_length
+	
+	output:
+	path "${logfile.simpleName}.log" into gatk_sitefilt_log_sanity_ch
+	path "${filtvcflog.simpleName}.gatksitefilt.OK.vcf.gz" optional true into gatk_sitefilt_vcf_ch
+	
+	"""
+	logstats.sh $logfile $allvcflog $filtvcflog 1 $min_filt_contig_length > ${logfile.simpleName}.log
+	"""
+	
+}
+
 process filterRegions {
 
 	// Filter regions using BEDTools. If failure, tries to fix using zcat.
@@ -738,7 +780,6 @@ process filterRegions {
 	path exclude_bed from exclude_bed_ch
 	
 	output:
-	path "${site_vcf.simpleName}.regionfilt.vcf.gz" into regionfilt_vcf_ch
 	tuple path("${site_vcf.simpleName}_regionfilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.regionfilt.vcf.gz") into regionfilt_log_ch
 	
 	script:
@@ -811,6 +852,28 @@ process filterRegions {
 
 }
 
+process sanityCheckLogsRegions {
+
+	// Sanity check logs for region filtering and remove too short contigs
+	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
+
+	label 'gzip'
+	errorStrategy 'finish'
+
+	input:
+	tuple path(logfile), path(allvcflog), path(filtvcflog) from regionfilt_log_ch
+	val min_filt_contig_length from params.min_filt_contig_length
+	
+	output:
+	path "${logfile.simpleName}.log" into regionfilt_log_sanity_ch
+	path "${filtvcflog.simpleName}.regionfilt.OK.vcf.gz" optional true into regionfilt_vcf_ch
+	
+	"""
+	logstats.sh $logfile $allvcflog $filtvcflog 1 $min_filt_contig_length > ${logfile.simpleName}.log
+	"""
+	
+}
+
 process calcDNMRate {
 
 	// Calculate de novo mutations using calc_denovo_mutation_rate
@@ -876,9 +939,11 @@ process summarizeDNM {
 
 }
 
-all_logs_ch = regionfilt_log_ch.mix(gatk_sitefilt_log_ch, sitefilt_log_ch, triosplit_log_ch, chrfilt_log_ch)
+all_logs_ch = triosplit_log_ch.mix(chrfilt_log_ch)
 
 process sanityCheckLogs {
+
+	// Sanity check logs for Chromosome filtering and trio-splitting, but perform no filtering
 
 	label 'gzip'
 	errorStrategy 'finish'
@@ -890,12 +955,12 @@ process sanityCheckLogs {
 	path "${logfile.simpleName}.log" into logs_sanity_ch
 	
 	"""
-	logstats.sh $logfile $allvcflog $filtvcflog > ${logfile.simpleName}.log
+	logstats.sh $logfile $allvcflog $filtvcflog 0 0 > ${logfile.simpleName}.log
 	"""
 	
 }
 
-all_logs_sanity_ch = logs_sanity_ch.mix(summary_log_ch)
+all_logs_sanity_ch = logs_sanity_ch.mix(regionfilt_log_sanity_ch, gatk_sitefilt_log_sanity_ch, sitefilt_log_sanity_ch, summary_log_ch)
 
 process generateSummaryStats {
 

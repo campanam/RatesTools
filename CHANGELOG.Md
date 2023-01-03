@@ -1,5 +1,5 @@
 # CHANGE LOG  
-Michael G. Campana & Ellie E. Armstrong, 2019-2022  
+Michael G. Campana & Ellie E. Armstrong, 2019-2023  
 Smithsonian Institution  
 Stanford University  
 
@@ -23,6 +23,9 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.12.2  
+Update file headers  
+
 ### Version 0.12.1  
 Handling for selfing parent  
 
@@ -98,6 +101,10 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 0.5.10  
+Update file headers  
+Contig length filtration  
+
 ### Version 0.5.8  
 Conda installation handling  
 
@@ -106,6 +113,9 @@ $launchDir instead of $baseDir
 Removed thread parameters  
 
 ## denovolib  
+### Version 0.8.2  
+Update file headers  
+
 ### Version 0.8.1  
 split_vcf now uses bgzip rather than gzip for GATK site filtering  
 filter_exit returns exit status 1  
@@ -156,11 +166,17 @@ print_results moved to denovolib
 Redundant methods (Parser, gz_open_file) moved to denovolib  
 gz_open_file improved to version in BaitsTools 1.6.6  
 
-## dnm_summary_stats
+## dnm_summary_stats  
+### Version 0.1.1  
+Update file headers  
+
 ### Version 0.1.0  
 First script to calculate summary statistics  
 
 ## filterGM  
+### Version 0.3.3  
+Update file headers  
+
 ### Version 0.3.2  
 Improved gz_file_open using yield  
 
@@ -179,6 +195,9 @@ Script capitalization consistency correction
 Filters GenMap output by specified mappabilities  
 
 ## indels2bed  
+### Version 0.3.3  
+Update file headers  
+
 ### Version 0.3.2  
 Improved gz_file_open using yield  
 
@@ -203,6 +222,9 @@ Output BED header line starts with # as appropriate
 Initial script to convert VCF of indels into BED file for variant site exclusion  
 
 ## kochDNp  
+### Version 0.1.2  
+Update file headers  
+
 ### Version 0.1.1  
 Fixed bug that ran command-line parser when run from calc_denovo_mutation_rate
 
@@ -210,6 +232,9 @@ Fixed bug that ran command-line parser when run from calc_denovo_mutation_rate
 Calculates and filters by Koch DNp statistic  
 
 ## nextflow_split  
+### Version 0.1.4  
+Update file headers  
+
 ### Version 0.1.3  
 Fixed bug where $options.writecycles was not defined  
 Prints help when no options/-h  
@@ -224,6 +249,10 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## logstats  
+### Version 0.1.2  
+Update file headers  
+Contig length filtration  
+
 ### Version 0.1.1  
 Improved sanity checks  
 
@@ -231,6 +260,10 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 0.5.10  
+Update file headers  
+Contig length filtration  
+
 ### Version 0.5.8  
 Conda profile and handling  
 
@@ -267,6 +300,9 @@ Added module options for bedtools, bcftools, bgzip, tabix
 Updated process defaults  
 
 ## plotDPGQ  
+### Version 0.3.1  
+Update file headers  
+
 ### Version 0.3.0  
 Fixed bug that misread sample names  
 Corrected output so that all PNGs properly named  
@@ -279,6 +315,10 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.10  
+Update file headers  
+Contig length filtration  
+
 ### Version 0.5.9  
 Handling for selfing parent in calc_denovo_mutation_rate.rb  
 
@@ -343,6 +383,9 @@ Removed duplicate BuildBamIndex step in callVariants
 Nextflow pipeline for de novo mutation discovery. Previously panthera_dnm.nf during construction   
 
 ## RM2bed  
+### Version 0.4.3  
+Update file headers  
+
 ### Version 0.4.2  
 Improved gz_file_open using yield  
 
@@ -368,6 +411,9 @@ Outputs usage if no parameters specified
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
 ## simplify_bed  
+### Version 0.2.2  
+Update file headers  
+
 ### Version 0.2.1  
 Improved gz_file_open using yield  
 
@@ -385,6 +431,9 @@ Code commented
 Initial script to combine overlapping BED entries for region inclusion/exclusion  
 
 ## simplify_sorted_bed  
+### Version 0.1.2  
+Update file headers  
+
 ### Version 0.1.1  
 Improved gz_file_open using yield  
 
@@ -392,6 +441,9 @@ Improved gz_file_open using yield
 Script to merge adjacent BED regions in a coordinate-sorted BED file to reduce simplify_bed memory use and compute time  
 
 ## summarize_denovo  
+### Version 0.5.6  
+Update file headers  
+
 ### Version 0.5.5  
 Code commented  
 

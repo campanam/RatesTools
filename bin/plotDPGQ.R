@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
 #----------------------------------------------------------------------------------------
-# plotDPGQ version 0.3.0
-# Ellie E. Armstrong & Michael G. Campana, 2022
-# Stanford University and Smithsonian Institution
+# plotDPGQ version 0.3.1
+# Michael G. Campana and Ellie E. Armstrong, 2022-2023
+# Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
 # University have waived all copyright and related or neighboring rights to RatesTools;
@@ -13,8 +13,8 @@
  
 # We politely request that this work be cited as:
 # Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting
-# de novo germline mutations in pedigree sequence data. *bioRxiv*.
-# doi: 10.1101/2022.07.18.500472.
+# de novo germline mutations in pedigree sequence data. Bioinformatics. btac784.
+# 10.1093/bioinformatics/btac784.
 #----------------------------------------------------------------------------------------
 
 #load libraries

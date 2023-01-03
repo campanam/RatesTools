@@ -865,7 +865,7 @@ process sanityCheckLogsRegions {
 	val min_filt_contig_length from params.min_filt_contig_length
 	
 	output:
-	path "${logfile.simpleName}.log" into regionfilt_sanity_log_ch
+	path "${logfile.simpleName}.log" into regionfilt_log_sanity_ch
 	path "${filtvcflog}_OK" optional true into regionfilt_vcf_ch
 	
 	"""
@@ -960,7 +960,7 @@ process sanityCheckLogs {
 	
 }
 
-all_logs_sanity_ch = logs_sanity_ch.mix(regionfilt_sanity_log_ch, gatk_sitefilt_sanity_log_ch, sitefilt_sanity_log_ch, summary_log_ch)
+all_logs_sanity_ch = logs_sanity_ch.mix(regionfilt_log_sanity_ch, gatk_sitefilt_log_sanity_ch, sitefilt_log_sanity_ch, summary_log_ch)
 
 process generateSummaryStats {
 

@@ -2,8 +2,8 @@
 
 #----------------------------------------------------------------------------------------
 # simplify_sorted_bed
-SIMSORTBEDVER = "0.1.1"
-# Michael G. Campana and Ellie E. Armstrong, 2020
+SIMSORTBEDVER = "0.1.2"
+# Michael G. Campana and Ellie E. Armstrong, 2020-2023
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -14,8 +14,8 @@ SIMSORTBEDVER = "0.1.1"
  
 # We politely request that this work be cited as:
 # Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting
-# de novo germline mutations in pedigree sequence data. *bioRxiv*.
-# doi: 10.1101/2022.07.18.500472.
+# de novo germline mutations in pedigree sequence data. Bioinformatics. btac784.
+# 10.1093/bioinformatics/btac784.
 #----------------------------------------------------------------------------------------
 
 # Script to detect and combine overlapping entries in a coordinate-sorted BED file

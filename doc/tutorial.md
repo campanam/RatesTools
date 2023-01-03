@@ -1,6 +1,6 @@
 # RatesTools Tutorial and Test Dataset
 
-__Michael G. Campana and Ellie E. Armstrong, 2019-2022__  
+__Michael G. Campana and Ellie E. Armstrong, 2019-2023__  
 Smithsonian Institution  
 Stanford University  
 
@@ -41,8 +41,10 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2s. `vcftools_site_filters` specifies the site-specific filters using VCFtools [12] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
 2t. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
 2u. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
-2v. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
-2w. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
+2v. `min_contig_length` specifies the minimum length (in bp) of contigs to retain before applying site and region filters.
+2w. `min_filt_contig_length` specifies the minimum length (in bp) of contigs to retain after applying site and region filters.
+2x. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
+2y. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
 
 3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
 

@@ -2,8 +2,8 @@
 
 #----------------------------------------------------------------------------------------
 # nextflow_split
-SPLITNFVCFVER = "0.1.3"
-# Michael G. Campana and Ellie E. Armstrong, 2020
+SPLITNFVCFVER = "0.1.4"
+# Michael G. Campana and Ellie E. Armstrong, 2020-2023
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -14,8 +14,8 @@ SPLITNFVCFVER = "0.1.3"
  
 # We politely request that this work be cited as:
 # Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting
-# de novo germline mutations in pedigree sequence data. *bioRxiv*.
-# doi: 10.1101/2022.07.18.500472.
+# de novo germline mutations in pedigree sequence data. Bioinformatics. btac784.
+# 10.1093/bioinformatics/btac784.
 #----------------------------------------------------------------------------------------
 
 # Script to split VCFs for parallel nextflow, bypassing calculations in other Ruby scripts

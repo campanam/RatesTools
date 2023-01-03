@@ -1,6 +1,6 @@
 # RatesTools Ruby and R Scripts  
 
-__Michael G. Campana & Ellie E. Armstrong, 2019-2022__  
+__Michael G. Campana & Ellie E. Armstrong, 2019-2023__  
 Smithsonian's National Zoo and Conservation Biology Institute  
 Stanford University  
 

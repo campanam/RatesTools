@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 #----------------------------------------------------------------------------------------
-# logstats.sh 0.1.1
-# Michael G. Campana and Ellie E. Armstrong, 2020-2022
+# logstats.sh 0.1.2
+# Michael G. Campana and Ellie E. Armstrong, 2022-2023
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -13,8 +13,8 @@
  
 # We politely request that this work be cited as:
 # Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting
-# de novo germline mutations in pedigree sequence data. *bioRxiv*.
-# doi: 10.1101/2022.07.18.500472.
+# de novo germline mutations in pedigree sequence data. Bioinformatics. btac784.
+# 10.1093/bioinformatics/btac784.
 #----------------------------------------------------------------------------------------
 
 logval=`tail -n2 $1 | head -n1`

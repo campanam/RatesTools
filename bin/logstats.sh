@@ -37,4 +37,4 @@ else
 fi
 # Mimic VCFtools output (Danecek et al. 2011. Bioinformatics. 27(15):2156-8. doi: 10.1093/bioinformatics/btr330).
 echo 'After filtering, kept '$filtval' out of a possible '$allval' Sites'
-if [[ $allval -ge $4 && $filtval -ge $5 ]]; then ln -s $3 ${3}_OK; fi
+if [[ $allval -ge $4 && $filtval -ge $5 ]]; then ln -s $3 ${3%vcf.gz}.OK.vcf.gz; fi

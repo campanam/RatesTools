@@ -35,8 +35,11 @@ The following document provides detailed descriptions of the steps included in t
 26. [calcDNMRate](#calcdnmrate)  
 27. [summarizeDNM](#summarizednm)  
 28. [sanityCheckLogs](#sanitychecklogs)  
-29. [generateSummaryStats](#generatesummarystats)  
-30. [References](#references)  
+29. [sanityCheckLogsVcftools](#sanitychecklogsvcftools)  
+30. [sanityCheckGatk](#sanitychecklogsGatk)  
+31. [sanityCheckLogsRegions](#sanitychecklogsRegions)  
+32. [generateSummaryStats](#generatesummarystats)  
+33. [References](#references)  
 
 ## prepareRef  
 The prepareRef process indexes the reference sequence using `bwa index` [1] (and optionally the specified indexing algorithm) and `samtools faidx` [2]. It also generates a sequence dictionary using `samtools dict`.
@@ -121,6 +124,15 @@ Using [`summarize_denovo.rb`](ruby_r_scripts.md#summarize_denovorb), the summari
 
 ## sanityCheckLogs  
 Retained site counts are sanity-checked and logged after each filtration step using [logstats.sh](ruby_r_scripts.md#logstatssh).  
+
+## sanityCheckLogsVcftools  
+Variant of sanityCheckLogs that removes too short contigs after VCFtools site filtration.  
+
+## sanityCheckLogsGatk  
+Variant of sanityCheckLogs that removes too short contigs after GATK site filtration.  
+
+## sanityCheckLogsRegions 
+Variant of sanityCheckLogs that removes too short contigs after region filtration.  
 
 ## generateSummaryStats  
 Using [`dnm_summary_stats.rb`](ruby_r_scripts.md#dnm_summary_stats.rb), the generate SummaryStats process calculates the numbers of sites retained after each filtration stage in the RatesTools pipeline. It also calculate the number of single-forward DNMs (assuming parental homozygosity) of each mutation class. All other candidate DNMs are aggregated as "Other".  

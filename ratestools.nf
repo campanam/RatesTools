@@ -741,13 +741,13 @@ process gatkFilterSites {
 process sanityCheckLogsGatk {
 	
 	// Sanity check logs for GATK site filtering and remove too short contigs
+	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
 
 	label 'gzip'
 	errorStrategy 'finish'
 
 	input:
 	tuple path(logfile), path(allvcflog), path(filtvcflog) from gatk_sitefilt_log_ch
-	val min_contig_length from params.min_contig_length
 	val min_filt_contig_length from params.min_filt_contig_length
 	
 	output:
@@ -755,7 +755,7 @@ process sanityCheckLogsGatk {
 	path "${filtvcflog.simpleName}.gatksitefilt.OK.vcf.gz" optional true into gatk_sitefilt_vcf_ch
 	
 	"""
-	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log
+	logstats.sh $logfile $allvcflog $filtvcflog 1 $min_filt_contig_length > ${logfile.simpleName}.log
 	"""
 	
 }
@@ -855,13 +855,13 @@ process filterRegions {
 process sanityCheckLogsRegions {
 
 	// Sanity check logs for region filtering and remove too short contigs
+	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
 
 	label 'gzip'
 	errorStrategy 'finish'
 
 	input:
 	tuple path(logfile), path(allvcflog), path(filtvcflog) from regionfilt_log_ch
-	val min_contig_length from params.min_contig_length
 	val min_filt_contig_length from params.min_filt_contig_length
 	
 	output:
@@ -869,7 +869,7 @@ process sanityCheckLogsRegions {
 	path "${filtvcflog.simpleName}.regionfilt.OK.vcf.gz" optional true into regionfilt_vcf_ch
 	
 	"""
-	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log
+	logstats.sh $logfile $allvcflog $filtvcflog 1 $min_filt_contig_length > ${logfile.simpleName}.log
 	"""
 	
 }

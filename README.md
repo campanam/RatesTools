@@ -23,7 +23,7 @@ To the extent possible under law, the Smithsonian Institution and Stanford Unive
 
 ## Citation  
 We politely request that this work be cited as:  
-Armstrong, E.E. & M.G. Campana. 2022. RatesTools: a Nextflow pipeline for detecting *de novo* germline mutations in pedigree sequence data. *Bioinformatics*. btac784. doi: [10.1093/bioinformatics/btac784](https://doi.org/10.1093/bioinformatics/btac784).  
+Armstrong, E.E. & M.G. Campana. 2023. RatesTools: a Nextflow pipeline for detecting *de novo* germline mutations in pedigree sequence data. *Bioinformatics*. 39: btac784. doi: [10.1093/bioinformatics/btac784](https://doi.org/10.1093/bioinformatics/btac784).  
 
 Preprint available on *bioRxiv*. doi: [10.1101/2022.07.18.500472](https://doi.org/10.1101/2022.07.18.500472).  
 

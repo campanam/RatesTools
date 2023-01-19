@@ -932,7 +932,7 @@ process summarizeDNM {
 		val=`grep -n \'#CHROM\' \$sumlog | cut -d \':\' -f 1`
 		total=`wc -l \$sumlog | cut -d \' \' -f 1`
 		let lncount=\$total-\$val
-		if [ $lncount -gt 0 ]; then
+		if [ \$lncount -gt 0 ]; then
 			tail -n \$lncount \$sumlog > tmp.txt
 			cat header.txt tmp.txt | gzip > \${sumlog/_summary.log/_candidates.vcf.gz}
 		else

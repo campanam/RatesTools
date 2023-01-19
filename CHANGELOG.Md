@@ -315,6 +315,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.11  
+Fixed glitch in summarizeDNM when no candidate sites found  
+
 ### Version 0.5.10  
 Update file headers  
 Contig length filtration  

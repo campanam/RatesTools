@@ -916,6 +916,7 @@ process summarizeDNM {
 	path "${params.prefix}*_candidates.vcf.gz" into candidates_vcf_ch
 	
 	"""
+	#!/usr/bin/env bash
 	for file in ${params.prefix}*.log; do 
 		if [ ! -d \${file%_chr*.log} ]; then
 			mkdir \${file%_chr*.log}

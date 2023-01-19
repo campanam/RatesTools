@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.10
+/* RatesTools version 0.5.11
 Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 
@@ -916,6 +916,7 @@ process summarizeDNM {
 	path "${params.prefix}*_candidates.vcf.gz" into candidates_vcf_ch
 	
 	"""
+	#!/usr/bin/env bash
 	for file in ${params.prefix}*.log; do 
 		if [ ! -d \${file%_chr*.log} ]; then
 			mkdir \${file%_chr*.log}
@@ -932,8 +933,13 @@ process summarizeDNM {
 		val=`grep -n \'#CHROM\' \$sumlog | cut -d \':\' -f 1`
 		total=`wc -l \$sumlog | cut -d \' \' -f 1`
 		let lncount=\$total-\$val
-		tail -n \$lncount \$sumlog > tmp.txt
-		cat header.txt tmp.txt | gzip > \${sumlog/_summary.log/_candidates.vcf.gz}
+		if [ \$lncount -gt 0 ]; then
+			tail -n \$lncount \$sumlog > tmp.txt
+			cat header.txt tmp.txt | gzip > \${sumlog/_summary.log/_candidates.vcf.gz}
+		else
+			mv header.txt \${sumlog/_summary.log/_candidates.vcf}
+			gzip \${sumlog/_summary.log/_candidates.vcf}
+		fi
 	done
 	"""
 

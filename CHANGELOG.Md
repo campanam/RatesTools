@@ -315,6 +315,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.12  
+Reduced hard-disk footprint of gatkFilterSites temporary files  
+
 ### Version 0.5.11  
 Fixed glitch in summarizeDNM when no candidate sites found  
 

@@ -260,6 +260,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 0.5.12  
+Added conda.enabled = true  
+
 ### Version 0.5.10  
 Update file headers  
 Contig length filtration  

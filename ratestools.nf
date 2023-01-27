@@ -438,7 +438,8 @@ process repeatMaskRM {
 	else
 		RepeatMasker -pa ${task.cpus} -gccalc -nolow -xsmall -lib consensi.fa.classified ${refseq_masked}
 		# Convert out file into BED for downstream
-		RM2bed.rb ${refseq_masked}.out > ${refseq}.RM.bed
+		cat ${rm_out} ${refseq_masked}.out > tmp.out
+		RM2bed.rb tmp.out > ${refseq}.RM.bed
 	fi
 	"""
 

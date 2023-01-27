@@ -320,6 +320,7 @@ Initial script (plotDPGQ-clean.R)
 ## ratestools  
 ### Version 0.5.12  
 Reduced hard-disk footprint of gatkFilterSites temporary files  
+RepeatMasker soft-masks rather than hard-masks  
 
 ### Version 0.5.11  
 Fixed glitch in summarizeDNM when no candidate sites found  

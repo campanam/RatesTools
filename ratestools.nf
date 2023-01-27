@@ -374,7 +374,7 @@ process repeatMask {
 	path "${refseq}.out" into rm_out_ch
 	
 	"""
-	RepeatMasker -pa ${task.cpus} -gccalc -nolow -species ${rm_species} ${refseq}
+	RepeatMasker -pa ${task.cpus} -gccalc -xsmall -nolow -species ${rm_species} ${refseq}
 	if [ ! -f ${refseq}.masked ]; then # Handling for no repeats detected
 		ln -s ${refseq} ${refseq}.masked
 	fi
@@ -436,7 +436,7 @@ process repeatMaskRM {
 	# If no output from RepeatModeler, use original RepeatMasker results
 		RM2bed.rb ${refseq}.out > ${refseq}.RM.bed
 	else
-		RepeatMasker -pa ${task.cpus} -gccalc -nolow -lib consensi.fa.classified ${refseq_masked}
+		RepeatMasker -pa ${task.cpus} -gccalc -nolow -xsmall -lib consensi.fa.classified ${refseq_masked}
 		# Convert out file into BED for downstream
 		RM2bed.rb ${refseq_masked}.out > ${refseq}.RM.bed
 	fi

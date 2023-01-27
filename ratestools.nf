@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.12
+/* RatesTools version 0.5.13
 Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 
@@ -372,6 +372,7 @@ process repeatMask {
 	output:
 	path "${refseq}.masked" into rm_ref_ch
 	path "${refseq}.out" into rm_out_ch
+	path "${refseq}.tbl"
 	
 	"""
 	RepeatMasker -pa ${task.cpus} -gccalc -xsmall -nolow -species ${rm_species} ${refseq}

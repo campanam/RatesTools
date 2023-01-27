@@ -318,6 +318,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.13  
+Added tbl file of first round of RepeatMasker to retained output  
+
 ### Version 0.5.12  
 Reduced hard-disk footprint of gatkFilterSites temporary files  
 RepeatMasker soft-masks rather than hard-masks  

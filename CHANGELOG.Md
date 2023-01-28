@@ -320,6 +320,7 @@ Initial script (plotDPGQ-clean.R)
 ## ratestools  
 ### Version 0.5.13  
 Added tbl file of first round of RepeatMasker to retained output  
+Fixed RM2bed concatenation glitch in repeatMaskRM
 
 ### Version 0.5.12  
 Reduced hard-disk footprint of gatkFilterSites temporary files  

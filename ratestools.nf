@@ -439,8 +439,9 @@ process repeatMaskRM {
 	else
 		RepeatMasker -pa ${task.cpus} -gccalc -nolow -xsmall -lib consensi.fa.classified ${refseq_masked}
 		# Convert out file into BED for downstream
-		cat ${rm_out} ${refseq_masked}.out > tmp.out
-		RM2bed.rb tmp.out > ${refseq}.RM.bed
+		RM2bed.rb ${rm_out} > tmp.out
+		RM2bed.rb ${refseq_masked}.out > tmp2.out
+		cat ${rm_out} ${refseq_masked}.out | sort  -k1,1 -k2,2n > ${refseq}.RM.bed
 	fi
 	"""
 

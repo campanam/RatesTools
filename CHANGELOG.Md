@@ -260,6 +260,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 0.5.14  
+Set repeatModeler task.cpus = 2 for standard and conda profiles  
+
 ### Version 0.5.12  
 Added conda.enabled = true  
 
@@ -318,6 +321,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.14  
+Added handling for RepeatModeler non-even positive thread requests  
+
 ### Version 0.5.13  
 Added tbl file of first round of RepeatMasker to retained output  
 Fixed RM2bed concatenation glitch in repeatMaskRM

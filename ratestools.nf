@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.13
+/* RatesTools version 0.5.14
 Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 
@@ -401,7 +401,9 @@ process repeatModeler {
 	
 	script:
 	// RepeatModeler adds an extra thread for each core for rmblastn
-	rm_pa = task.cpus / 2
+	// Also correct for non-sensical thread values
+	rm_pa = Math.floor(task.cpus / 2).toInteger()
+	if ( rm_pa < 1 ) { rm_pa = 1 }
 	"""
 	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
 	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft

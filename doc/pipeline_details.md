@@ -123,7 +123,7 @@ Using the region-filtered VCFs output from the filterRegions process, the calcDN
 Using [`summarize_denovo.rb`](ruby_r_scripts.md#summarize_denovorb), the summarizeDNM process combines the per-chromosome mutation rate results from the calcDNMRate process to obtain the genomic mutation rate. It outputs both a log summarizing the candidate DNMs and mutation rate estimates and a VCF of the candidate DNMs.  
 
 ## sanityCheckLogs  
-Retained site counts are sanity-checked and logged after each filtration step using [logstats.sh](ruby_r_scripts.md#logstatssh).  
+Retained site counts are sanity-checked and logged after each filtration step using [`logstats.sh`](ruby_r_scripts.md#logstatssh).  
 
 ## sanityCheckLogsVcftools  
 Variant of sanityCheckLogs that removes too short contigs after VCFtools site filtration.  

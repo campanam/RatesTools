@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.15
+/* RatesTools version 0.5.16
 Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 

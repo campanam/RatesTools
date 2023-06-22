@@ -249,6 +249,9 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## logstats  
+### Version 0.1.3  
+Fixed bug that discarded the unfiltered site total for contigs where all sites were removed  
+
 ### Version 0.1.2  
 Update file headers  
 Contig length filtration  

@@ -321,6 +321,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.5.15  
+Fixed bug in GATK4 pipeline that did not apply GATK site filters appropriately  
+
 ### Version 0.5.14  
 Added handling for RepeatModeler non-even positive thread requests  
 

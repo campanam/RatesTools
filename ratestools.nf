@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.14
+/* RatesTools version 0.5.15
 Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 
@@ -737,7 +737,7 @@ process gatkFilterSites {
 		"""
 		tabix $site_vcf
 		$gatk VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters
-		$gatk SelectVariants -R $refseq -V $site_vcf -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
+		$gatk SelectVariants -R $refseq -V tmp.vcf.gz -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
 		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		tail .command.log > ${site_vcf.simpleName}_gatksitefilt.tmp
 		rm tmp.vcf.gz

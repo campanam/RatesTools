@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.6.0
+/* RatesTools version 1.0.0
 Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 
@@ -184,7 +184,7 @@ process fixMate {
 	errorStrategy 'finish'
 		
 	input:
-	tuple path(filt_bam), tuple(filt_bai)
+	tuple path(filt_bam), path(filt_bai)
 	
 	output:
 	tuple path("${filt_bam.simpleName}.fix.bam"), path("${filt_bam.simpleName}.fix.bai")
@@ -206,7 +206,7 @@ process callVariants {
 		
 	input:
 	tuple path(fix_bam), path(fix_bai)
-	path "*" from bwa_index_ch
+	path "*"
 	
 	output:
 	path "${fix_bam.simpleName}.g.vcf.*"
@@ -265,12 +265,11 @@ process genMapIndex {
 	errorStrategy 'finish'
 	
 	input:
-	path refseq from params.refseq
-	val gm_tmpdir from params.gm_tmpdir
+	path refseq
+	val gm_tmpdir
 	
 	output:
-	path "${refseq.simpleName}_index" into genmap_index_ch
-	path "${refseq.simpleName}_index/*" into genmap_index_files_ch
+	tuple path("$refseq"), path("${refseq.simpleName}_index"), path("${refseq.simpleName}_index/*")
 	
 	"""
 	export TMPDIR=${gm_tmpdir}
@@ -289,15 +288,13 @@ process genMapMap {
 	errorStrategy 'finish'
 	
 	input:
-	path refseq from params.refseq
-	path genmap_index from genmap_index_ch
-	path '*' from genmap_index_files_ch
+	tuple path(refseq), path(genmap_index), path("*")
 	
 	output:
-	path "${refseq.simpleName}_genmap.1.0.bed" into genmap_ch
+	path "${refseq.simpleName}_genmap.1.0.bed"
 	
 	"""
-	genmap map -K 30 -E 2 -T ${task.cpus} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
+	genmap map ${params.gm_opts} -T ${task.cpus} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
 	filterGM.rb ${refseq.simpleName}_genmap.bed 1.0 exclude > ${refseq.simpleName}_genmap.1.0.bed
 	"""
 }
@@ -961,6 +958,7 @@ workflow.onComplete {
 	}
 }
 
+
 workflow {
 	main:
 		// algorithm for BWA index for prepareRef
@@ -986,6 +984,8 @@ workflow {
 		filterBams(realignIndels.out, prepareRef.out) | fixMate
 		callVariants(fixMate.out, prepareRef.out)
 		genotypegVCFs(callVariants.out.collect(), prepareRef.out)
+		
+		genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap
 
 	
 chr_file = file(params.chr_file)

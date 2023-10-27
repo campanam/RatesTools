@@ -15,6 +15,9 @@ Armstrong, E.E. & M.G. Campana. 2023. RatesTools: a Nextflow pipeline for detect
 de novo germline mutations in pedigree sequence data. Bioinformatics. 39: btac784.
 doi: 10.1093/bioinformatics/btac784. */
 
+// algorithm for BWA index for prepareRef
+bwa_alg = { params.bwa_alg == "" ? "" : "-a " + params.bwa_alg + " " }
+
 process prepareRef {
 
 	// Prepare reference sequence for downstream processing
@@ -873,10 +876,11 @@ workflow logRegionSanity {
 		regionSane
 }
 
+
+
 workflow {
 	main:
-		// algorithm for BWA index for prepareRef
-		bwa_alg = { params.bwa_alg == "" ? "" : "-a " + params.bwa_alg + " " }
+		
 		prepareRef(params.refseq)
 }
 /*

@@ -100,7 +100,8 @@ process mergeLibraries {
 	tuple path(bam), val(sample)
 	
 	output:
-	path "${sample}.merged.bam"
+	path "${sample}.merged.bam", emit: bams
+	val(sample), emit: samples
 	
 	script:
 	samtools_extra_threads = task.cpus - 1
@@ -371,7 +372,7 @@ process repeatMaskRM {
 	path rm_lib from rm_lib_ch
 	
 	output:
-	path "${refseq}.masked.*" optional true
+	path "${refseq}.masked.*", optional: true
 	path "${refseq}.RM.bed", emit: RMbed
 	
 	"""
@@ -422,7 +423,7 @@ process simplifyBed {
 	path gm_bed
 	
 	output:
-	path "${prefix}_excluded_reduced.bed" optional true
+	path "${prefix}_excluded_reduced.bed", optional: true
 	
 	"""
 	#!/usr/bin/env bash
@@ -441,32 +442,24 @@ process filterChr {
 	label 'vcftools'
 	label 'bcftools'
 	label  'gzip'
-	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*chrfilt.recode.vcf.gz'
+	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*chrfilt.vcf.gz'
 	errorStrategy 'finish'
 	
 	input:
-	path comb_vcf from combined_vcf_ch
-	val prefix from params.prefix
-	path chrs from chr_file
+	path comb_vcf
+	path chrs
 	
 	output:
-	path "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
-	tuple path('chrfilt.tmp'), path(comb_vcf), path("${prefix}.chrfilt.recode.vcf.gz") optional true into chrfilt_log_ch 
-	
-	script:
-	if (chrs.name == "NULL")
-		"""
-		ln -s $comb_vcf ${prefix}.chrfilt.recode.vcf.gz
-		"""
-	else
-		"""
-		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
-		vcftools --gzvcf $comb_vcf --recode -c \$chr_line | gzip > ${prefix}.chrfilt.recode.vcf.gz
-		cp .command.log chrfilt.tmp
-		"""
-}
+	path "${params.prefix}.chrfilt.recode.vcf.gz", emit: chr_vcf
+	path 'chrfilt.tmp', emit: chr_tmp
 
-filt_sample_ch2 = filt_sample_ch.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
+	"""
+	chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
+	vcftools --gzvcf $comb_vcf --recode -c \$chr_line | gzip > ${params.prefix}.chrfilt.vcf.gz
+	cp .command.log chrfilt.tmp
+	"""
+
+}
 
 process splitTrios {
 	
@@ -475,24 +468,21 @@ process splitTrios {
 	label 'vcftools'
 	label 'gzip'
 	label 'bcftools'
-	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: "${params.prefix}_offspring*.chrfilt.recode.vcf.gz"
+	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: "${params.prefix}_offspring*.vcf.gz"
 	errorStrategy 'finish'
 	
 	input:
-	path chr_vcf from chrfilt_vcf_ch
-	val dam from params.dam
-	val sire from params.sire
-	val prefix from params.prefix
-	val pair_id from filt_sample_ch2
+	path chr_vcf
+	val sample_id
 	path chrs from chr_file
 	
 	output:
-	path "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch, candidate_dnms_header_ch
-	tuple path("${prefix}_offspring${pair_id}_trio.tmp"), path(chr_vcf), path("${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz") into triosplit_log_ch
+	path "${params.prefix}_offspring${sample_id}.vcf.gz", emit: trio_vcf
+	path "${prefix}_offspring${sample_id}_trio.tmp", emit: trio_tmp
 	
 	"""
-	vcftools --gzvcf $chr_vcf --recode -c --indv ${dam} --indv ${sire} --indv ${pair_id} | gzip > ${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz
-	cp .command.log ${prefix}_offspring${pair_id}_trio.tmp
+	vcftools --gzvcf $chr_vcf --recode -c --indv ${params.dam} --indv ${params.sire} --indv ${sample_id} | gzip > ${params.prefix}_offspring${sample_id}.vcf.gz
+	cp .command.log ${params.prefix}_offspring${sample_id}_trio.tmp
 	"""
 
 }
@@ -507,13 +497,13 @@ process pullDPGQ {
 	
 	input:
 	path chrfilt from chrfilt_stats_ch
-	val pair_id from stats_sample_ch
+	val sample_id from stats_sample_ch
 	
 	output:
-	path "${chrfilt.simpleName}_ind${pair_id}.variants.txt" into dp_gq_ch
+	path "${chrfilt.simpleName}_ind${sample_id}.variants.txt"
 	
 	"""
-	bcftools view -v snps ${chrfilt} -s ${pair_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_ind${pair_id}.variants.txt
+	bcftools view -v snps ${chrfilt} -s ${sample_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_ind${sample_id}.variants.txt
 	"""
 
 }
@@ -527,7 +517,7 @@ process plotDPGQ {
 	errorStrategy 'finish'
 	
 	input:
-	path "*.txt" from dp_gq_ch.collect()
+	path "*.txt"
 	
 	output:
 	path "${params.prefix}_*.png"
@@ -873,7 +863,7 @@ process summarizeDNM {
 
 }
 
-all_logs_ch = triosplit_log_ch.mix(chrfilt_log_ch)
+
 
 process sanityCheckLogs {
 
@@ -883,10 +873,12 @@ process sanityCheckLogs {
 	errorStrategy 'finish'
 
 	input:
-	tuple path(logfile), path(allvcflog), path(filtvcflog) from all_logs_ch
+	path(logfile)
+	path(allvcflog)
+	path(filtvcflog)
 	
 	output:
-	path "${logfile.simpleName}.log" into logs_sanity_ch
+	path "${logfile.simpleName}.log"
 	
 	"""
 	logstats.sh $logfile $allvcflog $filtvcflog 0 0 > ${logfile.simpleName}.log
@@ -894,7 +886,7 @@ process sanityCheckLogs {
 	
 }
 
-all_logs_sanity_ch = logs_sanity_ch.mix(regionfilt_log_sanity_ch, gatk_sitefilt_log_sanity_ch, sitefilt_log_sanity_ch, summary_log_ch)
+
 
 process generateSummaryStats {
 
@@ -936,6 +928,17 @@ workflow.onComplete {
 	}
 }
 
+workflow logSanityTrio {
+	// Sanity Check logs from trio splitting
+	take:
+		tmpfile
+		rawvcf
+		filtvcf
+	main:
+		sanityCheckLogs(tmpfile, rawvcf, filtvcf)
+	emit:
+		trio_sanity
+}
 
 workflow {
 	main:
@@ -958,7 +961,7 @@ workflow {
 		
 		alignSeqs(read_data, prepareRef.out) | markDuplicates
 		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
-		realignIndels(mergeLibraries.out, prepareRef.out)
+		realignIndels(mergeLibraries.out.bams, prepareRef.out)
 		filterBams(realignIndels.out, prepareRef.out) | fixMate
 		callVariants(fixMate.out, prepareRef.out)
 		genotypegVCFs(callVariants.out.collect(), prepareRef.out) | maskIndels
@@ -970,8 +973,23 @@ workflow {
 			repeatMaskRM(repeatMask.out.rm1, repeatMask.out.rm1_out, repeatModeler.out)
 			simplifyBed(genMapMap.out, maskIndels.out, repeatMaskRM.out.RMbed)
 		}
-
-	
-chr_file = file(params.chr_file)
-
+		
+		trio_samples = mergeLibraries.out.samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
+		
+		if ( params.chr_file != 'NULL') {
+			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file)
+			// all_logs_ch = triosplit_log_ch.mix(chrfilt_log_ch)
+			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf)
+			splitTrios(filterChr.out.chr_vcf, trio_samples)
+			logSanityTrio(splitTrios.out.tmp, filterChr.out.chr_vcf, splitTrios.out.trio_vcf)
+			log_trio_sanity = sanityCheckLogs.out.mix(logSanityTrio.out.trio_sanity)
+			pullDPGQ(filterChr.out.chr_vcf, mergeLibraries.out.samples)
+		} else {
+			splitTrios(genotypegVCFs.out, trio_samples)
+			logSanityTrio(splitTrios.out.tmp, genotypegVCFs.out, splitTrios.out.tio_vcf)
+			log_trio_sanity = logSanityTrio.out.trio_sanity
+			pullDPGQ(genotypegVCFs.out, mergeLibraries.out.samples)
+		}
+		plotDPGQ(pullDPGQ.out.collect())
+		// all_logs_sanity_ch = log_trio_sanity.mix(regionfilt_log_sanity_ch, gatk_sitefilt_log_sanity_ch, sitefilt_log_sanity_ch, summary_log_ch)
 }

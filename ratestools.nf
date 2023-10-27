@@ -17,6 +17,17 @@ doi: 10.1093/bioinformatics/btac784. */
 
 // algorithm for BWA index for prepareRef
 bwa_alg = { params.bwa_alg == "" ? "" : "-a " + params.bwa_alg + " " }
+// Generate Picard and GATK executable commands
+picard = { params.picard_conda ? "picard " + params.picard_java : "java " + params.picard_java + " -jar " + params.picard }
+if ( params.gatk_conda ) {
+	if ( params.gatk_build == 3 ) {
+		gatk = "gatk3 " + params.gatk_java
+	} else if (params.gatk_build == 4 ) {
+		gatk = 'gatk --java-options "' + params.gatk_java + '" '
+	}
+} else {
+	gatk = "java " + params.gatk_java + " -jar " + params.gatk
+}
 
 process prepareRef {
 
@@ -880,24 +891,8 @@ workflow logRegionSanity {
 
 workflow {
 	main:
-		
 		prepareRef(params.refseq)
-}
-/*
-		// Generate Picard and GATK executable commands
-		picard = { params.picard_conda ? "picard " + params.picard_java : "java " + params.picard_java + " -jar " + params.picard }
-		if ( params.gatk_conda ) {
-			if ( params.gatk_build == 3 ) {
-				gatk = "gatk3 " + params.gatk_java
-			} else if (params.gatk_build == 4 ) {
-				gatk = 'gatk --java-options "' + params.gatk_java + '" '
-			}
-		} else {
-			gatk = "java " + params.gatk_java + " -jar " + params.gatk
-		}
-		
-		read_data = Channel.fromPath(params.reads).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.reads + row.Read1), file(params.reads + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }, prepareRef.out.bwa_index
-		
+		read_data = Channel.fromPath(params.reads).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.reads + row.Read1), file(params.reads + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }
 		alignSeqs(read_data, prepareRef.out) | markDuplicates
 		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
 		realignIndels(mergeLibraries.out.bams, prepareRef.out)

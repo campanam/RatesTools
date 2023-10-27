@@ -709,16 +709,13 @@ process calcDNMRate {
 	publishDir "$params.outdir/13_SplitCalcDNMLogs", mode: 'copy'
 		
 	input:
-	path splitvcf from regionfilt_vcf_ch
-	val sire from params.sire
-	val dam from params.dam
-	val dnm_opts from params.dnm_opts
+	path splitvcf
 	
 	output:
-	path "${splitvcf.simpleName}.log" into split_logs_ch
+	path "${splitvcf.simpleName}.log"
 	
 	"""
-	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} ${dnm_opts} > ${splitvcf.simpleName}.log
+	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${params.sire} -d ${params.dam} ${param.dnm_opts} > ${splitvcf.simpleName}.log
 	"""
 
 }
@@ -733,12 +730,12 @@ process summarizeDNM {
 	publishDir "$params.outdir/14_SummarizeDNMLogs", mode: 'copy'
 		
 	input:
-	path "*" from split_logs_ch.collect()
-	path "*" from candidate_dnms_header_ch.collect()
+	path "*"
+	path "*"
 	
 	output:
-	path "${params.prefix}*_summary.log" into summary_log_ch
-	path "${params.prefix}*_candidates.vcf.gz" into candidates_vcf_ch
+	path "${params.prefix}*_summary.log", emit: log
+	path "${params.prefix}*_candidates.vcf.gz", emit: vcf
 	
 	"""
 	#!/usr/bin/env bash
@@ -876,26 +873,6 @@ workflow logRegionSanity {
 		regionSane
 }
 
-process sanityCheckLogsRegions {
-
-	
-
-	label 'gzip'
-	
-	input:
-	tuple path(logfile), path(allvcflog), path(filtvcflog) from regionfilt_log_ch
-	val min_filt_contig_length from params.min_filt_contig_length
-	
-	output:
-	path "${logfile.simpleName}.log" into regionfilt_log_sanity_ch
-	path "${filtvcflog.simpleName}.regionfilt.OK.vcf.gz" optional true into regionfilt_vcf_ch
-	
-	"""
-	logstats.sh $logfile $allvcflog $filtvcflog 1 $min_filt_contig_length > ${logfile.simpleName}.log
-	"""
-	
-}
-
 workflow {
 	main:
 		// algorithm for BWA index for prepareRef
@@ -953,8 +930,13 @@ workflow {
 		gatkFilterSites(vcftoolsSane.out.ok_vcf,prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
 			filterRegions(gatkSane.out.ok.vcf) | logRegionSanity
-			all_logs_sanity = log_trio_sanity.mix(regionSane.out.log, gatkSane.out.log, vcftoolsSane.out.log, summary_log_ch)
+			calcDNMRate(regionSane.out.ok.vcf)
+			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
+			all_logs_sanity = log_trio_sanity.mix(regionSane.out.log, gatkSane.out.log, vcftoolsSane.out.log, summarizeDNM.out.log).collect()
 		} else {
-			all_logs_sanity = log_trio_sanity.mix(gatkSane.out.log, vcftoolsSane.out.log, summary_log_ch)
+			calcDNMRate(gatkSane.out.ok.vcf)
+			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
+			all_logs_sanity = log_trio_sanity.mix(gatkSane.out.log, vcftoolsSane.out.log, summarizeDNM.out.log).collect()
 		}
+		generateSummaryStats(all_logs_sanity)
 }

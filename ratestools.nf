@@ -67,7 +67,7 @@ process alignSeqs {
 	script:
 	samtools_extra_threads = task.cpus - 1
 	"""
-	bwa mem -t ${task.cpus} ${refseq} -R '${rg}' ${params.refseq} ${reads1} ${reads2} | samtools fixmate -@ ${samtools_extra_threads} -r -m - - | samtools sort -@ ${samtools_extra_threads} -o ${pair_id}_${refseq.simpleName}.bam - 
+	bwa mem -t ${task.cpus} -R '${rg}' ${params.refseq} ${reads1} ${reads2} | samtools fixmate -@ ${samtools_extra_threads} -r -m - - | samtools sort -@ ${samtools_extra_threads} -o ${pair_id}_${refseq.simpleName}.bam - 
 	"""
 	
 }
@@ -894,9 +894,9 @@ workflow {
 		prepareRef(params.refseq)
 		read_data = Channel.fromPath(params.reads).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.reads + row.Read1), file(params.reads + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }
 		alignSeqs(read_data, prepareRef.out) | markDuplicates
+		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
 }
 /*
-		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
 		realignIndels(mergeLibraries.out.bams, prepareRef.out)
 		filterBams(realignIndels.out, prepareRef.out) | fixMate
 		callVariants(fixMate.out, prepareRef.out)

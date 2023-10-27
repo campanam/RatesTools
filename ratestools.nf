@@ -893,7 +893,7 @@ workflow logRegionSanity {
 workflow {
 	main:
 		prepareRef(params.refseq)
-		read_data = Channel.fromPath(params.reads).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.reads + row.Read1), file(params.reads + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }
+		read_data = Channel.fromPath(params.reads).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.readDir + row.Read1), file(params.readDir + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }
 		alignSeqs(read_data, params.refseq, prepareRef.out) | markDuplicates
 		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
 }

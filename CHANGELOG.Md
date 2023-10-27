@@ -324,6 +324,14 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 0.6.0  
+Upgraded to nextflow DSL2  
+Readgroups added and alignment sorted during alignment process  
+Input reads specified via a CSV  
+Automated sample library merging  
+Added samtools markdup as a duplicate option  
+Bumped pipeline software versions  
+
 ### Version 0.5.15  
 Fixed bug in GATK4 pipeline that did not apply GATK site filters appropriately  
 

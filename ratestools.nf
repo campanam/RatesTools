@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.16
+/* RatesTools version 0.6.0
 Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 
@@ -15,33 +15,6 @@ Armstrong, E.E. & M.G. Campana. 2023. RatesTools: a Nextflow pipeline for detect
 de novo germline mutations in pedigree sequence data. Bioinformatics. 39: btac784.
 doi: 10.1093/bioinformatics/btac784. */
 
-nextflow.enable.dsl=1
-
-readpairs_ch = Channel.fromFilePairs(params.reads) // Group read pairs
-// algorithm for BWA index. Next lines make into command-line option for prepareRef
-if ( params.bwa_alg == "" ) {
-	bwa_alg = ""
-} else {
-	bwa_alg = "-a " + params.bwa_alg + " "
-}	
-chr_file = file(params.chr_file)
-
-// Generate Picard and GATK executable commands
-if ( params.picard_conda ) {
-	picard = "picard " + params.picard_java
-} else {
-	picard = "java " + params.picard_java + " -jar " + params.picard
-}
-if ( params.gatk_conda ) {
-	if ( params.gatk_build == 3 ) {
-		gatk = "gatk3 " + params.gatk_java
-	} else if (params.gatk_build == 4 ) {
-		gatk = 'gatk --java-options "' + params.gatk_java + '" '
-	}
-} else {
-	gatk = "java " + params.gatk_java + " -jar " + params.gatk
-}
-
 process prepareRef {
 
 	// Prepare reference sequence for downstream processing
@@ -51,10 +24,10 @@ process prepareRef {
 	errorStrategy 'finish'
 	
 	input:
-	path refseq from params.refseq
+	path refseq
 	
 	output:
-	path "${refseq.baseName}*.{amb,ann,bwt,pac,sa,fai,dict}" into bwa_index_ch // Channel to find these files again
+	path "${refseq.baseName}*.{amb,ann,bwt,pac,sa,fai,dict}"
 	
 	"""
 	bwa index ${bwa_alg}${refseq}
@@ -73,62 +46,44 @@ process alignSeqs {
 	errorStrategy 'finish'
 	
 	input:
-	path refseq from params.refseq
-	tuple val(pair_id), path(reads) from readpairs_ch
-	path "*" from bwa_index_ch
+	tuple val(sample), val(pair_id), path(reads1), path(reads2), val(rg)
+	path "*"
 	
 	output:
-	path "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
-	val pair_id into filt_sample_ch, stats_sample_ch // sample name for downstream use
+	tuple path("${pair_id}_${refseq.simpleName}.bam"), val(sample)
 	
 	script:
 	samtools_extra_threads = task.cpus - 1
 	"""
-	bwa mem -t ${task.cpus} ${refseq} ${reads} | samtools view -@ ${samtools_extra_threads} -bS -o ${pair_id}_${refseq.simpleName}.bam -  
-	"""
-	
-}
-
-process sortBAM {
-
-	// Sort aligned bams
-
-	label 'samtools'
-	errorStrategy 'finish'
-
-	input:
-	path raw_bam from raw_bam_ch
-	
-	output:
-	path "${raw_bam.simpleName}.srt.bam" into sorted_bam_ch
-	
-	script:
-	samtools_extra_threads = task.cpus - 1
-	"""
-	samtools sort -@ ${samtools_extra_threads} ${raw_bam} > ${raw_bam.simpleName}.srt.bam
+	bwa mem -t ${task.cpus} ${refseq} -R '${rg}' ${params.refseq} ${reads1} ${reads2} | samtools fixmate -@ ${samtools_extra_threads} -r -m - - | samtools sort -@ ${samtools_extra_threads} -o ${pair_id}_${refseq.simpleName}.bam - 
 	"""
 	
 }
 
 process markDuplicates {
 
-	// Mark duplicates using sambamba or picard
+	// Mark duplicates using sambamba, samtools or picard
 	
 	label 'sambamba'
+	label 'samtools'
 	label 'picard'
 	errorStrategy 'finish'
 	
 	input:
-	path sorted_bam from sorted_bam_ch
-	val markDuplicates from params.markDuplicates
+	tuple path(sorted_bam), val(sample)
 	
 	output:
-	path "${sorted_bam.simpleName}.markdup.bam" into markdup_bam_ch
+	tuple path("${sorted_bam.simpleName}.markdup.bam"), val(sample)
 	
 	script:
-	if ( markDuplicates == "sambamba" )
+	samtools_extra_threads = task.cpus - 1
+	if ( params.markDuplicates == "sambamba" )
 		"""
 		sambamba markdup ${sorted_bam} ${sorted_bam.simpleName}.markdup.bam
+		"""
+	else if ( params.markDuplicates == "samtools" )
+		"""
+		samtools markdup -@ ${samtools_extra_threads} ${sorted_bam} ${sorted_bam.simpleName}.markdup.bam
 		"""
 	else
 		"""
@@ -137,27 +92,33 @@ process markDuplicates {
 		
 }
 
-process fixReadGroups {
+process mergeLibraries {
 
-	// Fix read groups using picard
-	
-	label 'picard'
-	errorStrategy 'finish'
+	// Merge libraries by their sample IDs using SAMtools merge
 	
 	input:
-	path markdup_bam from markdup_bam_ch
-	path refseq from params.refseq
+	tuple path(bam), val(sample)
 	
 	output:
-	path "${markdup_bam.simpleName}.rg.bam" into rg_bam_ch
+	path "${sample}.merged.bam"
 	
 	script:
-	pair_id = "${markdup_bam.simpleName}".minus("_${refseq.simpleName}")
-	"""
-	$picard AddOrReplaceReadGroups I=${markdup_bam} O=${markdup_bam.simpleName}.rg.bam RGID=$pair_id RGLB=$pair_id RGPL=illumina RGPU=$pair_id RGSM=$pair_id
-	"""
-
-}
+	samtools_extra_threads = task.cpus - 1
+	bams = 0
+	bamlist = ""
+	for (i in bam) {
+		bams++
+		bamlist = bamlist + " " + i
+	}
+	if (bams == 1) // Skip merging single libraries
+		"""
+		ln -s $bamlist ${sample}.merged.bam
+		"""
+	else
+		"""
+		samtools merge -@ ${samtools_extra_threads} ${sample}.merged.bam $bamlist
+		"""
+} 
 
 process realignIndels {
 
@@ -168,26 +129,23 @@ process realignIndels {
 	errorStrategy 'finish'
 	
 	input:
-	path rg_bam from rg_bam_ch
-	path refseq from params.refseq
-	path "*" from bwa_index_ch
+	path rg_bam
+	path "*"
 	
 	output:
-	path "${rg_bam.simpleName}.realn.bam" into realn_bam_ch
-	path "${rg_bam.simpleName}.realn.bai" into realn_bai_ch
-	path "${rg_bam.baseName}.bai"
+	tuple path("${rg_bam.simpleName}.realn.bam"), path("${rg_bam.simpleName}.realn.bai")
 	
 	script:
 	if (params.gatk_build == 3)
 		"""
 		$picard BuildBamIndex I=${rg_bam}
-		$gatk -T RealignerTargetCreator -R ${refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
-		$gatk -T IndelRealigner -R ${refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
+		$gatk -T RealignerTargetCreator -R ${params.refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
+		$gatk -T IndelRealigner -R ${params.refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		$picard BuildBamIndex I=${rg_bam}
-		$gatk LeftAlignIndels -R ${refseq} -I $rg_bam -O ${rg_bam.simpleName}.realn.bam
+		$gatk LeftAlignIndels -R ${params.refseq} -I $rg_bam -O ${rg_bam.simpleName}.realn.bam
 		"""
 
 }
@@ -200,19 +158,16 @@ process filterBAMs {
 	errorStrategy 'finish'
 	
 	input:
-	path refseq from params.refseq
-	path realn_bam from realn_bam_ch
-	path realn_bai from realn_bai_ch
-	path "*" from bwa_index_ch
+	tuple path(realn_bam, realn_bai)
+	path "*"
 	
 	output:
-	path "${realn_bam.simpleName}.filt.bam" into filt_bam_ch
-	path "${realn_bam.simpleName}.filt.bai" into filt_bai_ch
+	tuple path("${realn_bam.simpleName}.filt.bam"), path("${realn_bam.simpleName}.filt.bai")
 	
 	script:
 	if (params.gatk_build == 3)
 		"""
-		$gatk -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${task.cpus} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
+		$gatk -R ${params.refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${task.cpus} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
 		"""
 	else if (params.gatk_build == 4)
 		"""
@@ -229,12 +184,10 @@ process fixMate {
 	errorStrategy 'finish'
 		
 	input:
-	path filt_bam from filt_bam_ch
-	path filt_bai from filt_bai_ch
+	tuple path(filt_bam), tuple(filt_bai)
 	
 	output:
-	path "${filt_bam.simpleName}.fix.bam" into fix_bam_ch
-	path "${filt_bam.simpleName}.fix.bai" into fix_bai_ch
+	tuple path("${filt_bam.simpleName}.fix.bam"), path("${filt_bam.simpleName}.fix.bai")
 	
 	"""
 	$picard FixMateInformation I=${filt_bam} O=${filt_bam.simpleName}.fix.bam ADD_MATE_CIGAR=true
@@ -252,22 +205,20 @@ process callVariants {
 	errorStrategy 'finish'
 		
 	input:
-	path refseq from params.refseq
-	path fix_bam from fix_bam_ch
-	path fix_bai from fix_bai_ch
+	tuple path(fix_bam), path(fix_bai)
 	path "*" from bwa_index_ch
 	
 	output:
-	path "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch
+	path "${fix_bam.simpleName}.g.vcf.*"
 	
 	script:
 	if (params.gatk_build == 3)
 		"""
-		$gatk -T HaplotypeCaller -nct ${task.cpus} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
+		$gatk -T HaplotypeCaller -nct ${task.cpus} -R ${params.refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
 		"""
 	else if (params.gatk_build == 4)
 		"""
-		$gatk HaplotypeCaller -R $refseq -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
+		$gatk HaplotypeCaller -R ${params.refseq} -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
 		"""
 
 }
@@ -284,30 +235,25 @@ process genotypegVCFs {
 	errorStrategy 'finish'
 	
 	input:
-	path refseq from params.refseq
-	path "*" from bwa_index_ch
-	path "*" from var_vcf_ch.collect()
-	val prefix from params.prefix
+	path("*")
+	path("*")
 	
 	output:
-	path "${prefix}_combined.vcf*"
-	path "${prefix}_combined.vcf.gz" into combined_vcf_ch, combined_indels_ch
+	path "${params.prefix}_combined.vcf.gz"
 	
 	script:
 	if (params.gatk_build == 3)
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		$gatk -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o ${prefix}_combined.vcf
-		gzip ${prefix}_combined.vcf
+		$gatk -T GenotypeGVCFs -R ${params.refseq} --includeNonVariantSites\$VARPATH -o >(gzip > ${params.prefix}_combined.vcf.gz)
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		$gatk CombineGVCFs -R $refseq -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
-		$gatk GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O ${prefix}_combined.vcf
-		gzip ${prefix}_combined.vcf
+		$gatk CombineGVCFs -R ${params.refseq} -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
+		$gatk GenotypeGVCFs -R ${params.refseq}--include-non-variant-sites -V tmp.g.vcf.gz -O >(gzip > ${params.prefix}_combined.vcf.gz)
 		"""
 }
 
@@ -1013,4 +959,35 @@ workflow.onComplete {
 			sendMail(to: params.email, subject: 'RatesTools terminated with errors', body: "RatesTools pipeline terminated with errors at $workflow.complete.\nError message: $workflow.errorMessage")
 		}
 	}
+}
+
+workflow {
+	main:
+		// algorithm for BWA index for prepareRef
+		bwa_alg = { params.bwa_alg == "" ? "" : "-a " + params.bwa_alg + " " }
+		prepareRef(params.refseq)
+		// Generate Picard and GATK executable commands
+		picard = { params.picard_conda ? "picard " + params.picard_java : "java " + params.picard_java + " -jar " + params.picard }
+		if ( params.gatk_conda ) {
+			if ( params.gatk_build == 3 ) {
+				gatk = "gatk3 " + params.gatk_java
+			} else if (params.gatk_build == 4 ) {
+				gatk = 'gatk --java-options "' + params.gatk_java + '" '
+			}
+		} else {
+			gatk = "java " + params.gatk_java + " -jar " + params.gatk
+		}
+		
+		read_data = Channel.fromPath(params.reads).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.reads + row.Read1), file(params.reads + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }, prepareRef.out.bwa_index
+		
+		alignSeqs(read_data, prepareRef.out) | markDuplicates
+		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
+		realignIndels(mergeLibraries.out, prepareRef.out)
+		filterBams(realignIndels.out, prepareRef.out) | fixMate
+		callVariants(fixMate.out, prepareRef.out)
+		genotypegVCFs(callVariants.out.collect(), prepareRef.out)
+
+	
+chr_file = file(params.chr_file)
+
 }

@@ -878,6 +878,8 @@ workflow {
 		// algorithm for BWA index for prepareRef
 		bwa_alg = { params.bwa_alg == "" ? "" : "-a " + params.bwa_alg + " " }
 		prepareRef(params.refseq)
+}
+/*
 		// Generate Picard and GATK executable commands
 		picard = { params.picard_conda ? "picard " + params.picard_java : "java " + params.picard_java + " -jar " + params.picard }
 		if ( params.gatk_conda ) {
@@ -939,4 +941,4 @@ workflow {
 			all_logs_sanity = log_trio_sanity.mix(gatkSane.out.log, vcftoolsSane.out.log, summarizeDNM.out.log).collect()
 		}
 		generateSummaryStats(all_logs_sanity)
-}
+} */

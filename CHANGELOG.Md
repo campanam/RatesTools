@@ -167,6 +167,9 @@ Redundant methods (Parser, gz_open_file) moved to denovolib
 gz_open_file improved to version in BaitsTools 1.6.6  
 
 ## dnm_summary_stats  
+### Version 0.2.0  
+Updated for ratestools 1.0.0  
+
 ### Version 0.1.1  
 Update file headers  
 

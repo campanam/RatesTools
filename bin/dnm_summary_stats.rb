@@ -133,9 +133,13 @@ else
 	puts "Individual,AllSites,ChrSites,TrioSites,VCFtoolsFiltSites,GATKFiltSites,RegionFiltSites"
 	outindivs = []
 	for indiv in $individuals
-		extract_site_count($vcf_filtsites, '_sitefilt.log', indiv)
-		extract_site_count($gatk_filtsites, '_gatksitefilt.log', indiv)
-		extract_site_count($regionsites, '_regionfilt.log', indiv)
+		extract_site_count($vcf_filtsites, '.sitefilt.log', indiv)
+		extract_site_count($gatk_filtsites, '.gatksitefilt.log', indiv)
+		if FileTest.exist?(ARGV[0]+ "/*regionfilt.log") # Handling for when region filters are turned off
+			extract_site_count($regionsites, '.regionfilt.log', indiv)
+		else
+			$regionsites = $gatk_filtsites
+		end
 		outindiv = indiv.gsub(ARGV[1] + "_offspring", "")
 		outindivs.push(outindiv)
 		puts outindiv + "," + $allsites + "," + $chrsites + "," + $triosites[indiv].to_s + "," + $vcf_filtsites[indiv].to_s + "," + $gatk_filtsites[indiv].to_s + "," + $regionsites[indiv].to_s

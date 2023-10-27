@@ -415,6 +415,8 @@ process simplifyBed {
 	cat ${indel_bed} ${rm_bed} ${gm_bed} | sort -k1,1 -k2,2n > tmp.bed
 	if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 		bedtools merge -i tmp.bed > ${params.prefix}_excluded_reduced.bed
+	else
+		touch ${params.prefix}_excluded_reduced.bed
 	fi
 	"""
 
@@ -623,11 +625,11 @@ process filterRegions {
 	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy', pattern: '*regionfilt.vcf.gz'
 	
 	input:
-	path site_vcf from gatk_sitefilt_vcf_ch
+	path site_vcf
 	path exclude_bed from exclude_bed_ch
 	
 	output:
-	tuple path("${site_vcf.simpleName}_regionfilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.regionfilt.vcf.gz") into regionfilt_log_ch
+	tuple path("${site_vcf.simpleName}_regionfilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.regionfilt.vcf.gz")
 	
 	script:
 	chr = site_vcf.simpleName.split('_chr')[1]
@@ -697,27 +699,6 @@ process filterRegions {
 		fi
 		"""
 
-}
-
-process sanityCheckLogsRegions {
-
-	// Sanity check logs for region filtering and remove too short contigs
-	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
-
-	label 'gzip'
-	
-	input:
-	tuple path(logfile), path(allvcflog), path(filtvcflog) from regionfilt_log_ch
-	val min_filt_contig_length from params.min_filt_contig_length
-	
-	output:
-	path "${logfile.simpleName}.log" into regionfilt_log_sanity_ch
-	path "${filtvcflog.simpleName}.regionfilt.OK.vcf.gz" optional true into regionfilt_vcf_ch
-	
-	"""
-	logstats.sh $logfile $allvcflog $filtvcflog 1 $min_filt_contig_length > ${logfile.simpleName}.log
-	"""
-	
 }
 
 process calcDNMRate {
@@ -884,6 +865,37 @@ workflow logGatkSanity {
 		gatkSane
 }
 
+workflow logRegionSanity {
+	// Sanity check logs for region filtering and remove too short contigs
+	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
+	take:
+		data
+	main:
+		sanityCheckLogs(data[0], data[1], data[2], 1, params.min_filt_contig_length)
+	emit:
+		regionSane
+}
+
+process sanityCheckLogsRegions {
+
+	
+
+	label 'gzip'
+	
+	input:
+	tuple path(logfile), path(allvcflog), path(filtvcflog) from regionfilt_log_ch
+	val min_filt_contig_length from params.min_filt_contig_length
+	
+	output:
+	path "${logfile.simpleName}.log" into regionfilt_log_sanity_ch
+	path "${filtvcflog.simpleName}.regionfilt.OK.vcf.gz" optional true into regionfilt_vcf_ch
+	
+	"""
+	logstats.sh $logfile $allvcflog $filtvcflog 1 $min_filt_contig_length > ${logfile.simpleName}.log
+	"""
+	
+}
+
 workflow {
 	main:
 		// algorithm for BWA index for prepareRef
@@ -939,5 +951,10 @@ workflow {
 		splitVCFs(spliTrios.out.trio_vcf)
 		vcftoolsFilterSites(splitVCFs.out.flatten()) | logVcftoolsSanity
 		gatkFilterSites(vcftoolsSane.out.ok_vcf,prepareRef.out) | logGatkSanity
-		// all_logs_sanity_ch = log_trio_sanity.mix(regionfilt_log_sanity_ch, gatkSane.out.log, vcftoolsSane.out.log, summary_log_ch)
+		if (params.region_filter) { 
+			filterRegions(gatkSane.out.ok.vcf) | logRegionSanity
+			all_logs_sanity = log_trio_sanity.mix(regionSane.out.log, gatkSane.out.log, vcftoolsSane.out.log, summary_log_ch)
+		} else {
+			all_logs_sanity = log_trio_sanity.mix(gatkSane.out.log, vcftoolsSane.out.log, summary_log_ch)
+		}
 }

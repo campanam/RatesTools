@@ -309,16 +309,16 @@ process repeatMask {
 	publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
 	
 	input:
-	path refseq from params.refseq
-	val rm_species from params.rm_species
+	path refseq
+	val rm_species
 	
 	output:
-	path "${refseq}.masked" into rm_ref_ch
-	path "${refseq}.out" into rm_out_ch
+	path("${refseq}.masked"), emit: rm1
+	path("${refseq}.out"), emit: rm1_out
 	path "${refseq}.tbl"
 	
 	"""
-	RepeatMasker -pa ${task.cpus} -gccalc -xsmall -nolow -species ${rm_species} ${refseq}
+	RepeatMasker -pa ${task.cpus} ${params.rm_mask_opts} -species ${rm_species} ${refseq}
 	if [ ! -f ${refseq}.masked ]; then # Handling for no repeats detected
 		ln -s ${refseq} ${refseq}.masked
 	fi
@@ -335,12 +335,10 @@ process repeatModeler {
 	publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
 	
 	input:
-	path refseq from params.refseq
-	path refseq_masked from rm_ref_ch
+	path(refseq_masked)
 	
 	output:
-	path "**consensi.fa.classified" into rm_lib_ch
-	path refseq_masked into rm_ref_ch2
+	path "**consensi.fa.classified"
 	
 	script:
 	// RepeatModeler adds an extra thread for each core for rmblastn
@@ -348,8 +346,8 @@ process repeatModeler {
 	rm_pa = Math.floor(task.cpus / 2).toInteger()
 	if ( rm_pa < 1 ) { rm_pa = 1 }
 	"""
-	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
-	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
+	BuildDatabase -name ${refseq_masked.baseName}-soft ${refseq_masked}
+	RepeatModeler -pa ${rm_pa} ${params.rm_model_opts} -database ${refseq_masked.baseName}-soft
 	if [ ! -f */consensi.fa.classified ]; then 
 		mkdir dummy # For fake library
 		touch dummy/consensi.fa.classified
@@ -368,25 +366,24 @@ process repeatMaskRM {
 	publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
 	
 	input:
-	path refseq from params.refseq
+	path refseq_masked
+	path rm_out
 	path rm_lib from rm_lib_ch
-	path rm_out from rm_out_ch
-	path refseq_masked from rm_ref_ch2
 	
 	output:
 	path "${refseq}.masked.*" optional true
-	path "${refseq}.RM.bed" into rm_bed_ch
+	path "${refseq}.RM.bed", emit: RMbed
 	
 	"""
 	if [ "\$(wc -l < consensi.fa.classified)" -eq 0 ]; then
 	# If no output from RepeatModeler, use original RepeatMasker results
-		RM2bed.rb ${refseq}.out > ${refseq}.RM.bed
+		RM2bed.rb ${rm_out} > ${refseq_masked.simpleName}.RM.bed
 	else
-		RepeatMasker -pa ${task.cpus} -gccalc -nolow -xsmall -lib consensi.fa.classified ${refseq_masked}
+		RepeatMasker -pa ${task.cpus} ${params.rm_mask_opts} -lib consensi.fa.classified ${refseq_masked}
 		# Convert out file into BED for downstream
 		RM2bed.rb ${rm_out} > tmp.out
 		RM2bed.rb ${refseq_masked}.out > tmp2.out
-		cat tmp.out tmp2.out | sort  -k1,1 -k2,2n > ${refseq}.RM.bed
+		cat tmp.out tmp2.out | sort  -k1,1 -k2,2n > ${refseq_masked.simpleName}.RM.bed
 	fi
 	"""
 
@@ -400,14 +397,13 @@ process maskIndels {
 	errorStrategy 'finish'
 	
 	input:
-	path combo_vcf from combined_indels_ch
-	val indelpad from params.indelpad
+	path combo_vcf
 	
 	output:
-	path "${combo_vcf.simpleName}_indels.bed" into indels_ch
+	path "${combo_vcf.simpleName}_indels.bed"
 	
 	"""
-	indels2bed.rb ${combo_vcf} $indelpad > ${combo_vcf.simpleName}_indels.bed
+	indels2bed.rb ${combo_vcf} ${params.indelpad} > ${combo_vcf.simpleName}_indels.bed
 	"""
 
 }
@@ -416,41 +412,23 @@ process simplifyBed {
 
 	// Reduce number of unique BED entries using simplify_bed
 	
-	label 'ruby'
+	label 'bedtools'
 	errorStrategy 'finish'
 	publishDir "$params.outdir/05_ExcludedRegions", mode: 'copy'
 	
 	input:
-	path indel_bed from indels_ch
-	path rm_bed from rm_bed_ch
-	path gm_bed from genmap_ch
-	val prefix from params.prefix
+	path indel_bed
+	path rm_bed
+	path gm_bed
 	
 	output:
-	path "${prefix}_excluded_reduced.bed" into exclude_bed_ch
+	path "${prefix}_excluded_reduced.bed" optional true
 	
 	"""
 	#!/usr/bin/env bash
-	if [ ! "\$(wc -l < ${indel_bed})" -eq 0 ]; then
-		simplify_sorted_bed.rb ${indel_bed} > ${indel_bed.baseName}_sorted.bed
-	else
-		ln -s ${indel_bed} ${indel_bed.baseName}_sorted.bed
-	fi
-	if [ ! "\$(wc -l < ${rm_bed})" -eq 0 ]; then
-		simplify_sorted_bed.rb ${rm_bed} > ${rm_bed.baseName}_sorted.bed
-	else
-		ln -s ${rm_bed} ${rm_bed.baseName}_sorted.bed
-	fi
-	if [ ! "\$(wc -l < ${gm_bed})" -eq 0 ]; then
-		simplify_sorted_bed.rb ${gm_bed} > ${gm_bed.baseName}_sorted.bed
-	else
-		ln -s ${gm_bed} ${gm_bed.baseName}_sorted.bed
-	fi
-	cat ${indel_bed.baseName}_sorted.bed ${rm_bed.baseName}_sorted.bed ${gm_bed.baseName}_sorted.bed > ${prefix}_excluded.bed
-	if [ ! "\$(wc -l < ${prefix}_excluded.bed)" -eq 0 ]; then
-		simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
-	else
-		ln -s ${prefix}_excluded.bed ${prefix}_excluded_reduced.bed
+	cat ${indel_bed} ${rm_bed} ${gm_bed} | sort -k1,1 -k2,2n > tmp.bed
+	if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
+		bedtools merge -i tmp.bed > ${params.prefix}_excluded_reduced.bed
 	fi
 	"""
 
@@ -983,9 +961,15 @@ workflow {
 		realignIndels(mergeLibraries.out, prepareRef.out)
 		filterBams(realignIndels.out, prepareRef.out) | fixMate
 		callVariants(fixMate.out, prepareRef.out)
-		genotypegVCFs(callVariants.out.collect(), prepareRef.out)
+		genotypegVCFs(callVariants.out.collect(), prepareRef.out) | maskIndels
 		
-		genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap
+		if (params.region_filter) {
+			genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap
+			repeatMask(params.refseq, params.rm_species)
+			repeatModeler(repeatMask.out.rm1)
+			repeatMaskRM(repeatMask.out.rm1, repeatMask.out.rm1_out, repeatModeler.out)
+			simplifyBed(genMapMap.out, maskIndels.out, repeatMaskRM.out.RMbed)
+		}
 
 	
 chr_file = file(params.chr_file)

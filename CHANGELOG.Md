@@ -332,6 +332,10 @@ Automated sample library merging
 Added samtools markdup as a duplicate option  
 Bumped pipeline software versions  
 Added GenMap mapping option parameter  
+Added RepeatMasker and RepeatModeler options parameters  
+BED simplification now uses BEDtools  
+simplify_bed and simplify_sorted_bed removed  
+Added option to ignore region filtration  
 
 ### Version 0.5.15  
 Fixed bug in GATK4 pipeline that did not apply GATK site filters appropriately  
@@ -445,35 +449,6 @@ Outputs usage if no parameters specified
 ### Version 0.1.0  
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
-## simplify_bed  
-### Version 0.2.2  
-Update file headers  
-
-### Version 0.2.1  
-Improved gz_file_open using yield  
-
-### Version 0.2.0  
-Complete rewrite of sorting/merging algorithm to use intervals (~8x faster)  
-
-### Version 0.1.2  
-Status output to stderr  
-Redundant sites not added to array to hopefully improve performance  
-
-### Version 0.1.1  
-Code commented  
-
-### Version 0.1.0  
-Initial script to combine overlapping BED entries for region inclusion/exclusion  
-
-## simplify_sorted_bed  
-### Version 0.1.2  
-Update file headers  
-
-### Version 0.1.1  
-Improved gz_file_open using yield  
-
-### Version 0.1.0  
-Script to merge adjacent BED regions in a coordinate-sorted BED file to reduce simplify_bed memory use and compute time  
 
 ## summarize_denovo  
 ### Version 0.5.6  
@@ -511,6 +486,40 @@ Concatenates headerless VCF results of identified de novo mutations
 Initial script to summarize parallelized de novo rate calculations  
 
 ## Deprecated  
+
+## simplify_bed  
+Removed in RatesTools version 1.0.0
+
+### Version 0.2.2  
+Update file headers  
+
+### Version 0.2.1  
+Improved gz_file_open using yield  
+
+### Version 0.2.0  
+Complete rewrite of sorting/merging algorithm to use intervals (~8x faster)  
+
+### Version 0.1.2  
+Status output to stderr  
+Redundant sites not added to array to hopefully improve performance  
+
+### Version 0.1.1  
+Code commented  
+
+### Version 0.1.0  
+Initial script to combine overlapping BED entries for region inclusion/exclusion  
+
+## simplify_sorted_bed  
+Removed in RatesTools version 1.0.0  
+
+### Version 0.1.2  
+Update file headers  
+
+### Version 0.1.1  
+Improved gz_file_open using yield  
+
+### Version 0.1.0  
+Script to merge adjacent BED regions in a coordinate-sorted BED file to reduce simplify_bed memory use and compute time  
 
 ## makefile  
 Removed in RatesTools version 0.5.7  

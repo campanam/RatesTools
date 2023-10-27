@@ -336,6 +336,7 @@ Added RepeatMasker and RepeatModeler options parameters
 BED simplification now uses BEDtools  
 simplify_bed and simplify_sorted_bed removed  
 Added option to ignore region filtration  
+errorStrategy calls moved to configuration file for easier manipulation  
 
 ### Version 0.5.15  
 Fixed bug in GATK4 pipeline that did not apply GATK site filters appropriately  

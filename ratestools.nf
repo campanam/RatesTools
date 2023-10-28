@@ -141,9 +141,9 @@ process realignIndels {
 	label 'gatk'
 	label 'picard'
 	
-	if (params.filter_bams) {
+	//if (params.filter_bams) {
 		publishDir  "$params.outdir/01_FinalBAMs", mode: 'copy'
-	}
+	//}
 		
 	input:
 	path rg_bam

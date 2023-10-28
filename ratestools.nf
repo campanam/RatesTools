@@ -143,6 +143,7 @@ process realignIndels {
 		
 	input:
 	path rg_bam
+	path refseq
 	path "*"
 	
 	output:
@@ -152,13 +153,13 @@ process realignIndels {
 	if (params.gatk_build == 3)
 		"""
 		$picard BuildBamIndex I=${rg_bam}
-		$gatk -T RealignerTargetCreator -R ${params.refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
-		$gatk -T IndelRealigner -R ${params.refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
+		$gatk -T RealignerTargetCreator -R ${refseq} -I ${rg_bam} -o ${rg_bam.baseName}.intervals
+		$gatk -T IndelRealigner -R ${refseq} --filter_bases_not_stored -I ${rg_bam} -targetIntervals ${rg_bam.baseName}.intervals -o ${rg_bam.simpleName}.realn.bam
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		$picard BuildBamIndex I=${rg_bam}
-		$gatk LeftAlignIndels -R ${params.refseq} -I $rg_bam -O ${rg_bam.simpleName}.realn.bam
+		$gatk LeftAlignIndels -R ${refseq} -I $rg_bam -O ${rg_bam.simpleName}.realn.bam
 		"""
 
 }
@@ -171,6 +172,7 @@ process filterBAMs {
 		
 	input:
 	tuple path(realn_bam), path(realn_bai)
+	path refseq
 	path "*"
 	
 	output:
@@ -179,7 +181,7 @@ process filterBAMs {
 	script:
 	if (params.gatk_build == 3)
 		"""
-		$gatk -R ${params.refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${task.cpus} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
+		$gatk -R ${refseq} -T PrintReads -I ${realn_bam} -o ${realn_bam.simpleName}.filt.bam -nct ${task.cpus} --read_filter BadCigar --read_filter DuplicateRead --read_filter FailsVendorQualityCheck --read_filter HCMappingQuality --read_filter MappingQualityUnavailable --read_filter NotPrimaryAlignment --read_filter UnmappedRead --filter_bases_not_stored --filter_mismatching_base_and_quals
 		"""
 	else if (params.gatk_build == 4)
 		"""
@@ -216,6 +218,7 @@ process callVariants {
 			
 	input:
 	tuple path(fix_bam), path(fix_bai)
+	path refseq
 	path "*"
 	
 	output:
@@ -224,11 +227,11 @@ process callVariants {
 	script:
 	if (params.gatk_build == 3)
 		"""
-		$gatk -T HaplotypeCaller -nct ${task.cpus} -R ${params.refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
+		$gatk -T HaplotypeCaller -nct ${task.cpus} -R ${refseq} -A DepthPerSampleHC -A Coverage -A HaplotypeScore -A StrandAlleleCountsBySample -I ${fix_bam} -o ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -out_mode EMIT_ALL_SITES
 		"""
 	else if (params.gatk_build == 4)
 		"""
-		$gatk HaplotypeCaller -R ${params.refseq} -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
+		$gatk HaplotypeCaller -R ${refseq} -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
 		"""
 
 }
@@ -244,8 +247,9 @@ process genotypegVCFs {
 	publishDir "$params.outdir/03_CombinedVCF", mode: 'copy'
 		
 	input:
-	path("*")
-	path("*")
+	path "*"
+	path refseq
+	path "*"
 	
 	output:
 	path "${params.prefix}_combined.vcf.gz"
@@ -255,14 +259,14 @@ process genotypegVCFs {
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		$gatk -T GenotypeGVCFs -R ${params.refseq} --includeNonVariantSites\$VARPATH -o >(gzip > ${params.prefix}_combined.vcf.gz)
+		$gatk -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o >(gzip > ${params.prefix}_combined.vcf.gz)
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		$gatk CombineGVCFs -R ${params.refseq} -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
-		$gatk GenotypeGVCFs -R ${params.refseq}--include-non-variant-sites -V tmp.g.vcf.gz -O >(gzip > ${params.prefix}_combined.vcf.gz)
+		$gatk CombineGVCFs -R ${refseq} -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
+		$gatk GenotypeGVCFs -R ${refseq}--include-non-variant-sites -V tmp.g.vcf.gz -O >(gzip > ${params.prefix}_combined.vcf.gz)
 		"""
 }
 
@@ -897,10 +901,10 @@ workflow {
 		read_data = Channel.fromPath(params.libraries).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.readDir + row.Read1), file(params.readDir + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }
 		alignSeqs(read_data, params.refseq, prepareRef.out) | markDuplicates
 		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
-		realignIndels(mergeLibraries.out.bams, prepareRef.out)
-		filterBAMs(realignIndels.out, prepareRef.out) | fixMate
-		callVariants(fixMate.out, prepareRef.out)
-		genotypegVCFs(callVariants.out.collect(), prepareRef.out) | maskIndels
+		realignIndels(mergeLibraries.out.bams, params.refseq, prepareRef.out)
+		filterBAMs(realignIndels.out, params.refseq, prepareRef.out) | fixMate
+		callVariants(fixMate.out, params.refseq, prepareRef.out)
+		genotypegVCFs(callVariants.out.collect(), params.refseq, prepareRef.out) | maskIndels
 }
 /*
 		

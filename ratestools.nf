@@ -270,7 +270,7 @@ process genotypegVCFs {
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
 		$gatk CombineGVCFs -R ${refseq} -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
-		$gatk GenotypeGVCFs -R ${refseq}--include-non-variant-sites -V tmp.g.vcf.gz -O >(gzip > ${params.prefix}_combined.vcf.gz)
+		$gatk GenotypeGVCFs -R ${refseq} --include-non-variant-sites -V tmp.g.vcf.gz -O >(gzip > ${params.prefix}_combined.vcf.gz)
 		"""
 }
 
@@ -912,11 +912,8 @@ workflow {
 		} else {
 			callVariants(realignIndels.out, params.refseq, prepareRef.out)
 		}
-}
-/*
 		genotypegVCFs(callVariants.out.collect(), params.refseq, prepareRef.out) | maskIndels
-
-		
+	
 		if (params.region_filter) {
 			genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap
 			repeatMask(params.refseq, params.rm_species)
@@ -925,6 +922,8 @@ workflow {
 			simplifyBed(genMapMap.out, maskIndels.out, repeatMaskRM.out.RMbed)
 		}
 		
+}
+/*
 		trio_samples = mergeLibraries.out.samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
 		
 		if ( params.chr_file != 'NULL') {

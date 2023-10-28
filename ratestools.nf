@@ -141,9 +141,9 @@ process realignIndels {
 	label 'gatk'
 	label 'picard'
 	
-	//if (params.filter_bams) {
+	if (params.filter_bams) {
 		publishDir  "$params.outdir/01_FinalBAMs", mode: 'copy'
-	//}
+	}
 		
 	input:
 	path rg_bam
@@ -906,7 +906,7 @@ workflow {
 		alignSeqs(read_data, params.refseq, prepareRef.out) | markDuplicates
 		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
 		realignIndels(mergeLibraries.out.bams, params.refseq, prepareRef.out)
-		if params.filter_bams {
+		if (params.filter_bams) {
 			filterBAMs(realignIndels.out, params.refseq, prepareRef.out) | fixMate
 			callVariants(fixMate.out, params.refseq, prepareRef.out)
 		} else {

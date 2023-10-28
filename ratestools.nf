@@ -16,9 +16,10 @@ de novo germline mutations in pedigree sequence data. Bioinformatics. 39: btac78
 doi: 10.1093/bioinformatics/btac784. */
 
 // algorithm for BWA index for prepareRef
+
 bwa_alg = { params.bwa_alg == "" ? "" : "-a " + params.bwa_alg + " " }
 // Generate Picard and GATK executable commands
-picard = { params.picard_conda ? "picard " + params.picard_java : "java " + params.picard_java + " -jar " + params.picard }
+params.picard_conda ? picard = "picard " + params.picard_java : picard = "java " + params.picard_java + " -jar " + params.picard
 if ( params.gatk_conda ) {
 	if ( params.gatk_build == 3 ) {
 		gatk = "gatk3 " + params.gatk_java

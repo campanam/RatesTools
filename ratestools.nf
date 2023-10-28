@@ -898,7 +898,7 @@ workflow {
 		alignSeqs(read_data, params.refseq, prepareRef.out) | markDuplicates
 		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
 		realignIndels(mergeLibraries.out.bams, prepareRef.out)
-		filterBams(realignIndels.out, prepareRef.out) | fixMate
+		filterBAMs(realignIndels.out, prepareRef.out) | fixMate
 		callVariants(fixMate.out, prepareRef.out)
 		genotypegVCFs(callVariants.out.collect(), prepareRef.out) | maskIndels
 }

@@ -170,7 +170,7 @@ process filterBAMs {
 	label 'gatk'
 		
 	input:
-	tuple path(realn_bam, realn_bai)
+	tuple path(realn_bam), path(realn_bai)
 	path "*"
 	
 	output:

@@ -17,9 +17,9 @@ doi: 10.1093/bioinformatics/btac784. */
 
 // algorithm for BWA index for prepareRef
 
-bwa_alg = { params.bwa_alg == "" ? "" : "-a " + params.bwa_alg + " " }
+if (params.bwa_alg == "") { bwa_alg = "" } else { bwa_alg = "-a " + params.bwa_alg + " " }
 // Generate Picard and GATK executable commands
-params.picard_conda ? picard = "picard " + params.picard_java : picard = "java " + params.picard_java + " -jar " + params.picard
+if (params.picard_conda) { picard = "picard " + params.picard_java} else { picard = "java " + params.picard_java + " -jar " + params.picard }
 if ( params.gatk_conda ) {
 	if ( params.gatk_build == 3 ) {
 		gatk = "gatk3 " + params.gatk_java
@@ -29,6 +29,7 @@ if ( params.gatk_conda ) {
 } else {
 	gatk = "java " + params.gatk_java + " -jar " + params.gatk
 }
+println bwa_alg
 println picard
 println gatk
 

@@ -897,12 +897,12 @@ workflow {
 		read_data = Channel.fromPath(params.libraries).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.readDir + row.Read1), file(params.readDir + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }
 		alignSeqs(read_data, params.refseq, prepareRef.out) | markDuplicates
 		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
-}
-/*
 		realignIndels(mergeLibraries.out.bams, prepareRef.out)
 		filterBams(realignIndels.out, prepareRef.out) | fixMate
 		callVariants(fixMate.out, prepareRef.out)
 		genotypegVCFs(callVariants.out.collect(), prepareRef.out) | maskIndels
+}
+/*
 		
 		if (params.region_filter) {
 			genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap

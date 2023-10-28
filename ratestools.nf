@@ -380,7 +380,7 @@ process repeatMaskRM {
 	input:
 	path refseq_masked
 	path rm_out
-	path rm_lib from rm_lib_ch
+	path rm_lib
 	
 	output:
 	path "${refseq}.masked.*", optional: true

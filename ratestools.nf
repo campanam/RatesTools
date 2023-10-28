@@ -130,7 +130,7 @@ process mergeLibraries {
 		"""
 	else
 		"""
-		samtools merge -@ ${samtools_extra_threads} ${sample}.merged.bam $bamlist
+		samtools merge -@ ${samtools_extra_threads} -o ${sample}.merged.bam $bamlist
 		"""
 } 
 

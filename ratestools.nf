@@ -141,9 +141,7 @@ process realignIndels {
 	label 'gatk'
 	label 'picard'
 	
-	if (params.filter_bams) {
-		publishDir  "$params.outdir/01_FinalBAMs", mode: 'copy'
-	}
+	publishDir  "$params.outdir/01_FinalBAMs", mode: 'copy', pattern: { params.filter_bams ? "${rg_bam.simpleName}.realn.ba*" : "${rg_bam.simpleName}.realn.null.bam" }
 		
 	input:
 	path rg_bam

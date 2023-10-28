@@ -29,9 +29,6 @@ if ( params.gatk_conda ) {
 } else {
 	gatk = "java " + params.gatk_java + " -jar " + params.gatk
 }
-println bwa_alg
-println picard
-println gatk
 
 process prepareRef {
 

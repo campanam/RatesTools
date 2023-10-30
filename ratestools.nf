@@ -263,14 +263,16 @@ process genotypegVCFs {
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		$gatk -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o >(gzip > ${params.prefix}_combined.vcf.gz)
+		$gatk -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o ${params.prefix}_combined.vcf
+		gzip ${params.prefix}_combined.vcf
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
 		$gatk CombineGVCFs -R ${refseq} -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
-		$gatk GenotypeGVCFs -R ${refseq} --include-non-variant-sites -V tmp.g.vcf.gz -O >(gzip > ${params.prefix}_combined.vcf.gz)
+		$gatk GenotypeGVCFs -R ${refseq} --include-non-variant-sites -V tmp.g.vcf.gz -O ${params.prefix}_combined.vcf
+		gzip ${params.prefix}_combined.vcf
 		"""
 }
 

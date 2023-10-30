@@ -89,12 +89,12 @@ Execute the script: `bash configure.sh`
 To specify sample and library information to RatesTools, provide a CSV with the following header and information:  
 
 Sample,Library,Read1,Read2  
-<samp1>,<lib1>,<lib1.R1.fq.gz>,<lib1.R2.fq.gz>   
-<samp2>,<lib2>,<lib2.R1.fq.gz>,<lib2.R2.fq.gz>   
-<samp2>,<lib3>,<lib3.R1.fq.gz>,<lib3.R2.fq.gz>   
+\<samp1\>,\<lib1\>,\<lib1.R1.fq.gz\>,\<lib1.R2.fq.gz\>   
+\<samp2\>,\<lib2\>,\<lib2.R1.fq.gz\>,\<lib2.R2.fq.gz\>   
+\<samp2\>,\<lib3\>,\<lib3.R1.fq.gz\>,\<lib3.R2.fq.gz\>   
 ...  
 
-`Sample` designates the unique sample name, `Library` is the unique library name (multiple libraries can correspond to the same sample). `Read1` and `Read2` are the forward and reverse read files (FASTQ format) respectively.  
+`Sample` designates the unique sample name. `Library` is the unique library name (multiple libraries can correspond to the same sample). `Read1` and `Read2` are the forward and reverse read files (FASTQ format) respectively.  
 
 RatesTools assumes bidirectional sequencing for each library, but allows for multiple sequenced libraries per individual. RatesTools will merge the libraries by sample name assuming the libraries are independent. If an individual library has been sequenced multiple times, concatenate the reads from the library and treat as a single bidirectionally sequenced file.  
 

@@ -341,6 +341,8 @@ simplify_bed and simplify_sorted_bed removed
 Added option to ignore region filtration  
 errorStrategy calls moved to configuration file for easier manipulation  
 Added option to bypass BAM filtering  
+Conda installs now use Mamba by default  
+RepeatModeler process updated for RepeatMasker 2.0.5  
 
 ### Version 0.5.15  
 Fixed bug in GATK4 pipeline that did not apply GATK site filters appropriately  

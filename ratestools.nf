@@ -343,6 +343,7 @@ process repeatMask {
 process repeatModeler {
 
 	// RepeatModeler on soft-masked reference
+	// Requires RepeatModeler 2.0.5
 	
 	label 'repeatmodeler'
 		publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
@@ -353,14 +354,9 @@ process repeatModeler {
 	output:
 	path "**consensi.fa.classified"
 	
-	script:
-	// RepeatModeler adds an extra thread for each core for rmblastn
-	// Also correct for non-sensical thread values
-	rm_pa = Math.floor(task.cpus / 2).toInteger()
-	if ( rm_pa < 1 ) { rm_pa = 1 }
 	"""
 	BuildDatabase -name ${refseq_masked.baseName}-soft ${refseq_masked}
-	RepeatModeler -pa ${rm_pa} ${params.rm_model_opts} -database ${refseq_masked.baseName}-soft
+	RepeatModeler -threads ${task.cpus} ${params.rm_model_opts} -database ${refseq_masked.baseName}-soft
 	if [ ! -f */consensi.fa.classified ]; then 
 		mkdir dummy # For fake library
 		touch dummy/consensi.fa.classified

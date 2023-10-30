@@ -381,8 +381,8 @@ process repeatMaskRM {
 	path rm_lib
 	
 	output:
-	path "${refseq}.masked.*", optional: true
-	path "${refseq}.RM.bed", emit: RMbed
+	path "${refseq_masked}.masked.*", optional: true
+	path "${refseq_masked}.RM.bed", emit: RMbed
 	
 	"""
 	if [ "\$(wc -l < consensi.fa.classified)" -eq 0 ]; then

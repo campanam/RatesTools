@@ -115,16 +115,6 @@ RM2bed.rb converts a RepeatMasker [4] out file into a bed for later exclusion of
 
 Usage: `RM2bed.rb <in_RM.txt[.gz]> > <out.bed>`.  
 
-## simplify_bed.rb  
-simplify_bed.rb merges overlapping entries in a bed file. It does not assume the input bed file is chromosome/contig- and coordinate-sorted, and therefore takes more computing resources and time to perform the merging than the [simplify_sorted_bed.rb](#simplify_sorted_bed.rb) script. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
-
-Usage: `simplify_bed.rb <in.bed[.gz]> > <out.bed>`.  
-
-## simplify_sorted_bed.rb  
-simplify_sorted_bed.rb merges overlapping entries in a chromosome/contig- and coordinate-sorted bed file. For an unsorted bed file, use the [simplify_sorted_bed.rb](#simplify_sorted_bed.rb) script. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
-
-Usage: `simplify_sorted_bed.rb <in.bed[.gz]> > <out.bed>`.  
-
 ## summarize_denovo.rb  
 summarize_denovo.rb calculates the genomic DNM rate from a directory of per-chromosome calc_denovo_mutation_rate.rb logs.  
 

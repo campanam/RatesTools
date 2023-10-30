@@ -6,7 +6,7 @@ Stanford University
 
 Pipeline to calculate de novo mutation rates from parent-offspring trios  
 
-This README provides basic details for installing, configuring and running the pipeline. Detailed documentation is available for the [Ruby and R scripts](doc/ruby_r_scripts.md) included in this package and for the [pipeline's operation](doc/pipeline_details.md). Test data are provided in the [Smithsonian Institution Figshare repository](https://dx.doi.org/10.25573/data.20250288) and a tutorial is available [here](doc/tutorial.md).  
+This README provides basic details for installing, configuring and running the pipeline. Please note that as of version 1.0.0, RatesTools has upgraded to Nextflow DSL2. For the original DSL1 pipeline, please see versions <=0.5.16. Detailed documentation is available for the [Ruby and R scripts](doc/ruby_r_scripts.md) included in this package and for the [pipeline's operation](doc/pipeline_details.md). Test data are provided in the [Smithsonian Institution Figshare repository](https://dx.doi.org/10.25573/data.20250288) and a tutorial is available [here](doc/tutorial.md).  
 
 ## Table of Contents  
 1. [Creative Commons 0 Waiver](#creative-commons-0-waiver)  
@@ -28,17 +28,17 @@ Armstrong, E.E. & M.G. Campana. 2023. RatesTools: a Nextflow pipeline for detect
 Preprint available on *bioRxiv*. doi: [10.1101/2022.07.18.500472](https://doi.org/10.1101/2022.07.18.500472).  
 
 ## Conda-Assisted Installation  
-We provide a configuration profile "conda" in the default configuration file (`nextflow.config`) that installs all dependencies using [Conda](https://docs.conda.io/en/latest/). Using this profile, the user only needs to install [Nextflow](https://www.nextflow.io/) [1], Conda and the RatesTools pipeline:  
+We provide a configuration profile "conda" in the default configuration file (`nextflow.config`) that installs all dependencies using [Conda](https://docs.conda.io/en/latest/). As of RatesTools 1.0.0, we recommend (and default to) the use of [Mamba](https://mamba.readthedocs.io/en/latest/) for environment construction. Using this profile, the user only needs to install [Nextflow](https://www.nextflow.io/) [1], Conda/Mamba and the RatesTools pipeline:  
 
 Install Nextflow: `curl -s https://get.nextflow.io | bash`  
-Install Conda: See installation instructions [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)  
+Install Conda (and/or Mamba): See installation instructions [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and [here](https://mamba.readthedocs.io/en/latest/installation.html#installation)  
 Pull the current version of the RatesTools pipeline: `nextflow pull campanam/RatesTools -r main`  
 
 ## Manual Pipeline Installation  
 We explicitly list software dependencies here as no installation system (e.g. via Conda or containerization) is universally supported across all computing architectures.  
 
 ### Install Nextflow, Ruby and R  
-RatesTools requires [Nextflow](https://www.nextflow.io/) [1] v. >= 20.10.0, [Ruby](http://www.ruby-lang.org) v. >= 2.6.3, [R](https://www.r-project.org/) [2] v. 4.0.2 and [Bash](https://www.gnu.org/software/bash/) v. >= 4.2.46(2)-release. Basic instructions for installing these languages are copied below. We recommend installing Ruby using the [Ruby Version Manager](https://rvm.io). See the official language documentation should you need help installing these languages.  
+RatesTools requires [Nextflow](https://www.nextflow.io/) [1] v. >= 23.10.0, [Ruby](http://www.ruby-lang.org) v. >= 3.2.2, [R](https://www.r-project.org/) [2] v. 4.0.2 and [Bash](https://www.gnu.org/software/bash/) v. >= 4.2.46(2)-release. Basic instructions for installing these languages are copied below. We recommend installing Ruby using the [Ruby Version Manager](https://rvm.io). See the official language documentation should you need help installing these languages.  
 
 Install Nextflow: `curl -s https://get.nextflow.io | bash`   
 Install the latest Ruby using Ruby Version Manager: `curl -sSL https://get.rvm.io | bash -s stable --ruby`  
@@ -49,25 +49,25 @@ Pull the current version of the pipeline: `nextflow pull campanam/RatesTools -r 
 To specify another RatesTools release, replace `main` with the RatesTools release version (e.g. `v0.5.7`).  
 
 ### Install the External Dependencies  
-RatesTools requires the following external dependencies. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] v. 3.8-1 or v. >= 4.2.3.0 and Java v. 1.8 (due to GATK). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize [Environment Modules](http://modules.sourceforge.net/) modulefiles to simplify deployment on computing clusters and limit dependency conflicts (See the [tutorial](doc/tutorial.md)).  
+RatesTools requires the following external dependencies. See the documentation for these programs for their installation requirements. RatesTools requires the Genome Analysis Toolkit (GATK) [3] v. 3.8-1 or v. >= 4.4.0.0 and Java v. 1.8 (GATK3) or v. 1.17 (GATK4). Currently, RatesTools is not compatible with other versions of Java. Otherwise, listed versions are those that have been tested and confirmed, but other versions may work. RatesTools can utilize [Environment Modules](http://modules.sourceforge.net/) modulefiles to simplify deployment on computing clusters and limit dependency conflicts (See the [tutorial](doc/tutorial.md)).  
 
 * gzip  
 * awk  
 * sed  
 * zcat  
 * [BWA](http://bio-bwa.sourceforge.net/) [4] v. 0.7.17  
-* [SAMtools](http://www.htslib.org/) [5,6] v. 1.9  
-* [BCFtools](http://www.htslib.org/) [5,6] v. 1.9  
-* [bgzip and tabix from HTSlib](http://www.htslib.org/) [6] v. 1.9  
-* [Java](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html) v. 1.8  
-* [Picard](https://broadinstitute.github.io/picard/) [7] v. 2.23.8  
-* [Sambamba](https://lomereiter.github.io/sambamba/) [8] v. 0.7.1 or v. 0.8.2  
-* [Genome Analysis Toolkit](https://github.com/broadgsa/gatk) v. 3.8-1 or 4.2.3.0  
+* [SAMtools](http://www.htslib.org/) [5,6] v. 1.18  
+* [BCFtools](http://www.htslib.org/) [5,6] v. 1.18  
+* [bgzip and tabix from HTSlib](http://www.htslib.org/) [6] v. 1.18  
+* [Java](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html) v. 1.8 (GATK3) or v. 1.17 (GATK4)  
+* [Picard](https://broadinstitute.github.io/picard/) [7] v. 2.23.8 (GATK3) or v. 3.1.07 (GATK4)  
+* [Sambamba](https://lomereiter.github.io/sambamba/) [8] v. v. 0.8.2  
+* [Genome Analysis Toolkit (GAKTK)](https://github.com/broadgsa/gatk) v. 3.8-1 or 4.4.0.0  
 * [VCFtools](https://vcftools.github.io/index.html) [9] v.0.1.16  
 * [GenMap](https://github.com/cpockrandt/genmap) [10] v.1.2.0 with [SeqAn](https://github.com/seqan/seqan/tree/f548b50705be3f824a65a696943ea90a390564ce) [11] v. 2.4.1  
-* [RepeatMasker](http://www.repeatmasker.org/) [12] v. 4.0.9 or v. 4.1.2  
-* [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) [13] v. 2.0.1  
-* [BEDTools](https://bedtools.readthedocs.io/en/latest/) [14] v. 2.28.0  
+* [RepeatMasker](http://www.repeatmasker.org/) [12] v. 4.1.5   
+* [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) [13] v. 2.0.5  
+* [BEDTools](https://bedtools.readthedocs.io/en/latest/) [14] v. 2.31.0  
 
 RatesTools requires the following R packages installed in your R environment:  
 * [tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) [16] v. 1.0.7  and [ggplot2](https://ggplot2.tidyverse.org/) [17] v. 3.3.5.
@@ -85,12 +85,18 @@ Move the files: `mv RatesTools/*config* /some/path/`
 Change to the specified directory: `cd /some/path`  
 Execute the script: `bash configure.sh`  
 
-### Specifying Read Pairs  
-Please note that RatesTools automatically detects read pairs using globbing and the Nextflow Channel.fromFilePairs() method (https://www.nextflow.io/docs/latest/channel.html#fromfilepairs). The user will need to specify a globbing pattern corresponding to the data. RatesTools also assumes that the sample name (e.g. for the sire and dam) is the shared portion of the read pair file name, excluding text after the first difference or specified in the globbing pattern. It may be ideal to rename your reads to minimize the extraneous information in the read name (e.g. lane information). For instance, using a typical Illumina naming scheme:
+### Specifying Library Information  
+To specify sample and library information to RatesTools, provide a CSV with the following header and information:  
 
-Using the globbing pattern `*{R1,R2}_001.fastq.gz`:  
-Read pairs `LION1_S01_L001_R1_001.fastq.gz` and `LION1_S01_L001_R2_001.fastq.gz` will be matched and have the sample name `LION1_S01_L001_`.  
-Renaming the files to `LION1R1_001.fastq.gz` and `LION1R2_001.fastq.gz` will match these reads with the cleaner name `LION1`.  
+Sample,Library,Read1,Read2  
+<samp1>,<lib1>,<lib1.R1.fq.gz>,<lib1.R2.fq.gz>   
+<samp2>,<lib2>,<lib2.R1.fq.gz>,<lib2.R2.fq.gz>   
+<samp2>,<lib3>,<lib3.R1.fq.gz>,<lib3.R2.fq.gz>   
+...  
+
+`Sample` designates the unique sample name, `Library` is the unique library name (multiple libraries can correspond to the same sample). `Read1` and `Read2` are the forward and reverse read files (FASTQ format) respectively.  
+
+RatesTools assumes bidirectional sequencing for each library, but allows for multiple sequenced libraries per individual. RatesTools will merge the libraries by sample name assuming the libraries are independent. If an individual library has been sequenced multiple times, concatenate the reads from the library and treat as a single bidirectionally sequenced file.  
 
 ### Platform-Specific Configuration  
 Given the wide-variety of computing architectures and operating systems, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes an example of a 'standard' [configuration profile](https://www.nextflow.io/docs/latest/config.html#config-profiles) for a local installation using modulefiles and a 'conda' configuration that installs all dependencies using Conda. Example configuration profiles for the analyses described in [Armstrong & Campana 2022](https://doi.org/10.1101/2022.07.18.500472) are provided in the [Figshare repository](https://dx.doi.org/10.25573/data.20250288). Please consult your computing staff to optimize the profile settings for your hardware. We recommend storing configuration profiles in a system-wide central location for access by all users.  

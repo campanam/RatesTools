@@ -458,7 +458,7 @@ process filterChr {
 	path chrs
 	
 	output:
-	path "${params.prefix}.chrfilt.recode.vcf.gz", emit: chr_vcf
+	path "${params.prefix}.chrfilt.vcf.gz", emit: chr_vcf
 	path 'chrfilt.tmp', emit: chr_tmp
 
 	"""

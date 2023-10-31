@@ -912,7 +912,6 @@ workflow {
 			callVariants(realignIndels.out, params.refseq, prepareRef.out)
 		}
 		genotypegVCFs(callVariants.out.collect(), params.refseq, prepareRef.out) | maskIndels
-	
 		if (params.region_filter) {
 			genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap
 			repeatMask(params.refseq, params.rm_species)
@@ -920,9 +919,7 @@ workflow {
 			repeatMaskRM(repeatMask.out.rm1, repeatMask.out.rm1_out, repeatModeler.out)
 			simplifyBed(genMapMap.out, maskIndels.out, repeatMaskRM.out.RMbed)
 		}
-		
 		trio_samples = mergeLibraries.out.samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
-		
 		if ( params.chr_file != 'NULL') {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
@@ -936,11 +933,8 @@ workflow {
 			log_trio_sanity = logSanityTrio.out.sanelog
 			pullDPGQ(genotypegVCFs.out, mergeLibraries.out.samples)
 		}
-		
-}
-/*
 		plotDPGQ(pullDPGQ.out.collect())
-		splitVCFs(spliTrios.out.trio_vcf)
+		splitVCFs(splitTrios.out.trio_vcf)
 		vcftoolsFilterSites(splitVCFs.out.flatten()) | logVcftoolsSanity
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf,prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
@@ -954,4 +948,4 @@ workflow {
 			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log).collect()
 		}
 		generateSummaryStats(all_logs_sanity)
-} */
+}

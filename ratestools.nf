@@ -918,7 +918,8 @@ workflow {
 		}
 		all_samples = read_data.map {it -> it[0]}.unique())
 		trio_samples = all_samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
-} /*
+}
+/*
 
 		if ( params.chr_file != 'NULL') {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))

@@ -924,8 +924,7 @@ workflow {
 		trio_samples = mergeLibraries.out.samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
 		
 		if ( params.chr_file != 'NULL') {
-			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file)
-			// all_logs_ch = triosplit_log_ch.mix(chrfilt_log_ch)
+			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
 			splitTrios(filterChr.out.chr_vcf, trio_samples)
 			logSanityTrio(splitTrios.out.tmp, filterChr.out.chr_vcf, splitTrios.out.trio_vcf)

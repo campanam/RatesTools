@@ -908,6 +908,7 @@ workflow {
 		} else {
 			callVariants(realignIndels.out, params.refseq, prepareRef.out)
 		}
+} /*
 		genotypegVCFs(callVariants.out.collect(), params.refseq, prepareRef.out) | maskIndels
 		if (params.region_filter) {
 			genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap
@@ -919,7 +920,7 @@ workflow {
 		all_samples = read_data.map {it -> it[0]}.unique())
 		trio_samples = all_samples.filter { it != params.sire && it != params.dam }) // Need new channel after filtering this one to remove dam and sire from offspring lists
 
-} /*
+
 		if ( params.chr_file != 'NULL') {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)

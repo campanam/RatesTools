@@ -858,6 +858,9 @@ workflow logSanityTrio {
 		filtvcf
 	main:
 		sanityCheckLogs(tmpfile, rawvcf, filtvcf, 0, 0)
+	emit:
+		log = sanityCheckLogs.out.log
+		ok_vcf = sanityCheckLogs.out.ok_vcf
 }
 
 workflow logVcftoolsSanity {

@@ -482,7 +482,7 @@ process splitTrios {
 	
 	output:
 	path "${params.prefix}_offspring${sample_id}.vcf.gz", emit: trio_vcf
-	path "${prefix}_offspring${sample_id}_trio.tmp", emit: trio_tmp
+	path "${params.prefix}_offspring${sample_id}_trio.tmp", emit: trio_tmp
 	
 	"""
 	vcftools --gzvcf $chr_vcf --recode -c --indv ${params.dam} --indv ${params.sire} --indv ${sample_id} | gzip > ${params.prefix}_offspring${sample_id}.vcf.gz

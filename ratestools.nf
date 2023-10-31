@@ -859,7 +859,7 @@ workflow logSanityTrio {
 	main:
 		sanityCheckLogs(tmpfile, rawvcf, filtvcf, 0, 0)
 	emit:
-		trio_sanity
+		trio_sanity = sanityChecklogs.out
 }
 
 workflow logVcftoolsSanity {
@@ -869,7 +869,7 @@ workflow logVcftoolsSanity {
 	main:
 		sanityCheckLogs(data[0], data[1], data[2], params.min_contig_length, params.min_filt_contig_length)
 	emit:
-		vcftoolsSane
+		vcftoolsSane = sanityChecklogs.out
 }
 
 workflow logGatkSanity {
@@ -880,7 +880,7 @@ workflow logGatkSanity {
 	main:
 		sanityCheckLogs(data[0], data[1], data[2], 1, params.min_filt_contig_length)
 	emit:
-		gatkSane
+		gatkSane = sanityChecklogs.out
 }
 
 workflow logRegionSanity {
@@ -891,7 +891,7 @@ workflow logRegionSanity {
 	main:
 		sanityCheckLogs(data[0], data[1], data[2], 1, params.min_filt_contig_length)
 	emit:
-		regionSane
+		regionSane = sanityChecklogs.out
 }
 
 
@@ -926,12 +926,12 @@ workflow {
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
 			splitTrios(filterChr.out.chr_vcf, trio_samples)
 			logSanityTrio(splitTrios.out.trio_tmp, filterChr.out.chr_vcf, splitTrios.out.trio_vcf)
-			log_trio_sanity = sanityCheckLogs.out.mix(logSanityTrio.trio_sanity)
+			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.trio_sanity.log)
 			pullDPGQ(filterChr.out.chr_vcf, mergeLibraries.out.samples)
 		} else {
 			splitTrios(genotypegVCFs.out, trio_samples)
 			logSanityTrio(splitTrios.out.trio_tmp, genotypegVCFs.out, splitTrios.out.trio_vcf)
-			log_trio_sanity = logSanityTrio.trio_sanity
+			log_trio_sanity = logSanityTrio.out.trio_sanity.log
 			pullDPGQ(genotypegVCFs.out, mergeLibraries.out.samples)
 		}
 		
@@ -940,16 +940,16 @@ workflow {
 		plotDPGQ(pullDPGQ.out.collect())
 		splitVCFs(spliTrios.out.trio_vcf)
 		vcftoolsFilterSites(splitVCFs.out.flatten()) | logVcftoolsSanity
-		gatkFilterSites(vcftoolsSane.out.ok_vcf,prepareRef.out) | logGatkSanity
+		gatkFilterSites(vcftoolsSane.ok_vcf,prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
-			filterRegions(gatkSane.out.ok.vcf) | logRegionSanity
-			calcDNMRate(regionSane.out.ok.vcf)
+			filterRegions(gatkSane.ok_vcf) | logRegionSanity
+			calcDNMRate(regionSane.ok_vcf)
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.mix(regionSane.out.log, gatkSane.out.log, vcftoolsSane.out.log, summarizeDNM.out.log).collect()
+			all_logs_sanity = log_trio_sanity.mix(regionSane.log, gatkSane.log, vcftoolsSane.log, summarizeDNM.out.log).collect()
 		} else {
 			calcDNMRate(gatkSane.out.ok.vcf)
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.mix(gatkSane.out.log, vcftoolsSane.out.log, summarizeDNM.out.log).collect()
+			all_logs_sanity = log_trio_sanity.mix(gatkSane.log, vcftoolsSane.log, summarizeDNM.out.log).collect()
 		}
 		generateSummaryStats(all_logs_sanity)
 } */

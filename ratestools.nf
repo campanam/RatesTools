@@ -113,8 +113,7 @@ process mergeLibraries {
 	tuple path(bam), val(sample)
 	
 	output:
-	path "${sample}.merged.bam", emit: bams
-	val(sample), emit: samples
+	path "${sample}.merged.bam"
 	
 	script:
 	samtools_extra_threads = task.cpus - 1
@@ -902,17 +901,9 @@ workflow {
 	main:
 		prepareRef(params.refseq)
 		read_data = Channel.fromPath(params.libraries).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.readDir + row.Read1), file(params.readDir + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }
-all_samples = read_data.map {it -> it[0]}.unique()
-		trio_samples = all_samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
-
-all_samples.view()
-trio_samples.view()
-
-} /*
-
 		alignSeqs(read_data, params.refseq, prepareRef.out) | markDuplicates
 		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
-		realignIndels(mergeLibraries.out.bams, params.refseq, prepareRef.out)
+		realignIndels(mergeLibraries.out, params.refseq, prepareRef.out)
 		if (params.filter_bams) {
 			filterBAMs(realignIndels.out, params.refseq, prepareRef.out) | fixMate
 			callVariants(fixMate.out, params.refseq, prepareRef.out)
@@ -935,15 +926,14 @@ trio_samples.view()
 			splitTrios(filterChr.out.chr_vcf, trio_samples)
 			logSanityTrio(splitTrios.out.trio_tmp, filterChr.out.chr_vcf, splitTrios.out.trio_vcf)
 			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.sanelog)
-			pullDPGQ(filterChr.out.chr_vcf, mergeLibraries.out.samples)
+			pullDPGQ(filterChr.out.chr_vcf, all_samples)
 		} else {
 			splitTrios(genotypegVCFs.out, trio_samples)
 			logSanityTrio(splitTrios.out.trio_tmp, genotypegVCFs.out, splitTrios.out.trio_vcf)
 			log_trio_sanity = logSanityTrio.out.sanelog
-			pullDPGQ(genotypegVCFs.out, mergeLibraries.out.samples)
+			pullDPGQ(genotypegVCFs.out, all_samples)
 		}
-		plotDPGQ(pullDPGQ.out.collect())
-		
+		plotDPGQ(pullDPGQ.out.collect())	
 		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
@@ -957,4 +947,4 @@ trio_samples.view()
 			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log).collect()
 		}
 		generateSummaryStats(all_logs_sanity)
-}*/
+}

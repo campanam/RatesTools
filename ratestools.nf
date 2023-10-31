@@ -921,7 +921,8 @@ workflow {
 		}
 		
 }
-		trio_samples = mergeLibraries.out.samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
+		println(read_data[0])
+		//trio_samples = mergeLibraries.out.samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
 		
 		if ( params.chr_file != 'NULL') {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))

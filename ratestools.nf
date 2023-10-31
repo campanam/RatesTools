@@ -925,12 +925,12 @@ workflow {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
 			splitTrios(filterChr.out.chr_vcf, trio_samples)
-			logSanityTrio(splitTrios.out.tmp, filterChr.out.chr_vcf, splitTrios.out.trio_vcf)
+			logSanityTrio(splitTrios.out.trio_tmp, filterChr.out.chr_vcf, splitTrios.out.trio_vcf)
 			log_trio_sanity = sanityCheckLogs.out.mix(logSanityTrio.out.trio_sanity)
 			pullDPGQ(filterChr.out.chr_vcf, mergeLibraries.out.samples)
 		} else {
 			splitTrios(genotypegVCFs.out, trio_samples)
-			logSanityTrio(splitTrios.out.tmp, genotypegVCFs.out, splitTrios.out.trio_vcf)
+			logSanityTrio(splitTrios.out.trio_tmp, genotypegVCFs.out, splitTrios.out.trio_vcf)
 			log_trio_sanity = logSanityTrio.out.trio_sanity
 			pullDPGQ(genotypegVCFs.out, mergeLibraries.out.samples)
 		}

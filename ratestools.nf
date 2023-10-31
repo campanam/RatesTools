@@ -921,7 +921,6 @@ workflow {
 		}
 		
 }
-/*
 		trio_samples = mergeLibraries.out.samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
 		
 		if ( params.chr_file != 'NULL') {
@@ -938,7 +937,7 @@ workflow {
 			log_trio_sanity = logSanityTrio.out.trio_sanity
 			pullDPGQ(genotypegVCFs.out, mergeLibraries.out.samples)
 		}
-		
+/*
 		plotDPGQ(pullDPGQ.out.collect())
 		splitVCFs(spliTrios.out.trio_vcf)
 		vcftoolsFilterSites(splitVCFs.out.flatten()) | logVcftoolsSanity

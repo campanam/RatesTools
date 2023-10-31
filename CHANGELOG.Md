@@ -101,6 +101,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 1.0.0  
+Updated for RatesTools v. 1.0.0  
+
 ### Version 0.5.10  
 Update file headers  
 Contig length filtration  

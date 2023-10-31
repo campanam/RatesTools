@@ -859,7 +859,7 @@ workflow logSanityTrio {
 	main:
 		sanityCheckLogs(tmpfile, rawvcf, filtvcf, 0, 0)
 	emit:
-		trio_sanity = sanityChecklogs.out
+		trio_sanity = sanityCheckLogs.out
 }
 
 workflow logVcftoolsSanity {
@@ -869,7 +869,7 @@ workflow logVcftoolsSanity {
 	main:
 		sanityCheckLogs(data[0], data[1], data[2], params.min_contig_length, params.min_filt_contig_length)
 	emit:
-		vcftoolsSane = sanityChecklogs.out
+		vcftoolsSane = sanityCheckLogs.out
 }
 
 workflow logGatkSanity {
@@ -880,7 +880,7 @@ workflow logGatkSanity {
 	main:
 		sanityCheckLogs(data[0], data[1], data[2], 1, params.min_filt_contig_length)
 	emit:
-		gatkSane = sanityChecklogs.out
+		gatkSane = sanityCheckLogs.out
 }
 
 workflow logRegionSanity {
@@ -891,7 +891,7 @@ workflow logRegionSanity {
 	main:
 		sanityCheckLogs(data[0], data[1], data[2], 1, params.min_filt_contig_length)
 	emit:
-		regionSane = sanityChecklogs.out
+		regionSane = sanityCheckLogs.out
 }
 
 

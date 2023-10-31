@@ -935,7 +935,9 @@ workflow {
 		}
 		plotDPGQ(pullDPGQ.out.collect())
 		splitVCFs(splitTrios.out.trio_vcf)
-		vcftoolsFilterSites(splitVCFs.out) | logVcftoolsSanity
+}
+/*
+		vcftoolsFilterSites(splitVCFs.out.flatten()) | logVcftoolsSanity
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf,prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
 			filterRegions(logGatkSanity.out.ok_vcf) | logRegionSanity
@@ -948,4 +950,4 @@ workflow {
 			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log).collect()
 		}
 		generateSummaryStats(all_logs_sanity)
-}
+}*/

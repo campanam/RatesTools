@@ -481,7 +481,6 @@ process splitTrios {
 	input:
 	path chr_vcf
 	val sample_id
-	path chrs
 	
 	output:
 	path "${params.prefix}_offspring${sample_id}.vcf.gz", emit: trio_vcf

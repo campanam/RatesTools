@@ -934,11 +934,8 @@ workflow {
 			pullDPGQ(genotypegVCFs.out, mergeLibraries.out.samples)
 		}
 		plotDPGQ(pullDPGQ.out.collect())
-		splitVCFs(splitTrios.out.trio_vcf)
-}
-/*
-		vcftoolsFilterSites(splitVCFs.out.flatten()) | logVcftoolsSanity
-		gatkFilterSites(logVcftoolsSanity.out.ok_vcf,prepareRef.out) | logGatkSanity
+		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity
+		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
 			filterRegions(logGatkSanity.out.ok_vcf) | logRegionSanity
 			calcDNMRate(logRegionSanity.out.ok_vcf)
@@ -950,4 +947,4 @@ workflow {
 			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log).collect()
 		}
 		generateSummaryStats(all_logs_sanity)
-}*/
+}

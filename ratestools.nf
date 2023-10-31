@@ -940,16 +940,16 @@ workflow {
 		plotDPGQ(pullDPGQ.out.collect())
 		splitVCFs(spliTrios.out.trio_vcf)
 		vcftoolsFilterSites(splitVCFs.out.flatten()) | logVcftoolsSanity
-		gatkFilterSites(vcftoolsSane.ok_vcf,prepareRef.out) | logGatkSanity
+		gatkFilterSites(logVcftoolsSanity.out.vcftoolsSane.ok_vcf,prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
-			filterRegions(gatkSane.ok_vcf) | logRegionSanity
-			calcDNMRate(regionSane.ok_vcf)
+			filterRegions(logGatkSanity.out.gatkSane.ok_vcf) | logRegionSanity
+			calcDNMRate(logRegionSanity.out.regionSane.ok_vcf)
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.mix(regionSane.log, gatkSane.log, vcftoolsSane.log, summarizeDNM.out.log).collect()
+			all_logs_sanity = log_trio_sanity.mix(logRegionSanity.out.regionSane.log, logGatkSanity.out.gatkSane.log, logVcftoolsSanity.out.vcftoolsSane.log, summarizeDNM.out.log).collect()
 		} else {
-			calcDNMRate(gatkSane.out.ok.vcf)
+			calcDNMRate(logGatkSanity.out.gatkSane.out.ok.vcf)
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.mix(gatkSane.log, vcftoolsSane.log, summarizeDNM.out.log).collect()
+			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.gatkSane.log, logVcftoolsSanity.out.vcftoolsSane.log, summarizeDNM.out.log).collect()
 		}
 		generateSummaryStats(all_logs_sanity)
 } */

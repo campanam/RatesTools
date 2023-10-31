@@ -478,8 +478,7 @@ process splitTrios {
 	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: "${params.prefix}_offspring*.vcf.gz"
 		
 	input:
-	path chr_vcf
-	val sample_id
+	tuple path(chr_vcf), val(sample_id)
 	
 	output:
 	path "${params.prefix}_offspring${sample_id}.vcf.gz", emit: trio_vcf
@@ -500,8 +499,7 @@ process pullDPGQ {
 	publishDir "$params.outdir/08_gVCFs_DP_GQ", mode: 'copy'
 		
 	input:
-	path chrfilt
-	val sample_id
+	tuple path(chrfilt), val(sample_id)
 	
 	output:
 	path "${chrfilt.simpleName}_ind${sample_id}.variants.txt"
@@ -918,21 +916,24 @@ workflow {
 			repeatMaskRM(repeatMask.out.rm1, repeatMask.out.rm1_out, repeatModeler.out)
 			simplifyBed(genMapMap.out, maskIndels.out, repeatMaskRM.out.RMbed)
 		}
-		all_samples = Channel.of(read_data.map {it -> it[0]}.unique())
-		trio_samples = Channel.of(all_samples.filter { it != params.sire && it != params.dam }) // Need new channel after filtering this one to remove dam and sire from offspring lists
+		all_samples = read_data.map {it -> it[0]}.unique())
+		trio_samples = all_samples.filter { it != params.sire && it != params.dam }) // Need new channel after filtering this one to remove dam and sire from offspring lists
 		if ( params.chr_file != 'NULL') {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
-			splitTrios(filterChr.out.chr_vcf, trio_samples)
+			trio = filterChr.out.chr_vcf.combine(trio_samples)
+			splitTrios(trio)
 			logSanityTrio(splitTrios.out.trio_tmp, filterChr.out.chr_vcf, splitTrios.out.trio_vcf)
 			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.sanelog)
-			pullDPGQ(filterChr.out.chr_vcf, all_samples)
+			allDPGQ = filterChr.out.chr_vcf.combine(all_samples)			
 		} else {
-			splitTrios(genotypegVCFs.out, trio_samples)
+			trio = genotypegVCFs.out.combine(trio_samples)
+			splitTrios(trio)
 			logSanityTrio(splitTrios.out.trio_tmp, genotypegVCFs.out, splitTrios.out.trio_vcf)
 			log_trio_sanity = logSanityTrio.out.sanelog
-			pullDPGQ(genotypegVCFs.out, all_samples)
+			allDPGQ = genotypegVCFs.out.combine(all_samples)
 		}
+		pullDPGQ(allDPGQ)
 		plotDPGQ(pullDPGQ.out.collect())
 } /*	
 		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity

@@ -919,7 +919,9 @@ workflow {
 			repeatMaskRM(repeatMask.out.rm1, repeatMask.out.rm1_out, repeatModeler.out)
 			simplifyBed(genMapMap.out, maskIndels.out, repeatMaskRM.out.RMbed)
 		}
-		trio_samples = mergeLibraries.out.samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
+		read_data[0].unique.filter.view
+}/*
+		trio_samples = read_data[0].unique.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
 		if ( params.chr_file != 'NULL') {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
@@ -934,8 +936,7 @@ workflow {
 			pullDPGQ(genotypegVCFs.out, mergeLibraries.out.samples)
 		}
 		plotDPGQ(pullDPGQ.out.collect())
-}
-/*
+		
 		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 

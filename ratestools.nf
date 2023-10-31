@@ -920,6 +920,8 @@ workflow {
 			simplifyBed(genMapMap.out, maskIndels.out, repeatMaskRM.out.RMbed)
 		}
 		read_data.map {it -> it[0]}
+				.unique()
+				.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
 				.view()
 }/*
 		trio_samples = read_data[0].unique.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists

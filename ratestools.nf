@@ -433,7 +433,7 @@ process simplifyBed {
 	
 	"""
 	#!/usr/bin/env bash
-	cat ${indel_bed} ${rm_bed} ${gm_bed} | sort -k1,1 -k2,2n > tmp.bed
+	cat ${indel_bed} ${rm_bed} ${gm_bed} | sort -k1,1 -k2,2n | cut -f1-3 > tmp.bed
 	if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 		bedtools merge -i tmp.bed > ${params.prefix}_excluded_reduced.bed
 	else
@@ -936,12 +936,12 @@ workflow {
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
 			trio = filterChr.out.chr_vcf.combine(trio_samples)
 			splitTrios(trio) | logSanityTrio
-			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.sanelog)
+			log_trio_sanity = sanityCheckLogs.out.log.collect().mix(logSanityTrio.out.sanelog.collect())
 			allDPGQ = filterChr.out.chr_vcf.combine(all_samples)			
 		} else {
 			trio = genotypegVCFs.out.combine(trio_samples)
 			splitTrios(trio) | logSanityTrio
-			log_trio_sanity = logSanityTrio.out.sanelog
+			log_trio_sanity = logSanityTrio.out.sanelog.collect()
 			allDPGQ = genotypegVCFs.out.combine(all_samples)
 		}
 		pullDPGQ(allDPGQ)
@@ -952,11 +952,11 @@ workflow {
 			filterRegions(logGatkSanity.out.ok_vcf, simplifyBed.out) | logRegionSanity
 			calcDNMRate(logRegionSanity.out.ok_vcf)
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.mix(logRegionSanity.out.sanelog, logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
+			all_logs_sanity = log_trio_sanity.collect().mix(logRegionSanity.out.sanelog.collect(), logGatkSanity.out.sanelog.collect(), logVcftoolsSanity.out.sanelog.collect(), summarizeDNM.out.log.collect())
 		} else {
 			calcDNMRate(logGatkSanity.out.ok_vcf)
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
+			all_logs_sanity = log_trio_sanity.collect().mix(logGatkSanity.out.sanelog.collect(), logVcftoolsSanity.out.sanelog.collect(), summarizeDNM.out.log.collect())
 		}
 		all_logs_sanity | collect | view
 		

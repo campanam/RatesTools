@@ -567,7 +567,9 @@ process vcftoolsFilterSites {
 	path split_vcf
 	
 	output:
-	tuple path("${split_vcf.simpleName}.sitefilt.tmp"), path(split_vcf), path("${split_vcf.simpleName}.sitefilt.vcf.gz")
+	path("${split_vcf.simpleName}.sitefilt.tmp"
+	path(split_vcf)
+	path("${split_vcf.simpleName}.sitefilt.vcf.gz")
 	
 	script:
 	if (params.vcftools_site_filters == "NULL")

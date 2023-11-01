@@ -863,7 +863,9 @@ workflow logSanityTrio {
 workflow logVcftoolsSanity {
 	// Sanity check logs from VCFtools site filtering
 	take:
-		tuple tmpfile, rawvcf, filtvcf
+		tmpfile
+		rawvcf
+		filtvcf
 	main:
 		sanityCheckLogs(tmpfile, rawvcf, filtvcf, params.min_contig_length, params.min_filt_contig_length)
 	emit:

@@ -821,7 +821,7 @@ process generateSummaryStats {
 	publishDir "$params.outdir/15_SummaryStats", mode: "copy"
 		
 	input:
-	path "*" from all_logs_sanity_ch.collect()
+	path "*"
 	
 	output:
 	path "summary_stats.csv"

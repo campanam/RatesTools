@@ -936,7 +936,7 @@ workflow {
 		pullDPGQ(allDPGQ)
 		plotDPGQ(pullDPGQ.out.collect())
 		splitVCFs(splitTrios.out.trio_vcf)
-		splitVCFs.out.view()
+		splitVCFs.out.flatten().view()
 		 } /* | flatten | vcftoolsFilterSites | logVcftoolsSanity
 
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity

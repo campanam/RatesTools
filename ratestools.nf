@@ -810,7 +810,7 @@ process sanityCheckLogs {
 	path "${filtvcflog.baseName}.OK.vcf.gz", optional: true, emit: ok_vcf
 	
 	"""
-	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length  > ${logfile.simpleName}.log
+	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length  > ${logfile.baseName}.log
 	"""
 	
 }

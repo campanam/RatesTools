@@ -649,7 +649,7 @@ process filterRegions {
 	
 	input:
 	path site_vcf
-	path exclude_bed from exclude_bed_ch
+	path exclude_bed
 	
 	output:
 	path("${site_vcf.simpleName}_regionfilt.tmp")

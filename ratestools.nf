@@ -429,7 +429,7 @@ process simplifyBed {
 	path gm_bed
 	
 	output:
-	path "${prefix}_excluded_reduced.bed", optional: true
+	path "${prefix}_excluded_reduced.bed"
 	
 	"""
 	#!/usr/bin/env bash
@@ -949,7 +949,7 @@ workflow {
 		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
-			filterRegions(logGatkSanity.out.ok_vcf) | logRegionSanity
+			filterRegions(logGatkSanity.out.ok_vcf, simplifyBed.out) | logRegionSanity
 			calcDNMRate(logRegionSanity.out.ok_vcf)
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
 			all_logs_sanity = log_trio_sanity.mix(logRegionSanity.out.sanelog, logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log).collect()

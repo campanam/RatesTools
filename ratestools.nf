@@ -807,7 +807,7 @@ process sanityCheckLogs {
 	
 	output:
 	path "${logfile.baseName}.log",  emit: log
-	path "${filtvcflog.split(".vcf.gz")[0]}.OK.vcf.gz", optional: true, emit: ok_vcf
+	path "${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz", optional: true, emit: ok_vcf
 	
 	"""
 	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length  > ${logfile.baseName}.log

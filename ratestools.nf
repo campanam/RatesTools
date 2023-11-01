@@ -567,7 +567,7 @@ process vcftoolsFilterSites {
 	path split_vcf
 	
 	output:
-	path("${split_vcf.simpleName}.sitefilt.tmp"
+	path("${split_vcf.simpleName}.sitefilt.tmp")
 	path(split_vcf)
 	path("${split_vcf.simpleName}.sitefilt.vcf.gz")
 	

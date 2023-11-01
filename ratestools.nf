@@ -481,8 +481,9 @@ process splitTrios {
 	tuple path(chr_vcf), val(sample_id)
 	
 	output:
-	path "${params.prefix}_offspring${sample_id}.vcf.gz", emit: trio_vcf
 	path "${params.prefix}_offspring${sample_id}_trio.tmp", emit: trio_tmp
+	path(chr_vcf)
+	path "${params.prefix}_offspring${sample_id}.vcf.gz", emit: trio_vcf
 	
 	"""
 	vcftools --gzvcf $chr_vcf --recode -c --indv ${params.dam} --indv ${params.sire} --indv ${sample_id} | gzip > ${params.prefix}_offspring${sample_id}.vcf.gz
@@ -601,7 +602,9 @@ process gatkFilterSites {
 	path "*"
 	
 	output:
-	tuple path("${site_vcf.simpleName}.gatksitefilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.gatksitefilt.vcf.gz")
+	path("${site_vcf.simpleName}.gatksitefilt.tmp")
+	path(site_vcf)
+	path("${site_vcf.simpleName}.gatksitefilt.vcf.gz")
 	
 	script:
 	if (params.gatk_site_filters == "NULL")
@@ -649,7 +652,9 @@ process filterRegions {
 	path exclude_bed from exclude_bed_ch
 	
 	output:
-	tuple path("${site_vcf.simpleName}_regionfilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.regionfilt.vcf.gz")
+	path("${site_vcf.simpleName}_regionfilt.tmp")
+	path(site_vcf)
+	path("${site_vcf.simpleName}.regionfilt.vcf.gz")
 	
 	script:
 	chr = site_vcf.simpleName.split('_chr')[1]
@@ -930,22 +935,18 @@ workflow {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
 			trio = filterChr.out.chr_vcf.combine(trio_samples)
-			splitTrios(trio)
-			logSanityTrio(splitTrios.out.trio_tmp, filterChr.out.chr_vcf, splitTrios.out.trio_vcf)
+			splitTrios(trio) | logSanityTrio
 			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.sanelog)
 			allDPGQ = filterChr.out.chr_vcf.combine(all_samples)			
 		} else {
 			trio = genotypegVCFs.out.combine(trio_samples)
-			splitTrios(trio)
-			logSanityTrio(splitTrios.out.trio_tmp, genotypegVCFs.out, splitTrios.out.trio_vcf)
+			splitTrios(trio) | logSanityTrio
 			log_trio_sanity = logSanityTrio.out.sanelog
 			allDPGQ = genotypegVCFs.out.combine(all_samples)
 		}
 		pullDPGQ(allDPGQ)
 		plotDPGQ(pullDPGQ.out.collect())
 		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity
-		 } /*
-
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
 			filterRegions(logGatkSanity.out.ok_vcf) | logRegionSanity
@@ -958,4 +959,4 @@ workflow {
 			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log).collect()
 		}
 		generateSummaryStats(all_logs_sanity)
-} */
+}

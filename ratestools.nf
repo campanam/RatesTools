@@ -806,7 +806,7 @@ process sanityCheckLogs {
 	val min_filt_contig_length
 	
 	output:
-	path "${logfile.simpleName}.log",  emit: log
+	path "${logfile.baseName}.log",  emit: log
 	path "${filtvcflog.baseName}.OK.vcf.gz", optional: true, emit: ok_vcf
 	
 	"""
@@ -936,12 +936,12 @@ workflow {
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
 			trio = filterChr.out.chr_vcf.combine(trio_samples)
 			splitTrios(trio) | logSanityTrio
-			log_trio_sanity = sanityCheckLogs.out.log.collect().mix(logSanityTrio.out.sanelog.collect())
+			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.sanelog)
 			allDPGQ = filterChr.out.chr_vcf.combine(all_samples)			
 		} else {
 			trio = genotypegVCFs.out.combine(trio_samples)
 			splitTrios(trio) | logSanityTrio
-			log_trio_sanity = logSanityTrio.out.sanelog.collect()
+			log_trio_sanity = logSanityTrio.out.sanelog
 			allDPGQ = genotypegVCFs.out.combine(all_samples)
 		}
 		pullDPGQ(allDPGQ)
@@ -952,13 +952,11 @@ workflow {
 			filterRegions(logGatkSanity.out.ok_vcf, simplifyBed.out) | logRegionSanity
 			calcDNMRate(logRegionSanity.out.ok_vcf)
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.collect().mix(logRegionSanity.out.sanelog.collect(), logGatkSanity.out.sanelog.collect(), logVcftoolsSanity.out.sanelog.collect(), summarizeDNM.out.log.collect())
+			all_logs_sanity = log_trio_sanity.mix(logRegionSanity.out.sanelog, logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
 		} else {
 			calcDNMRate(logGatkSanity.out.ok_vcf)
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.collect().mix(logGatkSanity.out.sanelog.collect(), logVcftoolsSanity.out.sanelog.collect(), summarizeDNM.out.log.collect())
+			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
 		}
-		all_logs_sanity | collect | view
-		
 		generateSummaryStats(all_logs_sanity.collect())
 }

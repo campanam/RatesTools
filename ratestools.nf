@@ -741,7 +741,7 @@ process calcDNMRate {
 	path "${splitvcf.simpleName}.log"
 	
 	"""
-	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${params.sire} -d ${params.dam} ${param.dnm_opts} > ${splitvcf.simpleName}.log
+	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${params.sire} -d ${params.dam} ${params.dnm_opts} > ${splitvcf.simpleName}.log
 	"""
 
 }

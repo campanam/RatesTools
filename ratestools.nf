@@ -935,10 +935,10 @@ workflow {
 		}
 		pullDPGQ(allDPGQ)
 		plotDPGQ(pullDPGQ.out.collect())
-		splitVCFs(splitTrios.out.trio_vcf) | flatten
+		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites
 		
-		vcftoolsFilterSites(flatten.out) | logVcftoolsSanity
-		 } /*
+		 } /* | logVcftoolsSanity
+		
 
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 

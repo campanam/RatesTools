@@ -599,6 +599,7 @@ process gatkFilterSites {
 		
 	input:
 	path site_vcf
+	path refseq
 	path "*"
 	
 	output:
@@ -616,8 +617,8 @@ process gatkFilterSites {
 	else if (params.gatk_build == 3)
 		"""
 		tabix $site_vcf
-		$gatk -T VariantFiltration -V $site_vcf -o tmp.vcf -R ${params.refseq} ${params.gatk_site_filters}
-		$gatk -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R ${params.refseq} --excludeFiltered
+		$gatk -T VariantFiltration -V $site_vcf -o tmp.vcf -R ${refseq} ${params.gatk_site_filters}
+		$gatk -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R ${refseq} --excludeFiltered
 		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		tail .command.log > ${site_vcf.simpleName}.gatksitefilt.tmp
 		rm tmp.vcf
@@ -625,8 +626,8 @@ process gatkFilterSites {
 	else if (params.gatk_build == 4)
 		"""
 		tabix $site_vcf
-		$gatk VariantFiltration -R ${params.refseq} -V $site_vcf -O tmp.vcf.gz ${params.gatk_site_filters}
-		$gatk SelectVariants -R ${params.refseq} -V tmp.vcf.gz -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
+		$gatk VariantFiltration -R ${refseq} -V $site_vcf -O tmp.vcf.gz ${params.gatk_site_filters}
+		$gatk SelectVariants -R ${refseq} -V tmp.vcf.gz -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
 		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		tail .command.log > ${site_vcf.simpleName}.gatksitefilt.tmp
 		rm tmp.vcf.gz
@@ -947,7 +948,7 @@ workflow {
 		pullDPGQ(allDPGQ)
 		plotDPGQ(pullDPGQ.out.collect())
 		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity
-		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity
+		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, params.refseq, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
 			filterRegions(logGatkSanity.out.ok_vcf, simplifyBed.out) | logRegionSanity
 			calcDNMRate(logRegionSanity.out.ok_vcf)

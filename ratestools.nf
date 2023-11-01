@@ -429,7 +429,7 @@ process simplifyBed {
 	path gm_bed
 	
 	output:
-	path "${prefix}_excluded_reduced.bed"
+	path "${params.prefix}_excluded_reduced.bed"
 	
 	"""
 	#!/usr/bin/env bash
@@ -960,5 +960,5 @@ workflow {
 		}
 		all_logs_sanity | collect | view
 		
-		// generateSummaryStats(all_logs_sanity.collect())
+		generateSummaryStats(all_logs_sanity.collect())
 }

@@ -863,9 +863,9 @@ workflow logSanityTrio {
 workflow logVcftoolsSanity {
 	// Sanity check logs from VCFtools site filtering
 	take:
-		data
+		tuple tmpfile, rawvcf, filtvcf
 	main:
-		sanityCheckLogs(data[0], data[1], data[2], params.min_contig_length, params.min_filt_contig_length)
+		sanityCheckLogs(tmpfile, rawvcf, filtvcf, params.min_contig_length, params.min_filt_contig_length)
 	emit:
 		sanelog = sanityCheckLogs.out.log
 		ok_vcf = sanityCheckLogs.out.ok_vcf
@@ -875,9 +875,11 @@ workflow logGatkSanity {
 	// Sanity check logs for GATK site filtering and remove too short contigs
 	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
 	take:
-		data
+		tmpfile
+		rawvcf
+		filtvcf
 	main:
-		sanityCheckLogs(data[0], data[1], data[2], 1, params.min_filt_contig_length)
+		sanityCheckLogs(tmpfile, rawvcf, filtvcf, 1, params.min_filt_contig_length)
 	emit:
 		sanelog = sanityCheckLogs.out.log
 		ok_vcf = sanityCheckLogs.out.ok_vcf
@@ -887,9 +889,11 @@ workflow logRegionSanity {
 	// Sanity check logs for region filtering and remove too short contigs
 	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
 	take:
-		data
+		tmpfile
+		rawvcf
+		filtvcf
 	main:
-		sanityCheckLogs(data[0], data[1], data[2], 1, params.min_filt_contig_length)
+		sanityCheckLogs(tmpfile, rawvcf, filtvcf, 1, params.min_filt_contig_length)
 	emit:
 		sanelog = sanityCheckLogs.out.log
 		ok_vcf = sanityCheckLogs.out.ok_vcf

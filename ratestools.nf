@@ -561,7 +561,7 @@ process vcftoolsFilterSites {
 	label 'vcftools'
 	label 'bcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*sitefilt.recode.vcf.gz'
+	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*sitefilt.vcf.gz'
 		
 	input:
 	path split_vcf
@@ -572,7 +572,7 @@ process vcftoolsFilterSites {
 	script:
 	if (params.vcftools_site_filters == "NULL")
 		"""
-		cp -P $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
+		cp -P $split_vcf ${split_vcf.simpleName}.sitefilt.vcf.gz
 		vcftools --gzvcf $split_vcf
 		cp .command.log ${split_vcf.simpleName}.sitefilt.tmp
 		"""
@@ -935,10 +935,10 @@ workflow {
 		}
 		pullDPGQ(allDPGQ)
 		plotDPGQ(pullDPGQ.out.collect())
-		splitVCFs(splitTrios.out.trio_vcf) | flatten | view
-		} /*
-		vcftoolsFilterSites(splitVCFs.out.flatten()) | logVcftoolsSanity
-		 
+		splitVCFs(splitTrios.out.trio_vcf) | flatten
+		
+		vcftoolsFilterSites(flatten.out) | logVcftoolsSanity
+		 } /*
 
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 

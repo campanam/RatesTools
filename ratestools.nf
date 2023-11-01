@@ -935,8 +935,8 @@ workflow {
 		}
 		pullDPGQ(allDPGQ)
 		plotDPGQ(pullDPGQ.out.collect())
-}/*
 		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity
+}/*
 		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
 			filterRegions(logGatkSanity.out.ok_vcf) | logRegionSanity

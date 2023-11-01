@@ -570,7 +570,7 @@ process vcftoolsFilterSites {
 	tuple path("${split_vcf.simpleName}.sitefilt.tmp"), path(split_vcf), path("${split_vcf.simpleName}.sitefilt.vcf.gz")
 	
 	script:
-	if (site_filters == "NULL")
+	if (params.vcftools_site_filters == "NULL")
 		"""
 		cp -P $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
 		vcftools --gzvcf $split_vcf
@@ -602,7 +602,7 @@ process gatkFilterSites {
 	tuple path("${site_vcf.simpleName}.gatksitefilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.gatksitefilt.vcf.gz")
 	
 	script:
-	if (site_filters == "NULL")
+	if (params.gatk_site_filters == "NULL")
 		"""
 		ln -s $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		vcftools --gzvcf $site_vcf

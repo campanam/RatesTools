@@ -136,8 +136,8 @@ else
 		extract_site_count($vcf_filtsites, '.sitefilt.log', indiv)
 		extract_site_count($gatk_filtsites, '.gatksitefilt.log', indiv)
 		if Dir.glob(ARGV[0]+ "/*regionfilt.log").any? # Handling for when region filters are turned off
-			puts "Got here"
 			extract_site_count($regionsites, '.regionfilt.log', indiv)
+			print $regionsites
 		else
 			$regionsites = $gatk_filtsites
 		end

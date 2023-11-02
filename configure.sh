@@ -67,24 +67,26 @@ get_jar_path () {
 			echo "Enter $1 path."
 			read jar_path
 			jar_path=`realpath $jar_path`
+		else
+			jar_path=$2
 		fi
 	done
-	if [ -f $jar_path ]; then
 	echo "$1 path: $jar_path"
-		jar_path=${jar_path//\//\\\/} # Escape all slashes
-		if [ $1 == 'Picard' ]; then
-			stem='picard'
-		elif [ $1 = 'GATK' ]; then
-			stem='gatk'
-		elif [ $1 = 'Refseq' ]; then
-			stem='refseq'
-			default_file=ref.fa
-		elif [ $1 = 'Chromosome' ]; then
-			stem='chr_file'
-			default_file=chr.txt
-		fi
-		sed -i '' "s/$stem = \"\$launchDir\/$default_file\"/$stem = \"$jar_path\"/" $filename
+	jar_path=${jar_path//\//\\\/} # Escape all slashes
+	if [ $1 == 'Picard' ]; then
+		stem='picard'
+		default_file=picard.jar
+	elif [ $1 = 'GATK' ]; then
+		stem='gatk'
+		default_file=GenomeAnalysisTK.jar
+	elif [ $1 = 'Refseq' ]; then
+		stem='refseq'
+		default_file=ref.fa
+	elif [ $1 = 'Chromosome' ]; then
+		stem='chr_file'
+		default_file=chr.txt
 	fi
+	sed -i '' "s/$stem = \"\$launchDir\/$default_file\"/$stem = \"$jar_path\"/" $filename
 }
 
 echo 'Config file name?'
@@ -141,21 +143,21 @@ if [ $answer == 'N' ]; then
 		read bwa_alg
 	done
 	if [ $bwa_alg != 'auto-infer' ]; then
-		sed -i '' "s/bwa_alg = \"\"/bwa_alg = $bwa_alg/" $filename
+		sed -i '' "s/bwa_alg = \"\"/bwa_alg = \"$bwa_alg\"/" $filename
 	fi
 fi
 echo 'Sambamba configuration...'
 get_path_module sambamba
 echo 'Specify software for marking duplicates (sambamba, samtools or picard).'
 read mkdup
-while [[ $mkdup != 'sambamba' && $mkdup != 'picard' && $mkdup != 'samtools']]; do
+while [[ $mkdup != 'sambamba' && $mkdup != 'picard' && $mkdup != 'samtools' ]]; do
 	echo 'Unknown software. Re-enter mark duplicates selection (sambamba, samtools or picard).'
 	read mkdup
 done
 sed -i '' "s/markDuplicates = \"picard\"/markDuplicates = \"$mkdup\"/" $filename
-echo 'Remove filtered reads from final BAM alignments before genotyping (Y/N?)?'
+echo 'Remove filtered reads from final BAM alignments before genotyping? (Y/N?)'
 yes_no_answer
-if [ $answer == 'Y' ]; then sed -i 's/filter_bams = false/filter_bams = true/' $filename; fi
+if [ $answer == 'Y' ]; then sed -i '' 's/filter_bams = false/filter_bams = true/' $filename; fi
 echo 'gzip configuration...'
 get_path_module gzip
 echo 'bgzip configuration...'
@@ -174,11 +176,14 @@ echo 'R configuration...'
 get_path_module R
 echo 'Ruby configuration...'
 get_path_module ruby
-echo "Use Picard through Nextflow's Conda handling?"
+echo "Use Picard through Nextflow's Conda handling? (Y/N?)"
 yes_no_answer
 if [ $answer == 'N' ]; then
-	echo 'Testing for Picard...'
-	get_jar_path Picard picard.jar
+	echo 'Picard jar file?'
+	read picardjar
+	get_jar_path Picard $picardjar
+else
+	sed -i '' 's/picard_conda = false/picard_conda = true/' $filename
 fi
 echo 'Use default Java options for Picard? (Y/N)'
 yes_no_answer
@@ -186,14 +191,13 @@ if [ $answer == 'N' ]; then
 	echo 'Enter options to pass to Java.'
 	read java_opts
 	sed -i '' "s/picard_java = \"\"/picard_java = \"$java_opts\"/" $filename
-else
-	sed -i '' 's/picard_conda = false/picard_conda = true/' $filename
 fi
-echo "Use GATK through Nextflow's Conda handling?"
+echo "Use GATK through Nextflow's Conda handling? (Y/N?)"
 yes_no_answer
 if [ $answer == 'N' ]; then
-	echo 'Testing for GATK...'
-	get_jar_path GATK GenomeAnalysisTK.jar
+	echo 'GATK jar file?'
+	read GATKjar
+	get_jar_path GATK $GATKjar
 else
 	sed -i '' 's/gatk_conda = false/gatk_conda = true/' $filename
 fi
@@ -204,7 +208,7 @@ while [[ $gatkver != 3 && $gatkver != 4 ]]; do
 	read gatkver
 done
 if [ $gatkver != 3 ]; then
-	sed -i '' "s/gatk_build = 3/gatk_build = \$gatkver/" $filename
+	sed -i '' "s/gatk_build = 3/gatk_build = $gatkver/" $filename
 fi
 echo 'Use default Java options for GATK? (Y/N)'
 yes_no_answer
@@ -219,7 +223,7 @@ if `command -v java 2>&1 >/dev/null`; then # If java found, identify version
 	java_version=`java -version 2>&1 >/dev/null | head -n1 | cut -d " " -f3`
 	java_version=${java_version//\"/}
 	echo Current Java version is $java_version.
-	if [[ $java_version =~ ^1.8. || $java_version =~ ^8. || $java_version=~ ^1.17 || $java_version=~ ^17. ]]; then
+	if [[ $java_version =~ ^1.8. || $java_version =~ ^8. || $java_version =~ ^1.17 || $java_version =~ ^17. ]]; then
 		echo "Current Java environment is compatible with GATK."
 	else
 		echo "WARNING: GATK requires Java 1.8 or 1.17. Current Java environment is incompatible."
@@ -281,7 +285,7 @@ if [ $answer == 'Y' ]; then
 	if [ $answer == 'N' ]; then
 		echo 'Enter options to pass to GenMap map.'
 		read gmopts
-		sed -i "s/gm_opts = \'-K 30 -E 2\'/gm_opts = \'$gmopts\'/" $filename
+		sed -i '' "s/gm_opts = \'-K 30 -E 2\'/gm_opts = \'$gmopts\'/" $filename
 	fi
 	echo 'RepeatMasker configuration...'
 	get_path_module RepeatMasker
@@ -293,14 +297,14 @@ if [ $answer == 'Y' ]; then
 	if [ $answer == 'N' ]; then
 		echo 'Enter options to pass to RepeatMasker.'
 		read rmopts
-		sed -i "s/rm_model_opts = \'-gccalc -nolow -xsmall\'/rm_model_opts = \'rmopts\'/" $filename
+		sed -i '' "s/rm_mask_opts = \'-gccalc -nolow -xsmall\'/rm_mask_opts = \'$rmopts\'/" $filename
 	fi
-	echo "Use RepeatModeler default options? (Y/N)'
+	echo 'Use RepeatModeler default options? (Y/N)'
 	yes_no_answer
 	if [ $answer == 'N' ]; then
 		echo 'Enter options to pass to RepeatModeler.'
 		read rmodelopts
-		sed -i "s/rm_mask_opts = \'\'/rm_mask_opts = \'rmodelopts\'/" $filename
+		sed -i '' "s/rm_model_opts = \'\'/rm_model_opts = \'$rmodelopts\'/" $filename
 	fi
 	echo 'RepeatModeler configuration...'
 	get_path_module RepeatModeler
@@ -308,7 +312,7 @@ if [ $answer == 'Y' ]; then
 	read indelpad
 	sed -i '' "s/indelpad = 5/indelpad = $indelpad/" $filename
 else
-	sed -i 's/region_filter = true/region_filter = false/' $filename
+	sed -i '' 's/region_filter = true/region_filter = false/' $filename
 fi
 echo 'Use default calc_denovo_mutation_rate options (-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom)? (Y/N)'
 yes_no_answer
@@ -322,5 +326,5 @@ yes_no_answer
 if [ $answer == 'Y' ]; then
 	echo 'Enter email address.'
 	read email
-	sed -i '' "s/email = \"NULL\"/email = $email/" $filename
+	sed -i '' "s/email = \"NULL\"/email = \"$email\"/" $filename
 fi

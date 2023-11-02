@@ -92,6 +92,8 @@ def classify_sites(outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[0,1] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
 					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+				else
+					puts line
 				end
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")

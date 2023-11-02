@@ -135,7 +135,7 @@ else
 	for indiv in $individuals
 		extract_site_count($vcf_filtsites, '.sitefilt.log', indiv)
 		extract_site_count($gatk_filtsites, '.gatksitefilt.log', indiv)
-		if FileTest.exist?(ARGV[0]+ "/*regionfilt.log") # Handling for when region filters are turned off
+		if Dir.glob(ARGV[0]+ "/*regionfilt.log").any? # Handling for when region filters are turned off
 			extract_site_count($regionsites, '.regionfilt.log', indiv)
 		else
 			$regionsites = $gatk_filtsites

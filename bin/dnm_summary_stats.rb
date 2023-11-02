@@ -223,13 +223,14 @@ else
 			total_overlap +=1
 			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
 				$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
+				puts $sfindv
 			end
 		end
 	end
 	puts "\nOffspring,Single-ForwardOverlappingSites,TotalOverlappingSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
 	for key in $sfindv.keys
 		srate = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate single-forward rate
-		arate = ($totalbases[key][1]-$sfindv[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
+		arate = ($totalbases[key][1]-total_overlap).to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
 		puts key + "," + $sfindv[key].to_s + "," + total_overlap.to_s + "," + srate.to_s + "," + arate.to_s
 	end
 end

@@ -101,6 +101,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 1.0.0  
+Updated for RatesTools v. 1.0.0  
+
 ### Version 0.5.10  
 Update file headers  
 Contig length filtration  
@@ -167,6 +170,11 @@ Redundant methods (Parser, gz_open_file) moved to denovolib
 gz_open_file improved to version in BaitsTools 1.6.6  
 
 ## dnm_summary_stats  
+### Version 1.0.0  
+Updated for ratestools 1.0.0  
+Added handling for more mutation classes  
+Added code to identify shared mutations between offspring and recalculate mutation rates  
+
 ### Version 0.1.1  
 Update file headers  
 
@@ -249,6 +257,9 @@ Requires denovolib rather than split_vcf
 Accessor script for split_vcf for nextflow   
 
 ## logstats  
+### Version 1.0.0  
+Added error handling when the run time line is not recorded  
+
 ### Version 0.1.3  
 Fixed bug that discarded the unfiltered site total for contigs where all sites were removed  
 
@@ -324,6 +335,23 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 1.0.0  
+Upgraded to nextflow DSL2  
+Readgroups added and alignment sorted during alignment process  
+Input reads specified via a CSV  
+Automated sample library merging  
+Added samtools markdup as a duplicate option  
+Bumped pipeline software versions  
+Added GenMap mapping option parameter  
+Added RepeatMasker and RepeatModeler options parameters  
+BED simplification now uses BEDtools  
+simplify_bed and simplify_sorted_bed removed  
+Added option to ignore region filtration  
+errorStrategy calls moved to configuration file for easier manipulation  
+Added option to bypass BAM filtering  
+Conda installs now use Mamba by default  
+RepeatModeler process updated for RepeatMasker 2.0.5  
+
 ### Version 0.5.15  
 Fixed bug in GATK4 pipeline that did not apply GATK site filters appropriately  
 
@@ -436,35 +464,6 @@ Outputs usage if no parameters specified
 ### Version 0.1.0  
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
 
-## simplify_bed  
-### Version 0.2.2  
-Update file headers  
-
-### Version 0.2.1  
-Improved gz_file_open using yield  
-
-### Version 0.2.0  
-Complete rewrite of sorting/merging algorithm to use intervals (~8x faster)  
-
-### Version 0.1.2  
-Status output to stderr  
-Redundant sites not added to array to hopefully improve performance  
-
-### Version 0.1.1  
-Code commented  
-
-### Version 0.1.0  
-Initial script to combine overlapping BED entries for region inclusion/exclusion  
-
-## simplify_sorted_bed  
-### Version 0.1.2  
-Update file headers  
-
-### Version 0.1.1  
-Improved gz_file_open using yield  
-
-### Version 0.1.0  
-Script to merge adjacent BED regions in a coordinate-sorted BED file to reduce simplify_bed memory use and compute time  
 
 ## summarize_denovo  
 ### Version 0.5.6  
@@ -502,6 +501,40 @@ Concatenates headerless VCF results of identified de novo mutations
 Initial script to summarize parallelized de novo rate calculations  
 
 ## Deprecated  
+
+## simplify_bed  
+Removed in RatesTools version 1.0.0
+
+### Version 0.2.2  
+Update file headers  
+
+### Version 0.2.1  
+Improved gz_file_open using yield  
+
+### Version 0.2.0  
+Complete rewrite of sorting/merging algorithm to use intervals (~8x faster)  
+
+### Version 0.1.2  
+Status output to stderr  
+Redundant sites not added to array to hopefully improve performance  
+
+### Version 0.1.1  
+Code commented  
+
+### Version 0.1.0  
+Initial script to combine overlapping BED entries for region inclusion/exclusion  
+
+## simplify_sorted_bed  
+Removed in RatesTools version 1.0.0  
+
+### Version 0.1.2  
+Update file headers  
+
+### Version 0.1.1  
+Improved gz_file_open using yield  
+
+### Version 0.1.0  
+Script to merge adjacent BED regions in a coordinate-sorted BED file to reduce simplify_bed memory use and compute time  
 
 ## makefile  
 Removed in RatesTools version 0.5.7  

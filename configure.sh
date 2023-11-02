@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# configure.sh script for RatesTools v0.5.10
+# configure.sh script for RatesTools v1.0.0
 
 #----------------------------------------------------------------------------------------
 # Michael G. Campana and Ellie E. Armstrong, 2020-2023
@@ -67,24 +67,26 @@ get_jar_path () {
 			echo "Enter $1 path."
 			read jar_path
 			jar_path=`realpath $jar_path`
+		else
+			jar_path=$2
 		fi
 	done
-	if [ -f $jar_path ]; then
 	echo "$1 path: $jar_path"
-		jar_path=${jar_path//\//\\\/} # Escape all slashes
-		if [ $1 == 'Picard' ]; then
-			stem='picard'
-		elif [ $1 = 'GATK' ]; then
-			stem='gatk'
-		elif [ $1 = 'Refseq' ]; then
-			stem='refseq'
-			default_file=ref.fa
-		elif [ $1 = 'Chromosome' ]; then
-			stem='chr_file'
-			default_file=chr.txt
-		fi
-		sed -i '' "s/$stem = \"\$launchDir\/$default_file\"/$stem = \"$jar_path\"/" $filename
+	jar_path=${jar_path//\//\\\/} # Escape all slashes
+	if [ $1 == 'Picard' ]; then
+		stem='picard'
+		default_file=picard.jar
+	elif [ $1 = 'GATK' ]; then
+		stem='gatk'
+		default_file=GenomeAnalysisTK.jar
+	elif [ $1 = 'Refseq' ]; then
+		stem='refseq'
+		default_file=ref.fa
+	elif [ $1 = 'Chromosome' ]; then
+		stem='chr_file'
+		default_file=chr.txt
 	fi
+	sed -i '' "s/$stem = \"\$launchDir\/$default_file\"/$stem = \"$jar_path\"/" $filename
 }
 
 echo 'Config file name?'
@@ -95,11 +97,13 @@ if [ ! -f nextflow.config ]; then
 	read config_path
 fi
 cp $config_path/nextflow.config $filename
-echo 'Enter path and file pattern for reads (See documentation).'
+echo 'Sample information CSV?'
+read csv
+sed -i '' "s/libraries = \"\$launchDir\/data.csv/libraries = \"$csv/" $filename
+echo 'Enter path for directory containing read files.'
 read reads
 reads=${reads//\//\\\/} # Escape slashes
-reads=${reads//\*/\\\*} # Escape asterisks
-sed -i '' "s/reads = \"\$launchDir\/\*{R1,R2}_001.fastq\*/reads = \"$reads/" $filename
+sed -i '' "s/readDir = \"\$launchDir\/RawData\//readDir = \"$reads/" $filename
 echo 'Sire name?'
 read sire
 sed -i '' "s/sire = \"SRR2\"/sire = \"$sire\"/" $filename
@@ -125,12 +129,6 @@ else
 	read chr_file
 	get_jar_path Chromosome $chr_file
 fi
-echo 'Minimum length of contig before site filters?'
-read minconlen
-sed -i '' "s/min_contig_length = 1/min_contig_length = $minconlen/" $filename
-echo 'Minimum length of contig after site filters?'
-read minfiltconlen
-sed -i '' "s/min_filt_contig_length = 1/min_filt_contig_length = $minfiltconlen/" $filename
 echo 'SAMtools configuration...'
 get_path_module samtools
 echo 'BWA configuration...'
@@ -145,44 +143,27 @@ if [ $answer == 'N' ]; then
 		read bwa_alg
 	done
 	if [ $bwa_alg != 'auto-infer' ]; then
-		sed -i '' "s/bwa_alg = \"\"/bwa_alg = $bwa_alg/" $filename
+		sed -i '' "s/bwa_alg = \"\"/bwa_alg = \"$bwa_alg\"/" $filename
 	fi
 fi
 echo 'Sambamba configuration...'
 get_path_module sambamba
-echo 'Specify software for marking duplicates (sambamba or picard).'
+echo 'Specify software for marking duplicates (sambamba, samtools or picard).'
 read mkdup
-while [[ $mkdup != 'sambamba' && $mkdup != 'picard' ]]; do
-	echo 'Unknown software. Re-enter mark duplicates selection (sambamba or picard).'
+while [[ $mkdup != 'sambamba' && $mkdup != 'picard' && $mkdup != 'samtools' ]]; do
+	echo 'Unknown software. Re-enter mark duplicates selection (sambamba, samtools or picard).'
 	read mkdup
 done
 sed -i '' "s/markDuplicates = \"picard\"/markDuplicates = \"$mkdup\"/" $filename
+echo 'Remove filtered reads from final BAM alignments before genotyping? (Y/N?)'
+yes_no_answer
+if [ $answer == 'Y' ]; then sed -i '' 's/filter_bams = false/filter_bams = true/' $filename; fi
 echo 'gzip configuration...'
 get_path_module gzip
 echo 'bgzip configuration...'
 get_path_module bgzip
 echo 'tabix configuration...'
 get_path_module tabix
-echo 'GenMap configuration...'
-get_path_module genmap
-echo 'Use default temporary directory for GenMap (/tmp)? (Y/N)'
-yes_no_answer
-if [ $answer == 'N' ]; then
-	echo 'Enter path for GenMap temporary files.'
-	read gm_tmpdir
-	gm_tmpdir=${gm_tmpdir//\//\\\/} # Escape slashes
-	sed -i '' "s/gm_tmpdir = \'\/tmp\'/gm_tmpdir = \"$gm_tmpdir\"/" $filename
-fi
-echo 'RepeatMasker configuration...'
-get_path_module RepeatMasker
-echo 'Specify RepeatMasker species.'
-read species
-sed -i '' "s/species = \"Felidae\"/species = \"$species\"/" $filename
-echo 'RepeatModeler configuration...'
-get_path_module RepeatModeler
-echo 'Enter number of bases to remove on each side of an indel.'
-read indelpad
-sed -i '' "s/indelpad = 5/indelpad = $indelpad/" $filename
 echo 'BEDTools configuration...'
 get_path_module bedtools
 echo 'BCFtools configuration...'
@@ -195,11 +176,14 @@ echo 'R configuration...'
 get_path_module R
 echo 'Ruby configuration...'
 get_path_module ruby
-echo "Use Picard through Nextflow's Conda handling?"
+echo "Use Picard through Nextflow's Conda handling? (Y/N?)"
 yes_no_answer
 if [ $answer == 'N' ]; then
-	echo 'Testing for Picard...'
-	get_jar_path Picard picard.jar
+	echo 'Picard jar file?'
+	read picardjar
+	get_jar_path Picard $picardjar
+else
+	sed -i '' 's/picard_conda = false/picard_conda = true/' $filename
 fi
 echo 'Use default Java options for Picard? (Y/N)'
 yes_no_answer
@@ -207,14 +191,13 @@ if [ $answer == 'N' ]; then
 	echo 'Enter options to pass to Java.'
 	read java_opts
 	sed -i '' "s/picard_java = \"\"/picard_java = \"$java_opts\"/" $filename
-else
-	sed -i '' 's/picard_conda = false/picard_conda = true/' $filename
 fi
-echo "Use GATK through Nextflow's Conda handling?"
+echo "Use GATK through Nextflow's Conda handling? (Y/N?)"
 yes_no_answer
 if [ $answer == 'N' ]; then
-	echo 'Testing for GATK...'
-	get_jar_path GATK GenomeAnalysisTK.jar
+	echo 'GATK jar file?'
+	read GATKjar
+	get_jar_path GATK $GATKjar
 else
 	sed -i '' 's/gatk_conda = false/gatk_conda = true/' $filename
 fi
@@ -225,7 +208,7 @@ while [[ $gatkver != 3 && $gatkver != 4 ]]; do
 	read gatkver
 done
 if [ $gatkver != 3 ]; then
-	sed -i '' "s/gatk_build = 3/gatk_build = \$gatkver/" $filename
+	sed -i '' "s/gatk_build = 3/gatk_build = $gatkver/" $filename
 fi
 echo 'Use default Java options for GATK? (Y/N)'
 yes_no_answer
@@ -240,12 +223,18 @@ if `command -v java 2>&1 >/dev/null`; then # If java found, identify version
 	java_version=`java -version 2>&1 >/dev/null | head -n1 | cut -d " " -f3`
 	java_version=${java_version//\"/}
 	echo Current Java version is $java_version.
-	if [[ $java_version =~ ^1.8. || $java_version =~ ^8. ]]; then
+	if [[ $java_version =~ ^1.8. || $java_version =~ ^8. || $java_version =~ ^1.17 || $java_version =~ ^17. ]]; then
 		echo "Current Java environment is compatible with GATK."
 	else
-		echo "WARNING: GATK requires Java 1.8. Current Java environment is incompatible."
+		echo "WARNING: GATK requires Java 1.8 or 1.17. Current Java environment is incompatible."
 	fi
 fi
+echo 'Minimum length of contig before site filters?'
+read minconlen
+sed -i '' "s/min_contig_length = 1/min_contig_length = $minconlen/" $filename
+echo 'Minimum length of contig after site filters?'
+read minfiltconlen
+sed -i '' "s/min_filt_contig_length = 1/min_filt_contig_length = $minfiltconlen/" $filename
 echo 'Filter sites using VCFtools? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
@@ -278,6 +267,53 @@ else
 		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filter-name \"filter\" --filter-expression \'$gatk_site_filters\'/" $filename
 	fi
 fi
+echo 'Remove low-mappability and low-quality regions? (Y/N)'
+yes_no_answer
+if [ $answer == 'Y' ]; then
+	echo 'GenMap configuration...'
+	get_path_module genmap
+	echo 'Use default temporary directory for GenMap (/tmp)? (Y/N)'
+	yes_no_answer
+	if [ $answer == 'N' ]; then
+		echo 'Enter path for GenMap temporary files.'
+		read gm_tmpdir
+		gm_tmpdir=${gm_tmpdir//\//\\\/} # Escape slashes
+		sed -i '' "s/gm_tmpdir = \'\/tmp\'/gm_tmpdir = \"$gm_tmpdir\"/" $filename
+	fi
+	echo 'Use default GenMap mapping options (-K 30 -E 2)? (Y/N)'
+	yes_no_answer
+	if [ $answer == 'N' ]; then
+		echo 'Enter options to pass to GenMap map.'
+		read gmopts
+		sed -i '' "s/gm_opts = \'-K 30 -E 2\'/gm_opts = \'$gmopts\'/" $filename
+	fi
+	echo 'RepeatMasker configuration...'
+	get_path_module RepeatMasker
+	echo 'Specify RepeatMasker species.'
+	read species
+	sed -i '' "s/species = \"Felidae\"/species = \"$species\"/" $filename
+	echo 'Use default RepeatMasker options (-gccalc -nolow -xsmall)? (Y/N)'
+	yes_no_answer
+	if [ $answer == 'N' ]; then
+		echo 'Enter options to pass to RepeatMasker.'
+		read rmopts
+		sed -i '' "s/rm_mask_opts = \'-gccalc -nolow -xsmall\'/rm_mask_opts = \'$rmopts\'/" $filename
+	fi
+	echo 'Use RepeatModeler default options? (Y/N)'
+	yes_no_answer
+	if [ $answer == 'N' ]; then
+		echo 'Enter options to pass to RepeatModeler.'
+		read rmodelopts
+		sed -i '' "s/rm_model_opts = \'\'/rm_model_opts = \'$rmodelopts\'/" $filename
+	fi
+	echo 'RepeatModeler configuration...'
+	get_path_module RepeatModeler
+	echo 'Enter number of bases to remove on each side of an indel.'
+	read indelpad
+	sed -i '' "s/indelpad = 5/indelpad = $indelpad/" $filename
+else
+	sed -i '' 's/region_filter = true/region_filter = false/' $filename
+fi
 echo 'Use default calc_denovo_mutation_rate options (-b 100 -M 10 -w 100000 -l 100000 -S 50000 --parhom)? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
@@ -290,5 +326,5 @@ yes_no_answer
 if [ $answer == 'Y' ]; then
 	echo 'Enter email address.'
 	read email
-	sed -i '' "s/email = \"NULL\"/email = $email/" $filename
+	sed -i '' "s/email = \"NULL\"/email = \"$email\"/" $filename
 fi

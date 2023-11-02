@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 0.5.16
+/* RatesTools version 1.0.0
 Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 
@@ -15,23 +15,11 @@ Armstrong, E.E. & M.G. Campana. 2023. RatesTools: a Nextflow pipeline for detect
 de novo germline mutations in pedigree sequence data. Bioinformatics. 39: btac784.
 doi: 10.1093/bioinformatics/btac784. */
 
-nextflow.enable.dsl=1
+// algorithm for BWA index for prepareRef
 
-readpairs_ch = Channel.fromFilePairs(params.reads) // Group read pairs
-// algorithm for BWA index. Next lines make into command-line option for prepareRef
-if ( params.bwa_alg == "" ) {
-	bwa_alg = ""
-} else {
-	bwa_alg = "-a " + params.bwa_alg + " "
-}	
-chr_file = file(params.chr_file)
-
+if (params.bwa_alg == "") { bwa_alg = "" } else { bwa_alg = "-a " + params.bwa_alg + " " }
 // Generate Picard and GATK executable commands
-if ( params.picard_conda ) {
-	picard = "picard " + params.picard_java
-} else {
-	picard = "java " + params.picard_java + " -jar " + params.picard
-}
+if (params.picard_conda) { picard = "picard " + params.picard_java} else { picard = "java " + params.picard_java + " -jar " + params.picard }
 if ( params.gatk_conda ) {
 	if ( params.gatk_build == 3 ) {
 		gatk = "gatk3 " + params.gatk_java
@@ -48,13 +36,12 @@ process prepareRef {
 	
 	label 'bwa'
 	label 'samtools'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path refseq from params.refseq
+	path refseq
 	
 	output:
-	path "${refseq.baseName}*.{amb,ann,bwt,pac,sa,fai,dict}" into bwa_index_ch // Channel to find these files again
+	path "${refseq.baseName}*.{amb,ann,bwt,pac,sa,fai,dict}"
 	
 	"""
 	bwa index ${bwa_alg}${refseq}
@@ -70,65 +57,46 @@ process alignSeqs {
 	
 	label 'bwa'
 	label 'samtools'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path refseq from params.refseq
-	tuple val(pair_id), path(reads) from readpairs_ch
-	path "*" from bwa_index_ch
+	tuple val(sample), val(pair_id), path(reads1), path(reads2), val(rg)
+	path refseq
+	path "*"
 	
 	output:
-	path "${pair_id}_${refseq.simpleName}.bam" into raw_bam_ch
-	val pair_id into filt_sample_ch, stats_sample_ch // sample name for downstream use
+	tuple path("${pair_id}_${refseq.simpleName}.bam"), val(sample)
 	
 	script:
 	samtools_extra_threads = task.cpus - 1
 	"""
-	bwa mem -t ${task.cpus} ${refseq} ${reads} | samtools view -@ ${samtools_extra_threads} -bS -o ${pair_id}_${refseq.simpleName}.bam -  
-	"""
-	
-}
-
-process sortBAM {
-
-	// Sort aligned bams
-
-	label 'samtools'
-	errorStrategy 'finish'
-
-	input:
-	path raw_bam from raw_bam_ch
-	
-	output:
-	path "${raw_bam.simpleName}.srt.bam" into sorted_bam_ch
-	
-	script:
-	samtools_extra_threads = task.cpus - 1
-	"""
-	samtools sort -@ ${samtools_extra_threads} ${raw_bam} > ${raw_bam.simpleName}.srt.bam
+	bwa mem -t ${task.cpus} -R '${rg}' ${refseq} ${reads1} ${reads2} | samtools fixmate -@ ${samtools_extra_threads} -m - - | samtools sort -@ ${samtools_extra_threads} -o ${pair_id}_${refseq.simpleName}.bam - 
 	"""
 	
 }
 
 process markDuplicates {
 
-	// Mark duplicates using sambamba or picard
+	// Mark duplicates using sambamba, samtools or picard
 	
 	label 'sambamba'
+	label 'samtools'
 	label 'picard'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path sorted_bam from sorted_bam_ch
-	val markDuplicates from params.markDuplicates
+	tuple path(sorted_bam), val(sample)
 	
 	output:
-	path "${sorted_bam.simpleName}.markdup.bam" into markdup_bam_ch
+	tuple path("${sorted_bam.simpleName}.markdup.bam"), val(sample)
 	
 	script:
-	if ( markDuplicates == "sambamba" )
+	samtools_extra_threads = task.cpus - 1
+	if ( params.markDuplicates == "sambamba" )
 		"""
 		sambamba markdup ${sorted_bam} ${sorted_bam.simpleName}.markdup.bam
+		"""
+	else if ( params.markDuplicates == "samtools" )
+		"""
+		samtools markdup -@ ${samtools_extra_threads} ${sorted_bam} ${sorted_bam.simpleName}.markdup.bam
 		"""
 	else
 		"""
@@ -137,27 +105,33 @@ process markDuplicates {
 		
 }
 
-process fixReadGroups {
+process mergeLibraries {
 
-	// Fix read groups using picard
-	
-	label 'picard'
-	errorStrategy 'finish'
+	// Merge libraries by their sample IDs using SAMtools merge
 	
 	input:
-	path markdup_bam from markdup_bam_ch
-	path refseq from params.refseq
+	tuple path(bam), val(sample)
 	
 	output:
-	path "${markdup_bam.simpleName}.rg.bam" into rg_bam_ch
+	path "${sample}.merged.bam"
 	
 	script:
-	pair_id = "${markdup_bam.simpleName}".minus("_${refseq.simpleName}")
-	"""
-	$picard AddOrReplaceReadGroups I=${markdup_bam} O=${markdup_bam.simpleName}.rg.bam RGID=$pair_id RGLB=$pair_id RGPL=illumina RGPU=$pair_id RGSM=$pair_id
-	"""
-
-}
+	samtools_extra_threads = task.cpus - 1
+	bams = 0
+	bamlist = ""
+	for (i in bam) {
+		bams++
+		bamlist = bamlist + " " + i
+	}
+	if (bams == 1) // Skip merging single libraries
+		"""
+		ln -s $bamlist ${sample}.merged.bam
+		"""
+	else
+		"""
+		samtools merge -@ ${samtools_extra_threads} -o ${sample}.merged.bam $bamlist
+		"""
+} 
 
 process realignIndels {
 
@@ -165,17 +139,18 @@ process realignIndels {
 	
 	label 'gatk'
 	label 'picard'
-	errorStrategy 'finish'
 	
+	if (params.filter_bams == false) {
+		publishDir  "$params.outdir/01_FinalBAMs", mode: 'copy'
+	}
+		
 	input:
-	path rg_bam from rg_bam_ch
-	path refseq from params.refseq
-	path "*" from bwa_index_ch
+	path rg_bam
+	path refseq
+	path "*"
 	
 	output:
-	path "${rg_bam.simpleName}.realn.bam" into realn_bam_ch
-	path "${rg_bam.simpleName}.realn.bai" into realn_bai_ch
-	path "${rg_bam.baseName}.bai"
+	tuple path("${rg_bam.simpleName}.realn.bam"), path("${rg_bam.simpleName}.realn.bai")
 	
 	script:
 	if (params.gatk_build == 3)
@@ -197,17 +172,14 @@ process filterBAMs {
 	// Filter BAMs using GATK
 	
 	label 'gatk'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path refseq from params.refseq
-	path realn_bam from realn_bam_ch
-	path realn_bai from realn_bai_ch
-	path "*" from bwa_index_ch
+	tuple path(realn_bam), path(realn_bai)
+	path refseq
+	path "*"
 	
 	output:
-	path "${realn_bam.simpleName}.filt.bam" into filt_bam_ch
-	path "${realn_bam.simpleName}.filt.bai" into filt_bai_ch
+	tuple path("${realn_bam.simpleName}.filt.bam"), path("${realn_bam.simpleName}.filt.bai")
 	
 	script:
 	if (params.gatk_build == 3)
@@ -226,15 +198,12 @@ process fixMate {
 	
 	label 'picard'
 	publishDir "$params.outdir/01_FinalBAMs", mode: 'copy'
-	errorStrategy 'finish'
-		
+			
 	input:
-	path filt_bam from filt_bam_ch
-	path filt_bai from filt_bai_ch
+	tuple path(filt_bam), path(filt_bai)
 	
 	output:
-	path "${filt_bam.simpleName}.fix.bam" into fix_bam_ch
-	path "${filt_bam.simpleName}.fix.bai" into fix_bai_ch
+	tuple path("${filt_bam.simpleName}.fix.bam"), path("${filt_bam.simpleName}.fix.bai")
 	
 	"""
 	$picard FixMateInformation I=${filt_bam} O=${filt_bam.simpleName}.fix.bam ADD_MATE_CIGAR=true
@@ -249,16 +218,14 @@ process callVariants {
 	
 	label 'gatk'
 	publishDir "$params.outdir/02_gVCFs", mode: 'copy'
-	errorStrategy 'finish'
-		
+			
 	input:
-	path refseq from params.refseq
-	path fix_bam from fix_bam_ch
-	path fix_bai from fix_bai_ch
-	path "*" from bwa_index_ch
+	tuple path(fix_bam), path(fix_bai)
+	path refseq
+	path "*"
 	
 	output:
-	path "${fix_bam.simpleName}.g.vcf.*" into var_vcf_ch
+	path "${fix_bam.simpleName}.g.vcf.*"
 	
 	script:
 	if (params.gatk_build == 3)
@@ -267,7 +234,7 @@ process callVariants {
 		"""
 	else if (params.gatk_build == 4)
 		"""
-		$gatk HaplotypeCaller -R $refseq -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
+		$gatk HaplotypeCaller -R ${refseq} -I $fix_bam -O ${fix_bam.simpleName}.g.vcf.gz -ERC GVCF -G StandardAnnotation -G AS_StandardAnnotation
 		"""
 
 }
@@ -281,33 +248,30 @@ process genotypegVCFs {
 	label 'gatk'
 	label 'gzip'
 	publishDir "$params.outdir/03_CombinedVCF", mode: 'copy'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path refseq from params.refseq
-	path "*" from bwa_index_ch
-	path "*" from var_vcf_ch.collect()
-	val prefix from params.prefix
+	path "*"
+	path refseq
+	path "*"
 	
 	output:
-	path "${prefix}_combined.vcf*"
-	path "${prefix}_combined.vcf.gz" into combined_vcf_ch, combined_indels_ch
+	path "${params.prefix}_combined.vcf.gz"
 	
 	script:
 	if (params.gatk_build == 3)
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		$gatk -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o ${prefix}_combined.vcf
-		gzip ${prefix}_combined.vcf
+		$gatk -T GenotypeGVCFs -R ${refseq} --includeNonVariantSites\$VARPATH -o ${params.prefix}_combined.vcf
+		gzip ${params.prefix}_combined.vcf
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		VARPATH=""
 		for file in *.vcf.gz; do VARPATH+=" --variant \$file"; done
-		$gatk CombineGVCFs -R $refseq -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
-		$gatk GenotypeGVCFs -R $refseq --include-non-variant-sites -V tmp.g.vcf.gz -O ${prefix}_combined.vcf
-		gzip ${prefix}_combined.vcf
+		$gatk CombineGVCFs -R ${refseq} -O tmp.g.vcf.gz --convert-to-base-pair-resolution\$VARPATH
+		$gatk GenotypeGVCFs -R ${refseq} --include-non-variant-sites -V tmp.g.vcf.gz -O ${params.prefix}_combined.vcf
+		gzip ${params.prefix}_combined.vcf
 		"""
 }
 
@@ -316,15 +280,13 @@ process genMapIndex {
 	// Generate GenMap index
 	
 	label 'genmap'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path refseq from params.refseq
-	val gm_tmpdir from params.gm_tmpdir
+	path refseq
+	val gm_tmpdir
 	
 	output:
-	path "${refseq.simpleName}_index" into genmap_index_ch
-	path "${refseq.simpleName}_index/*" into genmap_index_files_ch
+	tuple path("$refseq"), path("${refseq.simpleName}_index"), path("${refseq.simpleName}_index/*")
 	
 	"""
 	export TMPDIR=${gm_tmpdir}
@@ -340,18 +302,15 @@ process genMapMap {
 	
 	label 'genmap'
 	label 'ruby'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path refseq from params.refseq
-	path genmap_index from genmap_index_ch
-	path '*' from genmap_index_files_ch
+	tuple path(refseq), path(genmap_index), path("*")
 	
 	output:
-	path "${refseq.simpleName}_genmap.1.0.bed" into genmap_ch
+	path "${refseq.simpleName}_genmap.1.0.bed"
 	
 	"""
-	genmap map -K 30 -E 2 -T ${task.cpus} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
+	genmap map ${params.gm_opts} -T ${task.cpus} -I ${refseq.simpleName}_index/ -O ${refseq.simpleName}_genmap -b
 	filterGM.rb ${refseq.simpleName}_genmap.bed 1.0 exclude > ${refseq.simpleName}_genmap.1.0.bed
 	"""
 }
@@ -362,20 +321,19 @@ process repeatMask {
 	// Mask repeats using RepeatMasker and default RM libraries
 	
 	label 'repeatmasker'
-	errorStrategy 'finish'
-	publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
+		publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
 	
 	input:
-	path refseq from params.refseq
-	val rm_species from params.rm_species
+	path refseq
+	val rm_species
 	
 	output:
-	path "${refseq}.masked" into rm_ref_ch
-	path "${refseq}.out" into rm_out_ch
+	path("${refseq}.masked"), emit: rm1
+	path("${refseq}.out"), emit: rm1_out
 	path "${refseq}.tbl"
 	
 	"""
-	RepeatMasker -pa ${task.cpus} -gccalc -xsmall -nolow -species ${rm_species} ${refseq}
+	RepeatMasker -pa ${task.cpus} ${params.rm_mask_opts} -species ${rm_species} ${refseq}
 	if [ ! -f ${refseq}.masked ]; then # Handling for no repeats detected
 		ln -s ${refseq} ${refseq}.masked
 	fi
@@ -386,27 +344,20 @@ process repeatMask {
 process repeatModeler {
 
 	// RepeatModeler on soft-masked reference
+	// Requires RepeatModeler 2.0.5
 	
 	label 'repeatmodeler'
-	errorStrategy 'finish'
-	publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
+		publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
 	
 	input:
-	path refseq from params.refseq
-	path refseq_masked from rm_ref_ch
+	path(refseq_masked)
 	
 	output:
-	path "**consensi.fa.classified" into rm_lib_ch
-	path refseq_masked into rm_ref_ch2
+	path "**consensi.fa.classified"
 	
-	script:
-	// RepeatModeler adds an extra thread for each core for rmblastn
-	// Also correct for non-sensical thread values
-	rm_pa = Math.floor(task.cpus / 2).toInteger()
-	if ( rm_pa < 1 ) { rm_pa = 1 }
 	"""
-	BuildDatabase -name ${refseq.baseName}-soft ${refseq_masked}
-	RepeatModeler -pa ${rm_pa} -database ${refseq.baseName}-soft
+	BuildDatabase -name ${refseq_masked.baseName}-soft ${refseq_masked}
+	RepeatModeler -threads ${task.cpus} ${params.rm_model_opts} -database ${refseq_masked.baseName}-soft
 	if [ ! -f */consensi.fa.classified ]; then 
 		mkdir dummy # For fake library
 		touch dummy/consensi.fa.classified
@@ -421,29 +372,27 @@ process repeatMaskRM {
 	
 	label 'repeatmasker'
 	label 'ruby'
-	errorStrategy 'finish'
-	publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
+		publishDir "$params.outdir/04_RepeatMasking", mode: 'copy'
 	
 	input:
-	path refseq from params.refseq
-	path rm_lib from rm_lib_ch
-	path rm_out from rm_out_ch
-	path refseq_masked from rm_ref_ch2
+	path refseq_masked
+	path rm_out
+	path rm_lib
 	
 	output:
-	path "${refseq}.masked.*" optional true
-	path "${refseq}.RM.bed" into rm_bed_ch
+	path "${refseq_masked}.masked.*", optional: true
+	path "${refseq_masked.simpleName}.RM.bed", emit: RMbed
 	
 	"""
 	if [ "\$(wc -l < consensi.fa.classified)" -eq 0 ]; then
 	# If no output from RepeatModeler, use original RepeatMasker results
-		RM2bed.rb ${refseq}.out > ${refseq}.RM.bed
+		RM2bed.rb ${rm_out} > ${refseq_masked.simpleName}.RM.bed
 	else
-		RepeatMasker -pa ${task.cpus} -gccalc -nolow -xsmall -lib consensi.fa.classified ${refseq_masked}
+		RepeatMasker -pa ${task.cpus} ${params.rm_mask_opts} -lib consensi.fa.classified ${refseq_masked}
 		# Convert out file into BED for downstream
 		RM2bed.rb ${rm_out} > tmp.out
 		RM2bed.rb ${refseq_masked}.out > tmp2.out
-		cat tmp.out tmp2.out | sort  -k1,1 -k2,2n > ${refseq}.RM.bed
+		cat tmp.out tmp2.out | sort  -k1,1 -k2,2n > ${refseq_masked.simpleName}.RM.bed
 	fi
 	"""
 
@@ -454,17 +403,15 @@ process maskIndels {
 	// Mask indel-affected regions using indels2bed
 	
 	label 'ruby'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path combo_vcf from combined_indels_ch
-	val indelpad from params.indelpad
+	path combo_vcf
 	
 	output:
-	path "${combo_vcf.simpleName}_indels.bed" into indels_ch
+	path "${combo_vcf.simpleName}_indels.bed"
 	
 	"""
-	indels2bed.rb ${combo_vcf} $indelpad > ${combo_vcf.simpleName}_indels.bed
+	indels2bed.rb ${combo_vcf} ${params.indelpad} > ${combo_vcf.simpleName}_indels.bed
 	"""
 
 }
@@ -473,41 +420,24 @@ process simplifyBed {
 
 	// Reduce number of unique BED entries using simplify_bed
 	
-	label 'ruby'
-	errorStrategy 'finish'
-	publishDir "$params.outdir/05_ExcludedRegions", mode: 'copy'
+	label 'bedtools'
+		publishDir "$params.outdir/05_ExcludedRegions", mode: 'copy'
 	
 	input:
-	path indel_bed from indels_ch
-	path rm_bed from rm_bed_ch
-	path gm_bed from genmap_ch
-	val prefix from params.prefix
+	path indel_bed
+	path rm_bed
+	path gm_bed
 	
 	output:
-	path "${prefix}_excluded_reduced.bed" into exclude_bed_ch
+	path "${params.prefix}_excluded_reduced.bed"
 	
 	"""
 	#!/usr/bin/env bash
-	if [ ! "\$(wc -l < ${indel_bed})" -eq 0 ]; then
-		simplify_sorted_bed.rb ${indel_bed} > ${indel_bed.baseName}_sorted.bed
+	cat ${indel_bed} ${rm_bed} ${gm_bed} | sort -k1,1 -k2,2n | cut -f1-3 > tmp.bed
+	if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
+		bedtools merge -i tmp.bed > ${params.prefix}_excluded_reduced.bed
 	else
-		ln -s ${indel_bed} ${indel_bed.baseName}_sorted.bed
-	fi
-	if [ ! "\$(wc -l < ${rm_bed})" -eq 0 ]; then
-		simplify_sorted_bed.rb ${rm_bed} > ${rm_bed.baseName}_sorted.bed
-	else
-		ln -s ${rm_bed} ${rm_bed.baseName}_sorted.bed
-	fi
-	if [ ! "\$(wc -l < ${gm_bed})" -eq 0 ]; then
-		simplify_sorted_bed.rb ${gm_bed} > ${gm_bed.baseName}_sorted.bed
-	else
-		ln -s ${gm_bed} ${gm_bed.baseName}_sorted.bed
-	fi
-	cat ${indel_bed.baseName}_sorted.bed ${rm_bed.baseName}_sorted.bed ${gm_bed.baseName}_sorted.bed > ${prefix}_excluded.bed
-	if [ ! "\$(wc -l < ${prefix}_excluded.bed)" -eq 0 ]; then
-		simplify_bed.rb ${prefix}_excluded.bed > ${prefix}_excluded_reduced.bed
-	else
-		ln -s ${prefix}_excluded.bed ${prefix}_excluded_reduced.bed
+		touch ${params.prefix}_excluded_reduced.bed
 	fi
 	"""
 
@@ -520,32 +450,23 @@ process filterChr {
 	label 'vcftools'
 	label 'bcftools'
 	label  'gzip'
-	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*chrfilt.recode.vcf.gz'
-	errorStrategy 'finish'
-	
+	publishDir "$params.outdir/06_FilterChrVCFs", mode: 'copy', pattern: '*chrfilt.vcf.gz'
+		
 	input:
-	path comb_vcf from combined_vcf_ch
-	val prefix from params.prefix
-	path chrs from chr_file
+	path comb_vcf
+	path chrs
 	
 	output:
-	path "${prefix}.chrfilt.recode.vcf.gz" into chrfilt_vcf_ch, chrfilt_stats_ch
-	tuple path('chrfilt.tmp'), path(comb_vcf), path("${prefix}.chrfilt.recode.vcf.gz") optional true into chrfilt_log_ch 
-	
-	script:
-	if (chrs.name == "NULL")
-		"""
-		ln -s $comb_vcf ${prefix}.chrfilt.recode.vcf.gz
-		"""
-	else
-		"""
-		chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
-		vcftools --gzvcf $comb_vcf --recode -c \$chr_line | gzip > ${prefix}.chrfilt.recode.vcf.gz
-		cp .command.log chrfilt.tmp
-		"""
-}
+	path "${params.prefix}.chrfilt.vcf.gz", emit: chr_vcf
+	path 'chrfilt.tmp', emit: chr_tmp
 
-filt_sample_ch2 = filt_sample_ch.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
+	"""
+	chr_line=`echo '--chr '`; chr_line+=`awk 1 ORS=' --chr ' ${chrs}`; chr_line=`echo \${chr_line% --chr }` # Awkwardly make into a --chr command-list
+	vcftools --gzvcf $comb_vcf --recode -c \$chr_line | gzip > ${params.prefix}.chrfilt.vcf.gz
+	cp .command.log chrfilt.tmp
+	"""
+
+}
 
 process splitTrios {
 	
@@ -554,24 +475,19 @@ process splitTrios {
 	label 'vcftools'
 	label 'gzip'
 	label 'bcftools'
-	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: "${params.prefix}_offspring*.chrfilt.recode.vcf.gz"
-	errorStrategy 'finish'
-	
+	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: "${params.prefix}_offspring*.vcf.gz"
+		
 	input:
-	path chr_vcf from chrfilt_vcf_ch
-	val dam from params.dam
-	val sire from params.sire
-	val prefix from params.prefix
-	val pair_id from filt_sample_ch2
-	path chrs from chr_file
+	tuple path(chr_vcf), val(sample_id)
 	
 	output:
-	path "${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz" into triosplit_vcf_ch, candidate_dnms_header_ch
-	tuple path("${prefix}_offspring${pair_id}_trio.tmp"), path(chr_vcf), path("${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz") into triosplit_log_ch
+	path "${params.prefix}_offspring${sample_id}_trio.tmp", emit: trio_tmp
+	path(chr_vcf)
+	path "${params.prefix}_offspring${sample_id}.vcf.gz", emit: trio_vcf
 	
 	"""
-	vcftools --gzvcf $chr_vcf --recode -c --indv ${dam} --indv ${sire} --indv ${pair_id} | gzip > ${prefix}_offspring${pair_id}.chrfilt.recode.vcf.gz
-	cp .command.log ${prefix}_offspring${pair_id}_trio.tmp
+	vcftools --gzvcf $chr_vcf --recode -c --indv ${params.dam} --indv ${params.sire} --indv ${sample_id} | gzip > ${params.prefix}_offspring${sample_id}.vcf.gz
+	cp .command.log ${params.prefix}_offspring${sample_id}_trio.tmp
 	"""
 
 }
@@ -582,17 +498,15 @@ process pullDPGQ {
 
 	label 'bcftools'
 	publishDir "$params.outdir/08_gVCFs_DP_GQ", mode: 'copy'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path chrfilt from chrfilt_stats_ch
-	val pair_id from stats_sample_ch
+	tuple path(chrfilt), val(sample_id)
 	
 	output:
-	path "${chrfilt.simpleName}_ind${pair_id}.variants.txt" into dp_gq_ch
+	path "${chrfilt.simpleName}_ind${sample_id}.variants.txt"
 	
 	"""
-	bcftools view -v snps ${chrfilt} -s ${pair_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_ind${pair_id}.variants.txt
+	bcftools view -v snps ${chrfilt} -s ${sample_id} | bcftools query -f \"%CHROM %POS [ %DP] [ %GQ]\\n\" -o ${chrfilt.simpleName}_ind${sample_id}.variants.txt
 	"""
 
 }
@@ -603,10 +517,9 @@ process plotDPGQ {
 	
 	label 'R'
 	publishDir "$params.outdir/08_gVCFs_DP_GQ", mode: 'copy'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path "*.txt" from dp_gq_ch.collect()
+	path "*.txt"
 	
 	output:
 	path "${params.prefix}_*.png"
@@ -626,13 +539,12 @@ process splitVCFs {
 	label 'ruby'
 	label 'bgzip'
 	publishDir "$params.outdir/09_SplitVCFs", mode: 'copy'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path chr_vcf from triosplit_vcf_ch
+	path chr_vcf
 	
 	output:
-	path "${chr_vcf.simpleName}_split/*vcf.gz" into split_vcfs_ch mode flatten
+	path "${chr_vcf.simpleName}_split/*vcf.gz"
 	
 	"""
 	nextflow_split.rb -i ${chr_vcf} -o ${chr_vcf.simpleName}_split
@@ -650,51 +562,29 @@ process vcftoolsFilterSites {
 	label 'vcftools'
 	label 'bcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*sitefilt.recode.vcf.gz'
-	errorStrategy 'finish'
-	
+	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*sitefilt.vcf.gz'
+		
 	input:
-	path split_vcf from split_vcfs_ch
-	val site_filters from params.vcftools_site_filters
+	path split_vcf
 	
 	output:
-	tuple path("${split_vcf.simpleName}_sitefilt.tmp"), path(split_vcf), path("${split_vcf.simpleName}.sitefilt.recode.vcf.gz") into sitefilt_log_ch
+	path("${split_vcf.simpleName}.sitefilt.tmp")
+	path(split_vcf)
+	path("${split_vcf.simpleName}.sitefilt.vcf.gz")
 	
 	script:
-	if (site_filters == "NULL")
+	if (params.vcftools_site_filters == "NULL")
 		"""
-		cp -P $split_vcf ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
+		cp -P $split_vcf ${split_vcf.simpleName}.sitefilt.vcf.gz
 		vcftools --gzvcf $split_vcf
-		cp .command.log ${split_vcf.simpleName}_sitefilt.tmp
+		cp .command.log ${split_vcf.simpleName}.sitefilt.tmp
 		"""
 	else
 		"""
-		vcftools --gzvcf ${split_vcf} --recode -c ${site_filters} | bgzip > ${split_vcf.simpleName}.sitefilt.recode.vcf.gz
-		cp .command.log ${split_vcf.simpleName}_sitefilt.tmp
+		vcftools --gzvcf ${split_vcf} --recode -c ${params.vcftools_site_filters} | bgzip > ${split_vcf.simpleName}.sitefilt.vcf.gz
+		cp .command.log ${split_vcf.simpleName}.sitefilt.tmp
 		"""
 
-}
-
-process sanityCheckLogsVcftools {
-
-	// Sanity check logs for VCFtools site filtering and remove too short contigs
-
-	label 'gzip'
-	errorStrategy 'finish'
-
-	input:
-	tuple path(logfile), path(allvcflog), path(filtvcflog) from sitefilt_log_ch
-	val min_contig_length from params.min_contig_length
-	val min_filt_contig_length from params.min_filt_contig_length
-	
-	output:
-	path "${logfile.simpleName}.log" into sitefilt_log_sanity_ch
-	path "${filtvcflog.simpleName}.sitefilt.recode.OK.vcf.gz" optional true into sitefilt_vcf_ch
-	
-	"""
-	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length > ${logfile.simpleName}.log
-	"""
-	
 }
 
 process gatkFilterSites {
@@ -706,65 +596,43 @@ process gatkFilterSites {
 	label 'vcftools'
 	label 'bcftools'
 	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy', pattern: '*gatksitefilt.vcf.gz'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path refseq from params.refseq
-	path "*" from bwa_index_ch
-	path site_vcf from sitefilt_vcf_ch
-	val site_filters from params.gatk_site_filters
+	path site_vcf
+	path refseq
+	path "*"
 	
 	output:
-	tuple path("${site_vcf.simpleName}_gatksitefilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.gatksitefilt.vcf.gz") into gatk_sitefilt_log_ch
+	path("${site_vcf.simpleName}.gatksitefilt.tmp")
+	path(site_vcf)
+	path("${site_vcf.simpleName}.gatksitefilt.vcf.gz")
 	
 	script:
-	if (site_filters == "NULL")
+	if (params.gatk_site_filters == "NULL")
 		"""
 		ln -s $site_vcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
 		vcftools --gzvcf $site_vcf
-		cp .command.log  ${site_vcf.simpleName}_gatksitefilt.tmp
+		cp .command.log  ${site_vcf.simpleName}.gatksitefilt.tmp
 		"""
 	else if (params.gatk_build == 3)
 		"""
 		tabix $site_vcf
-		$gatk -T VariantFiltration -V $site_vcf -o tmp.vcf -R $refseq $site_filters
-		$gatk -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R $refseq --excludeFiltered
+		$gatk -T VariantFiltration -V $site_vcf -o tmp.vcf -R ${refseq} ${params.gatk_site_filters}
+		$gatk -T SelectVariants -V tmp.vcf -o ${site_vcf.simpleName}.gatksitefilt.vcf.gz -R ${refseq} --excludeFiltered
 		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
-		tail .command.log > ${site_vcf.simpleName}_gatksitefilt.tmp
+		tail .command.log > ${site_vcf.simpleName}.gatksitefilt.tmp
 		rm tmp.vcf
 		"""
 	else if (params.gatk_build == 4)
 		"""
 		tabix $site_vcf
-		$gatk VariantFiltration -R $refseq -V $site_vcf -O tmp.vcf.gz $site_filters
-		$gatk SelectVariants -R $refseq -V tmp.vcf.gz -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
+		$gatk VariantFiltration -R ${refseq} -V $site_vcf -O tmp.vcf.gz ${params.gatk_site_filters}
+		$gatk SelectVariants -R ${refseq} -V tmp.vcf.gz -O ${site_vcf.simpleName}.gatksitefilt.vcf.gz --exclude-filtered
 		vcftools --gzvcf ${site_vcf.simpleName}.gatksitefilt.vcf.gz
-		tail .command.log > ${site_vcf.simpleName}_gatksitefilt.tmp
+		tail .command.log > ${site_vcf.simpleName}.gatksitefilt.tmp
 		rm tmp.vcf.gz
 		"""
 
-}
-
-process sanityCheckLogsGatk {
-	
-	// Sanity check logs for GATK site filtering and remove too short contigs
-	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
-
-	label 'gzip'
-	errorStrategy 'finish'
-
-	input:
-	tuple path(logfile), path(allvcflog), path(filtvcflog) from gatk_sitefilt_log_ch
-	val min_filt_contig_length from params.min_filt_contig_length
-	
-	output:
-	path "${logfile.simpleName}.log" into gatk_sitefilt_log_sanity_ch
-	path "${filtvcflog.simpleName}.gatksitefilt.OK.vcf.gz" optional true into gatk_sitefilt_vcf_ch
-	
-	"""
-	logstats.sh $logfile $allvcflog $filtvcflog 1 $min_filt_contig_length > ${logfile.simpleName}.log
-	"""
-	
 }
 
 process filterRegions {
@@ -779,15 +647,15 @@ process filterRegions {
 	label 'tabix'
 	label 'gzip'
 	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy', pattern: '*regionfilt.vcf.gz'
-	errorStrategy 'retry'
-	maxRetries 3
 	
 	input:
-	path site_vcf from gatk_sitefilt_vcf_ch
-	path exclude_bed from exclude_bed_ch
+	path site_vcf
+	path exclude_bed
 	
 	output:
-	tuple path("${site_vcf.simpleName}_regionfilt.tmp"), path(site_vcf), path("${site_vcf.simpleName}.regionfilt.vcf.gz") into regionfilt_log_ch
+	path("${site_vcf.simpleName}.regionfilt.tmp")
+	path(site_vcf)
+	path("${site_vcf.simpleName}.regionfilt.vcf.gz")
 	
 	script:
 	chr = site_vcf.simpleName.split('_chr')[1]
@@ -799,13 +667,13 @@ process filterRegions {
 			bedtools subtract -a ${site_vcf} -b tmp.bed -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 			if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0 ]]; then
 				vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-				cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+				cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 			else
 				rm ${site_vcf.simpleName}.regionfilt.vcf.gz
 			fi
 		else
 			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		fi	
 		"""
 	else if (task.attempt == 2)
@@ -816,13 +684,13 @@ process filterRegions {
 			zcat ${site_vcf} | bedtools subtract -a stdin -b tmp.bed -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 			if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0 ]]; then
 				vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-				cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+				cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 			else
 				rm ${site_vcf.simpleName}.regionfilt.vcf.gz
 			fi
 		else
 			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		fi	
 		"""
 	else if (task.attempt == 3)
@@ -838,10 +706,10 @@ process filterRegions {
 			# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
 			bcftools view -T ${site_vcf.simpleName}.targets -Ov ${site_vcf} | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 			vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		else
 			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		fi
 		"""
 	else
@@ -850,35 +718,13 @@ process filterRegions {
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		else
 			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		fi
 		"""
 
-}
-
-process sanityCheckLogsRegions {
-
-	// Sanity check logs for region filtering and remove too short contigs
-	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
-
-	label 'gzip'
-	errorStrategy 'finish'
-
-	input:
-	tuple path(logfile), path(allvcflog), path(filtvcflog) from regionfilt_log_ch
-	val min_filt_contig_length from params.min_filt_contig_length
-	
-	output:
-	path "${logfile.simpleName}.log" into regionfilt_log_sanity_ch
-	path "${filtvcflog.simpleName}.regionfilt.OK.vcf.gz" optional true into regionfilt_vcf_ch
-	
-	"""
-	logstats.sh $logfile $allvcflog $filtvcflog 1 $min_filt_contig_length > ${logfile.simpleName}.log
-	"""
-	
 }
 
 process calcDNMRate {
@@ -887,19 +733,15 @@ process calcDNMRate {
 	
 	label 'ruby'
 	publishDir "$params.outdir/13_SplitCalcDNMLogs", mode: 'copy'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path splitvcf from regionfilt_vcf_ch
-	val sire from params.sire
-	val dam from params.dam
-	val dnm_opts from params.dnm_opts
+	path splitvcf
 	
 	output:
-	path "${splitvcf.simpleName}.log" into split_logs_ch
+	path "${splitvcf.simpleName}.log"
 	
 	"""
-	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${sire} -d ${dam} ${dnm_opts} > ${splitvcf.simpleName}.log
+	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${params.sire} -d ${params.dam} ${params.dnm_opts} > ${splitvcf.simpleName}.log
 	"""
 
 }
@@ -912,15 +754,14 @@ process summarizeDNM {
 	label 'bcftools'
 	label 'gzip'
 	publishDir "$params.outdir/14_SummarizeDNMLogs", mode: 'copy'
-	errorStrategy 'finish'
-	
+		
 	input:
-	path "*" from split_logs_ch.collect()
-	path "*" from candidate_dnms_header_ch.collect()
+	path "*"
+	path "*"
 	
 	output:
-	path "${params.prefix}*_summary.log" into summary_log_ch
-	path "${params.prefix}*_candidates.vcf.gz" into candidates_vcf_ch
+	path "${params.prefix}*_summary.log", emit: log
+	path "${params.prefix}*_candidates.vcf.gz", emit: vcf
 	
 	"""
 	#!/usr/bin/env bash
@@ -952,37 +793,36 @@ process summarizeDNM {
 
 }
 
-all_logs_ch = triosplit_log_ch.mix(chrfilt_log_ch)
-
 process sanityCheckLogs {
 
-	// Sanity check logs for Chromosome filtering and trio-splitting, but perform no filtering
+	// Sanity check filtering logs and remove too short contigs as needed
 
 	label 'gzip'
-	errorStrategy 'finish'
-
+	
 	input:
-	tuple path(logfile), path(allvcflog), path(filtvcflog) from all_logs_ch
+	path logfile
+	path allvcflog
+	path filtvcflog
+	val min_contig_length
+	val min_filt_contig_length
 	
 	output:
-	path "${logfile.simpleName}.log" into logs_sanity_ch
+	path "${logfile.baseName}.log",  emit: log
+	path "${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz", optional: true, emit: ok_vcf
 	
 	"""
-	logstats.sh $logfile $allvcflog $filtvcflog 0 0 > ${logfile.simpleName}.log
+	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length  > ${logfile.baseName}.log
 	"""
 	
 }
-
-all_logs_sanity_ch = logs_sanity_ch.mix(regionfilt_log_sanity_ch, gatk_sitefilt_log_sanity_ch, sitefilt_log_sanity_ch, summary_log_ch)
 
 process generateSummaryStats {
 
 	label 'ruby'
 	publishDir "$params.outdir/15_SummaryStats", mode: "copy"
-	errorStrategy 'finish'
-	
+		
 	input:
-	path "*" from all_logs_sanity_ch.collect()
+	path "*"
 	
 	output:
 	path "summary_stats.csv"
@@ -1013,4 +853,112 @@ workflow.onComplete {
 			sendMail(to: params.email, subject: 'RatesTools terminated with errors', body: "RatesTools pipeline terminated with errors at $workflow.complete.\nError message: $workflow.errorMessage")
 		}
 	}
+}
+
+workflow logSanityTrio {
+	// Sanity Check logs from trio splitting
+	take:
+		tmpfile
+		rawvcf
+		filtvcf
+	main:
+		sanityCheckLogs(tmpfile, rawvcf, filtvcf, 0, 0)
+	emit:
+		sanelog = sanityCheckLogs.out.log
+		ok_vcf = sanityCheckLogs.out.ok_vcf
+}
+
+workflow logVcftoolsSanity {
+	// Sanity check logs from VCFtools site filtering
+	take:
+		tmpfile
+		rawvcf
+		filtvcf
+	main:
+		sanityCheckLogs(tmpfile, rawvcf, filtvcf, params.min_contig_length, params.min_filt_contig_length)
+	emit:
+		sanelog = sanityCheckLogs.out.log
+		ok_vcf = sanityCheckLogs.out.ok_vcf
+}
+
+workflow logGatkSanity {
+	// Sanity check logs for GATK site filtering and remove too short contigs
+	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
+	take:
+		tmpfile
+		rawvcf
+		filtvcf
+	main:
+		sanityCheckLogs(tmpfile, rawvcf, filtvcf, 1, params.min_filt_contig_length)
+	emit:
+		sanelog = sanityCheckLogs.out.log
+		ok_vcf = sanityCheckLogs.out.ok_vcf
+}
+
+workflow logRegionSanity {
+	// Sanity check logs for region filtering and remove too short contigs
+	// Dummy value of 1 for min_contig_length since already evalutated and no longer accurate
+	take:
+		tmpfile
+		rawvcf
+		filtvcf
+	main:
+		sanityCheckLogs(tmpfile, rawvcf, filtvcf, 1, params.min_filt_contig_length)
+	emit:
+		sanelog = sanityCheckLogs.out.log
+		ok_vcf = sanityCheckLogs.out.ok_vcf
+}
+
+workflow {
+	main:
+		prepareRef(params.refseq)
+		read_data = Channel.fromPath(params.libraries).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.readDir + row.Read1), file(params.readDir + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }
+		alignSeqs(read_data, params.refseq, prepareRef.out) | markDuplicates
+		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
+		realignIndels(mergeLibraries.out, params.refseq, prepareRef.out)
+		if (params.filter_bams) {
+			filterBAMs(realignIndels.out, params.refseq, prepareRef.out) | fixMate
+			callVariants(fixMate.out, params.refseq, prepareRef.out)
+		} else {
+			callVariants(realignIndels.out, params.refseq, prepareRef.out)
+		}
+		genotypegVCFs(callVariants.out.collect(), params.refseq, prepareRef.out)
+		if (params.region_filter) {
+			maskIndels(genotypegVCFs.out)
+			genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap
+			repeatMask(params.refseq, params.rm_species)
+			repeatModeler(repeatMask.out.rm1)
+			repeatMaskRM(repeatMask.out.rm1, repeatMask.out.rm1_out, repeatModeler.out)
+			simplifyBed(genMapMap.out, maskIndels.out, repeatMaskRM.out.RMbed)
+		}
+		all_samples = read_data.map {it -> it[0]}.unique()
+		trio_samples = all_samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
+		if ( params.chr_file != 'NULL') {
+			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
+			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
+			trio = filterChr.out.chr_vcf.combine(trio_samples)
+			splitTrios(trio) | logSanityTrio
+			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.sanelog)
+			allDPGQ = filterChr.out.chr_vcf.combine(all_samples)			
+		} else {
+			trio = genotypegVCFs.out.combine(trio_samples)
+			splitTrios(trio) | logSanityTrio
+			log_trio_sanity = logSanityTrio.out.sanelog
+			allDPGQ = genotypegVCFs.out.combine(all_samples)
+		}
+		pullDPGQ(allDPGQ)
+		plotDPGQ(pullDPGQ.out.collect())
+		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity
+		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, params.refseq, prepareRef.out) | logGatkSanity
+		if (params.region_filter) { 
+			filterRegions(logGatkSanity.out.ok_vcf, simplifyBed.out) | logRegionSanity
+			calcDNMRate(logRegionSanity.out.ok_vcf)
+			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
+			all_logs_sanity = log_trio_sanity.mix(logRegionSanity.out.sanelog, logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
+		} else {
+			calcDNMRate(logGatkSanity.out.ok_vcf)
+			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
+			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
+		}
+		generateSummaryStats(all_logs_sanity.collect())
 }

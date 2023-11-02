@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #----------------------------------------------------------------------------------------
-# logstats.sh 0.1.3
+# logstats.sh 1.0.0
 # Michael G. Campana and Ellie E. Armstrong, 2022-2023
 # Smithsonian Institution and Stanford University
 
@@ -20,6 +20,10 @@
 logval=`tail -n2 $1 | head -n1`
 if [[ $logval == 'No data left for analysis!' ]]; then
 	logval=`tail -n3 $1 | head -n1`
+fi
+indval=`echo  $logval | cut -f8 -d ' '`
+if [[ $indval == 'Individuals' ]]; then
+	logval=`tail -n1 $1`
 fi
 if [[ $logval == 'File does not contain any sites' ]]; then
 	bcftools stats <(gunzip -c $2) > tmp.txt

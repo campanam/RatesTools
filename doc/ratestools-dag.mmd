@@ -1,172 +1,171 @@
-flowchart TD
-    p0((Channel.fromFilePairs))
-    p1(( ))
-    p2[prepareRef]
-    p3(( ))
-    p4[alignSeqs]
-    p5[sortBAM]
-    p6(( ))
-    p7[markDuplicates]
-    p8(( ))
-    p9[fixReadGroups]
-    p10(( ))
-    p11[realignIndels]
-    p12(( ))
-    p13[filterBAMs]
-    p14[fixMate]
-    p15(( ))
-    p16[callVariants]
-    p17([collect])
-    p18(( ))
-    p19(( ))
-    p20[genotypegVCFs]
-    p21(( ))
-    p22(( ))
-    p23[genMapIndex]
-    p24(( ))
-    p25[genMapMap]
-    p26(( ))
-    p27(( ))
-    p28[repeatMask]
-    p29(( ))
-    p30[repeatModeler]
-    p31(( ))
-    p32[repeatMaskRM]
-    p33(( ))
-    p34[maskIndels]
-    p35(( ))
-    p36[simplifyBed]
-    p37(( ))
-    p38(( ))
-    p39[filterChr]
-    p40([filter])
-    p41(( ))
-    p42(( ))
-    p43(( ))
-    p44(( ))
-    p45[splitTrios]
-    p46[pullDPGQ]
-    p47([collect])
-    p48[plotDPGQ]
-    p49[splitVCFs]
-    p50(( ))
-    p51[vcftoolsFilterSites]
-    p52(( ))
-    p53(( ))
-    p54[sanityCheckLogsVcftools]
-    p55(( ))
-    p56(( ))
-    p57[gatkFilterSites]
-    p58(( ))
-    p59[sanityCheckLogsGatk]
-    p60[filterRegions]
-    p61(( ))
-    p62[sanityCheckLogsRegions]
-    p63(( ))
-    p64(( ))
-    p65(( ))
-    p66[calcDNMRate]
-    p67([collect])
-    p68([collect])
-    p69[summarizeDNM]
-    p70(( ))
-    p71([mix])
-    p72[sanityCheckLogs]
-    p73([mix])
-    p74([collect])
-    p75[generateSummaryStats]
-    p0 -->|readpairs_ch| p4
-    p1 -->|refseq| p2
-    p2 -->|bwa_index_ch| p4
-    p3 -->|refseq| p4
-    p4 -->|raw_bam_ch| p5
-    p4 -->|filt_sample_ch| p40
-    p4 -->|stats_sample_ch| p46
-    p5 -->|sorted_bam_ch| p7
-    p6 -->|markDuplicates| p7
-    p7 -->|markdup_bam_ch| p9
-    p8 -->|refseq| p9
-    p9 -->|rg_bam_ch| p11
-    p10 -->|refseq| p11
-    p2 -->|bwa_index_ch| p11
-    p11 -->|realn_bam_ch| p13
-    p11 -->|realn_bai_ch| p13
-    p12 -->|refseq| p13
-    p2 -->|bwa_index_ch| p13
-    p13 -->|filt_bam_ch| p14
-    p13 -->|filt_bai_ch| p14
-    p14 -->|fix_bam_ch| p16
-    p14 -->|fix_bai_ch| p16
-    p15 -->|refseq| p16
-    p2 -->|bwa_index_ch| p16
-    p16 -->|var_vcf_ch| p17
-    p17 --> p20
-    p18 -->|refseq| p20
-    p2 -->|bwa_index_ch| p20
-    p19 -->|prefix| p20
-    p20 -->|combined_vcf_ch| p39
-    p20 -->|combined_indels_ch| p34
-    p21 -->|refseq| p23
-    p22 -->|gm_tmpdir| p23
-    p23 -->|genmap_index_ch| p25
-    p23 -->|genmap_index_files_ch| p25
-    p24 -->|refseq| p25
-    p25 -->|genmap_ch| p36
-    p26 -->|refseq| p28
-    p27 -->|rm_species| p28
-    p28 -->|rm_ref_ch| p30
-    p28 -->|rm_out_ch| p32
-    p29 -->|refseq| p30
-    p30 -->|rm_lib_ch| p32
-    p30 -->|rm_ref_ch2| p32
-    p31 -->|refseq| p32
-    p32 -->|rm_bed_ch| p36
-    p33 -->|indelpad| p34
-    p34 -->|indels_ch| p36
-    p35 -->|prefix| p36
-    p36 -->|exclude_bed_ch| p60
-    p37 -->|prefix| p39
-    p38 -->|chrs| p39
-    p39 -->|chrfilt_vcf_ch| p45
-    p39 -->|chrfilt_stats_ch| p46
-    p39 -->|chrfilt_log_ch| p71
-    p40 -->|filt_sample_ch2| p45
-    p41 -->|dam| p45
-    p42 -->|sire| p45
-    p43 -->|prefix| p45
-    p44 -->|chrs| p45
-    p45 -->|triosplit_vcf_ch| p49
-    p45 -->|candidate_dnms_header_ch| p68
-    p45 -->|triosplit_log_ch| p71
-    p46 -->|dp_gq_ch| p47
-    p47 --> p48
-    p49 -->|split_vcfs_ch| p51
-    p50 -->|site_filters| p51
-    p51 -->|sitefilt_log_ch| p54
-    p52 -->|min_contig_length| p54
-    p53 -->|min_filt_contig_length| p54
-    p54 -->|sitefilt_log_sanity_ch| p73
-    p54 -->|sitefilt_vcf_ch| p57
-    p55 -->|refseq| p57
-    p2 -->|bwa_index_ch| p57
-    p56 -->|site_filters| p57
-    p57 -->|gatk_sitefilt_log_ch| p59
-    p58 -->|min_filt_contig_length| p59
-    p59 -->|gatk_sitefilt_log_sanity_ch| p73
-    p59 -->|gatk_sitefilt_vcf_ch| p60
-    p60 -->|regionfilt_log_ch| p62
-    p61 -->|min_filt_contig_length| p62
-    p62 -->|regionfilt_log_sanity_ch| p73
-    p62 -->|regionfilt_vcf_ch| p66
-    p63 -->|sire| p66
-    p64 -->|dam| p66
-    p65 -->|dnm_opts| p66
-    p66 -->|split_logs_ch| p67
-    p67 --> p69
-    p68 --> p69
-    p69 -->|summary_log_ch| p73
-    p69 -->|candidates_vcf_ch| p70
-    p71 -->|all_logs_ch| p72
-    p72 -->|logs_sanity_ch| p73
-    p73 -->|all_logs_sanity_ch| p74
-    p74 --> p75
+flowchart TB
+    subgraph " "
+    v0["refseq"]
+    v2["Channel.fromPath"]
+    v5["refseq"]
+    v10["refseq"]
+    v12["refseq"]
+    v15["refseq"]
+    v18["refseq"]
+    v21["refseq"]
+    v22["gm_tmpdir"]
+    v25["refseq"]
+    v26["rm_species"]
+    v36["Channel.fromPath"]
+    v38["min_contig_length"]
+    v39["min_filt_contig_length"]
+    v44["min_contig_length"]
+    v45["min_filt_contig_length"]
+    v59["min_contig_length"]
+    v60["min_filt_contig_length"]
+    v62["refseq"]
+    v64["min_contig_length"]
+    v65["min_filt_contig_length"]
+    v68["min_contig_length"]
+    v69["min_filt_contig_length"]
+    end
+    v1([prepareRef])
+    v6([alignSeqs])
+    v7([markDuplicates])
+    v9([mergeLibraries])
+    v11([realignIndels])
+    v13([filterBAMs])
+    v14([fixMate])
+    v16([callVariants])
+    v19([genotypegVCFs])
+    v20([maskIndels])
+    v23([genMapIndex])
+    v24([genMapMap])
+    v27([repeatMask])
+    subgraph " "
+    v28[" "]
+    v31[" "]
+    v41[" "]
+    v47["ok_vcf"]
+    v53[" "]
+    v54[" "]
+    v55[" "]
+    v75[" "]
+    v79[" "]
+    end
+    v29([repeatModeler])
+    v30([repeatMaskRM])
+    v32([simplifyBed])
+    v37([filterChr])
+    v40([sanityCheckLogs])
+    v43([splitTrios])
+    subgraph logSanityTrio
+    v46([sanityCheckLogs])
+    end
+    v50([pullDPGQ])
+    v52([plotDPGQ])
+    v56([splitVCFs])
+    v58([vcftoolsFilterSites])
+    subgraph logVcftoolsSanity
+    v61([sanityCheckLogs])
+    end
+    v63([gatkFilterSites])
+    subgraph logGatkSanity
+    v66([sanityCheckLogs])
+    end
+    v67([filterRegions])
+    subgraph logRegionSanity
+    v70([sanityCheckLogs])
+    end
+    v71([calcDNMRate])
+    v74([summarizeDNM])
+    v78([generateSummaryStats])
+    v3(( ))
+    v8(( ))
+    v17(( ))
+    v48(( ))
+    v51(( ))
+    v57(( ))
+    v72(( ))
+    v73(( ))
+    v0 --> v1
+    v1 --> v6
+    v1 --> v11
+    v1 --> v13
+    v1 --> v16
+    v1 --> v19
+    v1 --> v63
+    v2 --> v3
+    v5 --> v6
+    v3 --> v6
+    v6 --> v7
+    v7 --> v8
+    v8 --> v9
+    v9 --> v11
+    v10 --> v11
+    v11 --> v13
+    v12 --> v13
+    v13 --> v14
+    v14 --> v16
+    v15 --> v16
+    v16 --> v17
+    v18 --> v19
+    v17 --> v19
+    v19 --> v20
+    v19 --> v37
+    v19 --> v40
+    v20 --> v32
+    v21 --> v23
+    v22 --> v23
+    v23 --> v24
+    v24 --> v32
+    v25 --> v27
+    v26 --> v27
+    v27 --> v29
+    v27 --> v30
+    v27 --> v28
+    v29 --> v30
+    v30 --> v31
+    v30 --> v32
+    v32 --> v67
+    v36 --> v37
+    v37 --> v40
+    v37 --> v3
+    v38 --> v40
+    v39 --> v40
+    v40 --> v41
+    v40 --> v48
+    v3 --> v43
+    v43 --> v46
+    v43 --> v56
+    v43 --> v73
+    v44 --> v46
+    v45 --> v46
+    v46 --> v47
+    v46 --> v48
+    v3 --> v50
+    v50 --> v51
+    v51 --> v52
+    v52 --> v55
+    v52 --> v54
+    v52 --> v53
+    v56 --> v57
+    v57 --> v58
+    v58 --> v61
+    v59 --> v61
+    v60 --> v61
+    v61 --> v63
+    v61 --> v48
+    v62 --> v63
+    v63 --> v66
+    v64 --> v66
+    v65 --> v66
+    v66 --> v67
+    v66 --> v48
+    v67 --> v70
+    v68 --> v70
+    v69 --> v70
+    v70 --> v71
+    v70 --> v48
+    v71 --> v72
+    v72 --> v74
+    v73 --> v74
+    v74 --> v75
+    v74 --> v48
+    v48 --> v78
+    v78 --> v79

@@ -217,6 +217,6 @@ else
 	end
 	puts "\nOffspring,Single-ForwardOverlappingSites,TotalOverlappingSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
 	for key in $sfindv.keys
-		puts key + "," + $sfindiv[key].to_s + "," + total_overlap.to_s
+		puts key + "," + $sfindv[key].to_s + "," + total_overlap.to_s
 	end
 end

@@ -173,7 +173,7 @@ gz_open_file improved to version in BaitsTools 1.6.6
 ### Version 1.0.0  
 Updated for ratestools 1.0.0  
 Added handling for more mutation classes  
-Added code to identify shared mutations between offspring  
+Added code to identify shared mutations between offspring and recalculate mutation rates  
 
 ### Version 0.1.1  
 Update file headers  

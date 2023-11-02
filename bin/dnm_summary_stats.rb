@@ -92,6 +92,18 @@ def classify_sites(outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[0,1] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
 					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+				elsif par_genotypes[0] == [1] && par_genotypes[1] == [0] && off_genotype == [1]
+					mutclass = "#{alleles[0]}->#{alleles[1]}"
+					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+				elsif par_genotypes[0] == [1] && par_genotypes[1] == [0] && off_genotype == [0]
+					mutclass = "#{alleles[1]}->#{alleles[0]}"
+					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+				elsif par_genotypes[0] == [0] && par_genotypes[1] == [1] && off_genotype == [1]
+					mutclass = "#{alleles[0]}->#{alleles[1]}"
+					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+				elsif par_genotypes[0] == [0] && par_genotypes[1] == [1] && off_genotype == [0]
+					mutclass = "#{alleles[1]}->#{alleles[0]}"
+					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
 				else
 					puts line
 				end

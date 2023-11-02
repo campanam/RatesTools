@@ -104,8 +104,6 @@ def classify_sites(outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
 					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
-				else
-					puts line
 				end
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")
@@ -118,15 +116,15 @@ def classify_sites(outindiv)
 	for mut in mutclasses.keys
 		puts mut + "," + mutclasses[mut].to_s
 	end
-	puts "\n\nDouble-Forward Mutation,Count"
+	puts "\nDouble-Forward Mutation,Count"
 	for mut in dfclasses.keys
 		puts mut + "," + dfclasses[mut].to_s
 	end
-	puts "\n\nBackward Mutation,Count"
+	puts "\nBackward Mutation,Count"
 	for mut in backclasses.keys
 		puts mut + "," + backclasses[mut].to_s
 	end
-	puts "\n\nIndels and Other Mutations,Count"
+	puts "\nIndels and Other Mutations,Count"
 	puts "Total: " + otherscnt.to_s
 end
 #----------------------------------------------------------------------------------------

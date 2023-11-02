@@ -653,7 +653,7 @@ process filterRegions {
 	path exclude_bed
 	
 	output:
-	path("${site_vcf.simpleName}_regionfilt.tmp")
+	path("${site_vcf.simpleName}.regionfilt.tmp")
 	path(site_vcf)
 	path("${site_vcf.simpleName}.regionfilt.vcf.gz")
 	
@@ -667,13 +667,13 @@ process filterRegions {
 			bedtools subtract -a ${site_vcf} -b tmp.bed -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 			if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0 ]]; then
 				vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-				cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+				cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 			else
 				rm ${site_vcf.simpleName}.regionfilt.vcf.gz
 			fi
 		else
 			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		fi	
 		"""
 	else if (task.attempt == 2)
@@ -684,13 +684,13 @@ process filterRegions {
 			zcat ${site_vcf} | bedtools subtract -a stdin -b tmp.bed -header | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 			if [[ `grep -n 'Error: Invalid record' .command.log | cut -d ':' -f 1` -eq 0 ]]; then
 				vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-				cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+				cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 			else
 				rm ${site_vcf.simpleName}.regionfilt.vcf.gz
 			fi
 		else
 			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		fi	
 		"""
 	else if (task.attempt == 3)
@@ -706,10 +706,10 @@ process filterRegions {
 			# Use the isec output to get the output. Needs to stream (-T) rather than index jump (-R) for efficiency.
 			bcftools view -T ${site_vcf.simpleName}.targets -Ov ${site_vcf} | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
 			vcftools --gzvcf ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		else
 			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		fi
 		"""
 	else
@@ -718,10 +718,10 @@ process filterRegions {
 		grep ${chr} ${exclude_bed} > tmp.bed
 		if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
 			vcftools --gzvcf ${site_vcf} --recode -c --exclude-bed tmp.bed | gzip  > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		else
 			vcftools --gzvcf ${site_vcf} --recode -c | gzip > ${site_vcf.simpleName}.regionfilt.vcf.gz
-			cp .command.log ${site_vcf.simpleName}_regionfilt.tmp
+			cp .command.log ${site_vcf.simpleName}.regionfilt.tmp
 		fi
 		"""
 

@@ -124,19 +124,19 @@ def classify_sites(outindiv)
 			end
 		end	
 	end
-	puts "\n" + outindiv + " Mutation Classes\nSingle-Forward Mutation,Count"
+	puts "\n" + outindiv + " Mutation Classes\nSingle-Forward,Count"
 	for mut in mutclasses.keys
 		puts mut + "," + mutclasses[mut].to_s
 	end
-	puts "\nDouble-Forward Mutation,Count"
+	puts "\nDouble-Forward,Count"
 	for mut in dfclasses.keys
 		puts mut + "," + dfclasses[mut].to_s
 	end
-	puts "\nBackward Mutation,Count"
+	puts "\nBackward,Count"
 	for mut in backclasses.keys
 		puts mut + "," + backclasses[mut].to_s
 	end
-	puts "\nIndels and Other Mutations,Count"
+	puts "\nIndels/Other,Count"
 	puts "Total: " + otherscnt.to_s
 end
 #----------------------------------------------------------------------------------------
@@ -215,9 +215,8 @@ else
 			end
 		end
 	end
-	puts 'Total Overlapping Sites: ' + total_overlap
-	puts "\nSingle-Forward Overlapping Sites\nOffspring,Count"
+	puts "\nOffspring,Single-ForwardOverlappingSites,TotalOverlappingSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
 	for key in $sfindv.keys
-		puts key + "," + $sfindiv[key].to_s
+		puts key + "," + $sfindiv[key].to_s + "," + total_overlap.to_s
 	end
 end

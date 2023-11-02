@@ -60,7 +60,7 @@ def classify_sites(outindiv)
 			if start
 				snp_array = line[0..-2].split("\t")
 				snpsite = snp_array[0] + ':' + snp_array[1]
-				$candidates[snpsite].nil? ? $candidates[snpsite] = 1 :  $candidates[snpsite] += 1
+				$candidates[snpsite].nil? ? $candidates[snpsite] = [1,[]] :  $candidates[snpsite][0] += 1 # Structure is array of [total_number, [individuals for single-forward mutation]]
 				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
 				alleles.delete("<non_ref>") if alleles.include?("<non_ref>")
 				alleles.delete(".") if alleles.include?(".") # Ignore for non-polymorphic sites
@@ -77,11 +77,21 @@ def classify_sites(outindiv)
 				end
 				# Basic handling assuming biallelic SNPs, single-forward, parental homozygous. Dumps all other types into "other".
 				if par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [0,1]
-					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					mutclasses[mutclass].nil? ? otherscnt += 1 : mutclasses[mutclass] += 1 # Dumps all other mutations into other
+					mutclass = "#{alleles[0]}->#{alleles[1]}" # Dumps all other mutations into other
+					if mutclasses[mutclass].nil? 
+						otherscnt += 1
+					else
+						mutclasses[mutclass] += 1
+						$candidates[snpsite][1].push(outindiv) # Add to single-forward array
+					end
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0,1]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					mutclasses[mutclass].nil? ? otherscnt += 1 : mutclasses[mutclass] += 1 # Dumps all other mutations into other
+					if mutclasses[mutclass].nil?  # Dumps all other mutations into other
+						otherscnt += 1
+					else
+						mutclasses[mutclass] += 1
+						$candidates[snpsite][1].push(outindiv) # Add to single-forward array
+					end
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
 					dfclasses[mutclass].nil? ? otherscnt += 1 : dfclasses[mutclass] += 1 # Dumps all other mutations into other
@@ -194,9 +204,20 @@ else
 		classify_sites(outindiv)
 	end
 	puts "\nCandidate Sites Overlapping Between Offspring"
+	total_overlap = 0
+	$sfindv = {} # Hash of single-forward counts per individual
 	for key in $candidates.keys
-		if $candidates[key] > 1
+		if $candidates[key][0] > 1
 			puts key
+			total_overlap +=1
+			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
+				$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
+			end
 		end
+	end
+	puts 'Total Overlapping Sites: ' + total_overlap
+	puts "\nSingle-Forward Overlapping Sites\nOffspring,Count"
+	for key in $sfindv.keys
+		puts key + "," + $sfindiv[key].to_s
 	end
 end

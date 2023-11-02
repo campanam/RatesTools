@@ -126,7 +126,7 @@ def classify_sites(outindiv)
 				cnts = line.strip.split.map { |x| x.to_i }
 				getmutationcnts = false
 				$totalbases[outindiv][1] = cnts[1..3].sum
-				$totalbases[outindiv][2] = cnts[3]
+				$totalbases[outindiv][2] = cnts[1]
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")
 				@off_index = header_arr.index(outindiv)
@@ -221,7 +221,6 @@ else
 		if $candidates[key][0] > 1
 			puts key
 			total_overlap +=1
-				puts $candidates[key][1]
 			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
 				$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
 			end

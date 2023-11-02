@@ -59,6 +59,8 @@ def classify_sites(outindiv)
 		while line = f3.gets
 			if start
 				snp_array = line[0..-2].split("\t")
+				snpsite = snp_array[0] + ':' + snp_array[1]
+				$candidates[snpsite].nil? ? $candidates[snpsite] = 1 :  $candidates[snpsite] += 1
 				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
 				alleles.delete("<non_ref>") if alleles.include?("<non_ref>")
 				alleles.delete(".") if alleles.include?(".") # Ignore for non-polymorphic sites
@@ -139,6 +141,7 @@ else
 	$vcf_filtsites = {} # Hash of site counts after VCFtools site filtering
 	$gatk_filtsites = {} # Hash of site counts after GATK site filtering
 	$regionsites = {} # Hash of site counts after region filtering
+	$candidates = {} # Hash of mutation site counts to identify sibling overlaps
 	
 	# Get individual names
 	Dir.foreach(ARGV[0] + "/") do |f1|
@@ -189,5 +192,11 @@ else
 	end
 	for outindiv in outindivs
 		classify_sites(outindiv)
+	end
+	puts "\nCandidate Sites Overlapping Between Offspring"
+	for key in $candidates.keys
+		if $candidates[key] > 1
+			puts key
+		end
 	end
 end

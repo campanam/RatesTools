@@ -135,9 +135,10 @@ else
 	for indiv in $individuals
 		extract_site_count($vcf_filtsites, '.sitefilt.log', indiv)
 		extract_site_count($gatk_filtsites, '.gatksitefilt.log', indiv)
+		Dir.pwd
 		if Dir.glob(ARGV[0]+ "/*regionfilt.log").any? # Handling for when region filters are turned off
 			extract_site_count($regionsites, '.regionfilt.log', indiv)
-			print $regionsites
+			Dir.pwd
 		else
 			$regionsites = $gatk_filtsites
 		end

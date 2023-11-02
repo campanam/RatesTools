@@ -55,6 +55,7 @@ def classify_sites(outindiv)
 					"G->A" => 0, "G->C" => 0 }
 	otherscnt = 0
 	start = false # Flag to collect data
+	getmutationcnts = false # Flag to collect mutation count data
 	File.open(ARGV[1] + "_offspring" + outindiv + "_summary.log") do |f3|
 		while line = f3.gets
 			if start
@@ -117,6 +118,15 @@ def classify_sites(outindiv)
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
 					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
 				end
+			elsif line.split[":"][0] == "Total number of retained sites"
+				$totalbases[outindv] = [line.split[":"][1].to_i,0,0] # Total callable bases, total mutations, single-forward mutations
+			elsif line == "Offspring\tSingle-Forward\tDouble-Forward\tBackward\n"
+				getmutationcnts = true
+			elsif getmutationcnts
+				cnts = line.strip.split.map { |x| x.to_i }
+				getmutationcnts = false
+				$totalbases[outindv][1] = cnts[1..3].sum
+				$totalbases[outindv][2] = cnts[3]
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")
 				@off_index = header_arr.index(outindiv)
@@ -152,6 +162,7 @@ else
 	$gatk_filtsites = {} # Hash of site counts after GATK site filtering
 	$regionsites = {} # Hash of site counts after region filtering
 	$candidates = {} # Hash of mutation site counts to identify sibling overlaps
+	$totalbases = {} # Hash indexing total site counts to individuals
 	
 	# Get individual names
 	Dir.foreach(ARGV[0] + "/") do |f1|
@@ -217,6 +228,8 @@ else
 	end
 	puts "\nOffspring,Single-ForwardOverlappingSites,TotalOverlappingSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
 	for key in $sfindv.keys
-		puts key + "," + $sfindv[key].to_s + "," + total_overlap.to_s
+		srate = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate single-forward rate
+		arate = ($totalbases[key][1]-$sfindv[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
+		puts key + "," + $sfindv[key].to_s + "," + total_overlap.to_s + "," + srate.to_s + "," + arate.to_s
 	end
 end

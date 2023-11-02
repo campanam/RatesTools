@@ -217,13 +217,13 @@ else
 	puts "\nCandidate Sites Overlapping Between Offspring"
 	total_overlap = 0
 	$sfindv = {} # Hash of single-forward counts per individual
+	puts $candidates
 	for key in $candidates.keys
 		if $candidates[key][0] > 1
 			puts key
 			total_overlap +=1
 			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
 				$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
-				puts $sfindv
 			end
 		end
 	end

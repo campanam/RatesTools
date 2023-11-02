@@ -135,13 +135,8 @@ else
 	for indiv in $individuals
 		extract_site_count($vcf_filtsites, '.sitefilt.log', indiv)
 		extract_site_count($gatk_filtsites, '.gatksitefilt.log', indiv)
-		Dir.pwd
-		if Dir.glob(ARGV[0]+ "/*regionfilt.log").any? # Handling for when region filters are turned off
-			extract_site_count($regionsites, '.regionfilt.log', indiv)
-			Dir.pwd
-		else
-			$regionsites = $gatk_filtsites
-		end
+		extract_site_count($regionsites, '.regionfilt.log', indiv)
+		$regionsites = $gatk_filtsites if Dir.glob(ARGV[0]+ "/*regionfilt.log").empty? # Handling for when region filters are turned off
 		outindiv = indiv.gsub(ARGV[1] + "_offspring", "")
 		outindivs.push(outindiv)
 		puts outindiv + "," + $allsites + "," + $chrsites + "," + $triosites[indiv].to_s + "," + $vcf_filtsites[indiv].to_s + "," + $gatk_filtsites[indiv].to_s + "," + $regionsites[indiv].to_s

@@ -119,14 +119,14 @@ def classify_sites(outindiv)
 					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
 				end
 			elsif line[0..30] == "Total number of retained sites:"
-				$totalbases[outindv] = [line.split[":"][1].to_i,0,0] # Total callable bases, total mutations, single-forward mutations
+				$totalbases[outindiv] = [line.split[":"][1].to_i,0,0] # Total callable bases, total mutations, single-forward mutations
 			elsif line == "Offspring\tSingle-Forward\tDouble-Forward\tBackward\n"
 				getmutationcnts = true
 			elsif getmutationcnts
 				cnts = line.strip.split.map { |x| x.to_i }
 				getmutationcnts = false
-				$totalbases[outindv][1] = cnts[1..3].sum
-				$totalbases[outindv][2] = cnts[3]
+				$totalbases[outindiv][1] = cnts[1..3].sum
+				$totalbases[outindiv][2] = cnts[3]
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")
 				@off_index = header_arr.index(outindiv)

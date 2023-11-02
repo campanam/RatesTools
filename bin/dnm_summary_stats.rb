@@ -119,7 +119,7 @@ def classify_sites(outindiv)
 					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
 				end
 			elsif line[0..30] == "Total number of retained sites:"
-				$totalbases[outindiv] = [line.split[":"][1].to_i,0,0] # Total callable bases, total mutations, single-forward mutations
+				$totalbases[outindiv] = [line.split(":")[1].to_i,0,0] # Total callable bases, total mutations, single-forward mutations
 			elsif line == "Offspring\tSingle-Forward\tDouble-Forward\tBackward\n"
 				getmutationcnts = true
 			elsif getmutationcnts

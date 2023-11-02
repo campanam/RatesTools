@@ -922,8 +922,9 @@ workflow {
 		} else {
 			callVariants(realignIndels.out, params.refseq, prepareRef.out)
 		}
-		genotypegVCFs(callVariants.out.collect(), params.refseq, prepareRef.out) | maskIndels
+		genotypegVCFs(callVariants.out.collect(), params.refseq, prepareRef.out)
 		if (params.region_filter) {
+			maskIndels(genotypegVCFs.out)
 			genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap
 			repeatMask(params.refseq, params.rm_species)
 			repeatModeler(repeatMask.out.rm1)

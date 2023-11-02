@@ -75,7 +75,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2l. `12_RegionFilteredVCFs`: Trio chromosome VCFs after removal of unreliable regions.  
 2m. `13_SplitCalcDNMLogs`: De novo mutations (DNMs) and DNM rates calculated per chromosome for each trio.  
 2n. `14_SummarizeDNMLogs`: Summarized DNMs and DNM rates for all chromosomes for each trio.  
-2o. `15_SummaryStats`: Summary statistics of the total number of sites retained after each filtration step and the number of each single-forward mutation class.  
+2o. `15_SummaryStats`: Summary statistics of the total number of sites retained after each filtration step and the number of each mutation class. It also identifies overlapping candidate mutations between siblings and recalculates mutation rate estimates assuming these sites are erroneous.  
 3. We provide example output of the `14_SummarizeDNMLogs` and `15_SummaryStats` files. A successful run should produce complete versions of these files with similar results.  
 
 ## References  

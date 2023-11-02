@@ -135,7 +135,7 @@ Variant of sanityCheckLogs that removes too short contigs after GATK site filtra
 Variant of sanityCheckLogs that removes too short contigs after region filtration.  
 
 ## generateSummaryStats  
-Using [`dnm_summary_stats.rb`](ruby_r_scripts.md#dnm_summary_stats.rb), the generate SummaryStats process calculates the numbers of sites retained after each filtration stage in the RatesTools pipeline. It also calculate the number of single-forward DNMs (assuming parental homozygosity) of each mutation class. All other candidate DNMs are aggregated as "Other".  
+Using [`dnm_summary_stats.rb`](ruby_r_scripts.md#dnm_summary_stats.rb), the generate SummaryStats process calculates the numbers of sites retained after each filtration stage in the RatesTools pipeline. It also calculate the number of DNMs of each mutation class. If multiple siblings are sequenced, it identifies overlapping candidate mutations and recalculates point mutation rate estimates after the removing the overlapping sites.  
 
 ## References  
 1. Li, H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. *arXiv*, [1303.3997v2](https://arxiv.org/abs/1303.3997).  

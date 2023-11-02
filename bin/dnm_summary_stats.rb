@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # dnm_summary_stats
-DNMSUMSTATSVER = "0.2.0"
+DNMSUMSTATSVER = "1.0.0"
 # Michael G. Campana and Ellie E. Armstrong, 2022-2023
 # Smithsonian Institution and Stanford University
 

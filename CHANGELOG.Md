@@ -274,6 +274,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 1.0.0  
+Updated for RatesTools v. 1.0.0  
+
 ### Version 0.5.14  
 Set repeatModeler task.cpus = 2 for standard and conda profiles  
 

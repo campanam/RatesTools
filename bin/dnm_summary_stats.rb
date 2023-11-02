@@ -41,9 +41,19 @@ def extract_site_count(count, logpattern, indiv)
 end
 #----------------------------------------------------------------------------------------
 def classify_sites(outindiv)
+	# Single-Forward Mutations
 	mutclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
 					"T->G" => 0, "C->T" => 0, "C->G" => 0, "C->A" => 0, "G->T" => 0,
-					"G->A" => 0, "G->C" => 0, "Other" => 0 }
+					"G->A" => 0, "G->C" => 0 }
+	# Double-forward mutations
+	dfclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
+					"T->G" => 0, "C->T" => 0, "C->G" => 0, "C->A" => 0, "G->T" => 0,
+					"G->A" => 0, "G->C" => 0 }
+	# Backward mutations
+	backclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
+					"T->G" => 0, "C->T" => 0, "C->G" => 0, "C->A" => 0, "G->T" => 0,
+					"G->A" => 0, "G->C" => 0 }
+	otherscnt = 0
 	start = false # Flag to collect data
 	File.open(ARGV[1] + "_offspring" + outindiv + "_summary.log") do |f3|
 		while line = f3.gets
@@ -66,12 +76,22 @@ def classify_sites(outindiv)
 				# Basic handling assuming biallelic SNPs, single-forward, parental homozygous. Dumps all other types into "other".
 				if par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [0,1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					mutclasses[mutclass] += 1
+					mutclasses[mutclass].nil? ? otherscnt += 1 : mutclasses[mutclass] += 1 # Dumps all other mutations into other
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0,1]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					mutclasses[mutclass] += 1
-				else
-					mutclasses["Other"] += 1
+					mutclasses[mutclass].nil? ? otherscnt += 1 : mutclasses[mutclass] += 1 # Dumps all other mutations into other
+				elsif par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [1]
+					mutclass = "#{alleles[0]}->#{alleles[1]}"
+					dfclasses[mutclass].nil? ? otherscnt += 1 : dfclasses[mutclass] += 1 # Dumps all other mutations into other
+				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0]
+					mutclass = "#{alleles[1]}->#{alleles[0]}"
+					dfclasses[mutclass].nil? ? otherscnt += 1 : dfclasses[mutclass] += 1 # Dumps all other mutations into other
+				elsif par_genotypes[0] == [0,1] && par_genotypes[1] && off_genotype == [0]
+					mutclass = "#{alleles[1]}->#{alleles[0]}"
+					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+				elsif par_genotypes[0] == [0] && par_genotypes[0,1] && off_genotype == [1]
+					mutclass = "#{alleles[0]}->#{alleles[1]}"
+					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
 				end
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")
@@ -80,10 +100,20 @@ def classify_sites(outindiv)
 			end
 		end	
 	end
-	puts "\n" + outindiv + " Mutation Classes\nMutation,Count"
+	puts "\n" + outindiv + " Mutation Classes\nSingle-Forward Mutation,Count"
 	for mut in mutclasses.keys
 		puts mut + "," + mutclasses[mut].to_s
 	end
+	puts "\n\nDouble-Forward Mutation,Count"
+	for mut in dfclasses.keys
+		puts mut + "," + dfclasses[mut].to_s
+	end
+	puts "\n\nBackward Mutation,Count"
+	for mut in backclasses.keys
+		puts mut + "," + backclasses[mut].to_s
+	end
+	puts "\n\nIndels and Other Mutations,Count"
+	puts "Total: " + otherscnt.to_s
 end
 #----------------------------------------------------------------------------------------
 if ARGV[0].nil?

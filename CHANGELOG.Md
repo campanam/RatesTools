@@ -172,6 +172,7 @@ gz_open_file improved to version in BaitsTools 1.6.6
 ## dnm_summary_stats  
 ### Version 1.0.0  
 Updated for ratestools 1.0.0  
+Added handling for more mutation classes  
 
 ### Version 0.1.1  
 Update file headers  

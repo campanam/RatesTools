@@ -492,7 +492,7 @@ process phaseTrio {
 	echo \'FAM001 ${params.dam} 0 0 2 0\' >> ${params.prefix}.ped
 	for i in *.*.bam; do
 		samp=\${i%.*.bam}
-		if [[ \$samp != ${params.sire} && \$samp != $params.dam} ]]; then
+		if [[ \$samp != ${params.sire} && \$samp != ${params.dam} ]]; then
 			echo \"FAM001 \$samp ${params.sire} ${params.dam} 0 0\" >> ${params.prefix}.ped
 		fi
 	done

@@ -468,6 +468,36 @@ process filterChr {
 
 }
 
+process phaseTrio {
+
+	// Phase trio haplotypes using WhatsHap
+	
+	label 'whatshap'
+	publishDir "$params.outdir/ZZ_TrioPhasedVCFs", mode: 'copy', pattern: '*phased.vcf.gz'
+	
+	input:
+	path invcf
+	path inbams
+	
+	output:
+	path "${params.prefix}.phased.vcf.gz"
+	path "${params.prefix}.ped"
+	
+	"""
+	#!/usr/bin/env bash
+	echo \'FAM001 ${params.sire} 0 0 1 0\' > ${params.prefix}.ped
+	echo \'FAM001 ${params.dam} 0 0 2 0\' >> ${params.prefix}.ped
+	for i in *.*.bam; do
+		if [[ \$i != ${params.sire} && \$i != $params.dam} ]]; then
+			echo \"FAM001 \$i ${params.sire} ${params.dam} 0 0\" >> ${params.prefix}.ped
+		fi
+	done
+	whatshap phase --ped ${params.prefix}.ped --reference=${params.refseq} -o ${params.prefix}.phased.vcf ${invcf} *.bam
+	gzip ${params.prefix}.phased.vcf
+	"""
+
+}
+
 process splitTrios {
 	
 	// Split samples into trios for analysis
@@ -936,11 +966,21 @@ workflow {
 		if ( params.chr_file != 'NULL') {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
+			if (params.filter_bams) {
+				phaseTrio(filterChr.out.chr_vcf, fixMate.out)
+			} else {
+				phaseTrio(filterChr.out.chr_vcf, realignIndels.out)
+			}
 			trio = filterChr.out.chr_vcf.combine(trio_samples)
 			splitTrios(trio) | logSanityTrio
 			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.sanelog)
 			allDPGQ = filterChr.out.chr_vcf.combine(all_samples)			
 		} else {
+			if (params.filter_bams) {
+				phaseTrio(genotypegVCFs.out, fixMate.out)
+			} else {
+				phaseTrio(genotypegVCFs.out, realignIndels.out)
+			}
 			trio = genotypegVCFs.out.combine(trio_samples)
 			splitTrios(trio) | logSanityTrio
 			log_trio_sanity = logSanityTrio.out.sanelog

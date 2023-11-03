@@ -491,13 +491,12 @@ process phaseTrio {
 	echo \'FAM001 ${params.sire} 0 0 1 0\' > ${params.prefix}.ped
 	echo \'FAM001 ${params.dam} 0 0 2 0\' >> ${params.prefix}.ped
 	for i in *.*.bam; do
-		samp=${i%.*.bam}
+		samp=\${i%.*.bam}
 		if [[ \$samp != ${params.sire} && \$samp != $params.dam} ]]; then
 			echo \"FAM001 \$samp ${params.sire} ${params.dam} 0 0\" >> ${params.prefix}.ped
 		fi
 	done
-	whatshap phase --ped ${params.prefix}.ped --reference=${refseq} -o ${params.prefix}.phased.vcf <(gunzip -c ${invcf}) *.bam
-	gzip ${params.prefix}.phased.vcf
+	whatshap phase --ped ${params.prefix}.ped --reference=${refseq} -o >(gzip > ${params.prefix}.phased.vcf.gz) <(gunzip -c ${invcf}) *.bam
 	"""
 
 }

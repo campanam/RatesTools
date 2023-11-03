@@ -473,6 +473,7 @@ process phaseTrio {
 	// Phase trio haplotypes using WhatsHap
 	
 	label 'whatshap'
+	label 'gzip'
 	publishDir "$params.outdir/ZZ_TrioPhasedVCFs", mode: 'copy', pattern: '*phased.vcf.gz'
 	
 	input:
@@ -492,8 +493,10 @@ process phaseTrio {
 			echo \"FAM001 \$i ${params.sire} ${params.dam} 0 0\" >> ${params.prefix}.ped
 		fi
 	done
-	whatshap phase --ped ${params.prefix}.ped --reference=${params.refseq} -o ${params.prefix}.phased.vcf ${invcf} *.bam
+	gunzip ${invcf}
+	whatshap phase --ped ${params.prefix}.ped --reference=${params.refseq} -o ${params.prefix}.phased.vcf ${invcf.baseName} *.bam
 	gzip ${params.prefix}.phased.vcf
+	rm ${invcf.baseName}
 	"""
 
 }

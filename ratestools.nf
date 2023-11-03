@@ -479,6 +479,8 @@ process phaseTrio {
 	input:
 	path invcf
 	path inbams
+	path refseq
+	path "*"
 	
 	output:
 	path "${params.prefix}.phased.vcf.gz"
@@ -489,14 +491,13 @@ process phaseTrio {
 	echo \'FAM001 ${params.sire} 0 0 1 0\' > ${params.prefix}.ped
 	echo \'FAM001 ${params.dam} 0 0 2 0\' >> ${params.prefix}.ped
 	for i in *.*.bam; do
-		if [[ \$i != ${params.sire} && \$i != $params.dam} ]]; then
-			echo \"FAM001 \$i ${params.sire} ${params.dam} 0 0\" >> ${params.prefix}.ped
+		samp=${i%.*.bam}
+		if [[ \$samp != ${params.sire} && \$samp != $params.dam} ]]; then
+			echo \"FAM001 \$samp ${params.sire} ${params.dam} 0 0\" >> ${params.prefix}.ped
 		fi
 	done
-	gunzip ${invcf}
-	whatshap phase --ped ${params.prefix}.ped --reference=${params.refseq} -o ${params.prefix}.phased.vcf ${invcf.baseName} *.bam
+	whatshap phase --ped ${params.prefix}.ped --reference=${refseq} -o ${params.prefix}.phased.vcf <(gunzip -c ${invcf}) *.bam
 	gzip ${params.prefix}.phased.vcf
-	rm ${invcf.baseName}
 	"""
 
 }
@@ -970,9 +971,9 @@ workflow {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
 			if (params.filter_bams) {
-				phaseTrio(filterChr.out.chr_vcf, fixMate.out)
+				phaseTrio(filterChr.out.chr_vcf, fixMate.out.collect(), params.refseq, prepareRef.out)
 			} else {
-				phaseTrio(filterChr.out.chr_vcf, realignIndels.out)
+				phaseTrio(filterChr.out.chr_vcf, realignIndels.out.collect(), params.refseq, prepareRef.out)
 			}
 			trio = filterChr.out.chr_vcf.combine(trio_samples)
 			splitTrios(trio) | logSanityTrio
@@ -980,9 +981,9 @@ workflow {
 			allDPGQ = filterChr.out.chr_vcf.combine(all_samples)			
 		} else {
 			if (params.filter_bams) {
-				phaseTrio(genotypegVCFs.out, fixMate.out)
+				phaseTrio(genotypegVCFs.out, fixMate.out.collect(), params.refseq, prepareRef.out)
 			} else {
-				phaseTrio(genotypegVCFs.out, realignIndels.out)
+				phaseTrio(genotypegVCFs.out, realignIndels.out.collect(), params.refseq, prepareRef.out)
 			}
 			trio = genotypegVCFs.out.combine(trio_samples)
 			splitTrios(trio) | logSanityTrio

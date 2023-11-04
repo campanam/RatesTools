@@ -229,13 +229,20 @@ if `command -v java 2>&1 >/dev/null`; then # If java found, identify version
 		echo "WARNING: GATK requires Java 1.8 or 1.17. Current Java environment is incompatible."
 	fi
 fi
-echo 'Phase trios using WhatsHap? (Y/N'
+echo 'Phase trios using WhatsHap? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
 	sed -i '' 's/phase = true/phase = false/' $filename
 else
 	echo 'WhatsHap configuration...'
 	get_path_module whatshap
+	echo 'Use default settings for WhatsHap trio phasing? (Y/N)'
+	yes_no_answer
+	if [ $answer == 'N' ]; then
+		echo 'Enter options to pass to WhatsHap'
+		read whatshap_opts
+		sed -i '' "s/whatshap_opts = \"\"/whatshap_opts = \"$whatshap_opts\"/" $filename
+	fi
 fi
 echo 'Minimum length of contig before site filters?'
 read minconlen

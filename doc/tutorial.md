@@ -35,23 +35,24 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2m. `filter_bams` determines whether to filter BAM alignments (e.g. for secondary alignments and duplicates) before genotyping. Set the value to true to filter.  
 2n. `region_filter` determines whether to remove low-quality regions from the called sites. Set to true to remove regions (recommended).
 2o. `phase` determines whether to phase genotypes using WhatsHap trio-phasing.  
-2p. `gm_tmpdir` specifies the path to a temporary directory for GenMap [10].  
-2q. `gm_opts` specifies mapping parameters (as a string) for GenMap. Use cpus in the process configuration to set number of concurrent threads.  
-2r. `rm_species` specifies the species library for RepeatMasker [11].  
-2s. `rm_mask_opts` specifies parameters (as a string) for RepeatMasker. Use cpus in the process configuration to set number of concurrent threads.   
-2t. `rm_model_opts` specifies parameters (as a string) for RepeatModeler [12]. Use cpus in the process configuration to set number of concurrent threads and omit the `-lib` parameter.   
-2u. `indelpad` specifies the number of bases up- and downstream of an indel to remove.  
-2v. `prefix` specifies the file prefix for output files.  
-2w. `outdir` specifies the name of the output directory.  
-2x. `dam` specifies the name of the dam. This must match the name derivied from file globbing of the reads.  
-2y. `sire` specifies the name of the sire. This must match the name derivied from file globbing of the reads.  
-2z. `vcftools_site_filters` specifies the site-specific filters using VCFtools [13] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
-2aa. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
-2ab. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
-2ac. `min_contig_length` specifies the minimum length (in bp) of contigs to retain before applying site and region filters.
-2ad. `min_filt_contig_length` specifies the minimum length (in bp) of contigs to retain after applying site and region filters.
-2ae. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
-2af. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
+2p. `whatshap_opts` specifies additional options (as a string) to pass to WhatsHap phase.  
+2q. `gm_tmpdir` specifies the path to a temporary directory for GenMap [10].  
+2r. `gm_opts` specifies mapping parameters (as a string) for GenMap. Use cpus in the process configuration to set number of concurrent threads.  
+2s. `rm_species` specifies the species library for RepeatMasker [11].  
+2t. `rm_mask_opts` specifies parameters (as a string) for RepeatMasker. Use cpus in the process configuration to set number of concurrent threads.   
+2u. `rm_model_opts` specifies parameters (as a string) for RepeatModeler [12]. Use cpus in the process configuration to set number of concurrent threads and omit the `-lib` parameter.   
+2v. `indelpad` specifies the number of bases up- and downstream of an indel to remove.  
+2w. `prefix` specifies the file prefix for output files.  
+2x. `outdir` specifies the name of the output directory.  
+2y. `dam` specifies the name of the dam. This must match the name derivied from file globbing of the reads.  
+2z. `sire` specifies the name of the sire. This must match the name derivied from file globbing of the reads.  
+2aa. `vcftools_site_filters` specifies the site-specific filters using VCFtools [13] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2ab. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2ac. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
+2ad. `min_contig_length` specifies the minimum length (in bp) of contigs to retain before applying site and region filters.
+2ae. `min_filt_contig_length` specifies the minimum length (in bp) of contigs to retain after applying site and region filters.
+2af. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
+2ag. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
 
 3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
 

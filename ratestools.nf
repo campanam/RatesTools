@@ -497,9 +497,8 @@ process phaseTrio {
 		fi
 	done
 	gunzip -c ${invcf} > ${invcf.baseName}
-	whatshap phase --ped ${params.prefix}.ped --reference=${refseq} -o ${params.prefix}.phased.vcf ${invcf.baseName} *.bam
+	whatshap phase --ped ${params.prefix}.ped --reference=${refseq} -o >(gzip > ${params.prefix}.phased.vcf.gz) ${invcf.baseName} *.bam
 	rm ${invcf.baseName}
-	gzip ${params.prefix}.phased.vcf
 	"""
 
 }

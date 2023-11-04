@@ -68,10 +68,11 @@ RatesTools requires the following external dependencies. See the documentation f
 * [RepeatMasker](http://www.repeatmasker.org/) [12] v. 4.1.5   
 * [RepeatModeler](http://www.repeatmasker.org/RepeatModeler/) [13] v. 2.0.5  
 * [BEDTools](https://bedtools.readthedocs.io/en/latest/) [14] v. 2.31.0  
+* [WhatsHap](https://whatshap.readthedocs.io/en/latest/index.html) [15,16] v. 2.1  
 
 RatesTools requires the following R packages installed in your R environment:  
-* [tidyverse](https://www.tidyverse.org/) [15] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) [16] v. 1.0.7  and [ggplot2](https://ggplot2.tidyverse.org/) [17] v. 3.3.5.
-* [data.table](https://rdatatable.gitlab.io/data.table/) [18] v. 1.14.2  
+* [tidyverse](https://www.tidyverse.org/) [17] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) [18] v. 1.0.7  and [ggplot2](https://ggplot2.tidyverse.org/) [19] v. 3.3.5.
+* [data.table](https://rdatatable.gitlab.io/data.table/) [20] v. 1.14.2  
 
 ### Conda-Assisted Installation of Java Dependencies  
 To assist installation and execution of the Java dependencies, we provide built-in options to install GATK and Picard through Conda. See the [tutorial](doc/tutorial.md) for details.  
@@ -119,7 +120,9 @@ Enter `nextflow run campanam/RatesTools -r <version> -c <config_file>` to run th
 12. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  
 13. Flynn, J.M., Hubley, R., Goubert, C., Rosen, J. Clark,. A.G., Feschotte, C., Smit, A.F. (2020) RepeatModeler2 for automated genomic discovery of transposable element families. *Proc Natl Acad Sci U S A*, __117__, 9451-9457. DOI: [10.1073/pnas.1921046117](https://www.pnas.org/content/117/17/9451.short).  
 14. Quinlan, A.R., Hall, I.M. (2010) BEDTools: a flexible suite of utilities for comparing genomic features. *Bioinformatics*, __26__, 841-842, doi: [10.1093/bioinformatics/btq0333](https://academic.oup.com/bioinformatics/article/26/6/841/244688).  
-15. Wickham, H., Averick, M., Bryan, J., Chang, W., D'Agostino McGowan, L., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T.L., Miller, E., Bache, S.M., Müller, K., Ooms, J., Robinson, D., Seidel, D.P., Spinu, V., Takahashi, K., Vaughan, D., Wilke, C., Woo, K. Yutani, H. (2019). Welcome to the Tidyverse. *J Open Source Softw*, __4__, 1686. DOI: [10.21105/joss.01686](https://joss.theoj.org/papers/10.21105/joss.01686).  
-16. Wickham, H., François, R., Henry, L., Müller, K. (2021) dplyr: a grammar of data manipulation. R package version 1.0.7 (https://dplyr.tidyverse.org/).  
-17. Wickham, H. (2016) *ggplot2: Elegant Graphics for Data Analysis.* Springer-Verlag, New York, USA.  
-18. Dowle, M., Srinivasan, A. (2021) data.table: extension of 'data.frame'. R package version 1.14.2. (https://r-datatable.com).  
+15. Martin, M., Patterson, M., Garg, S., Fischer, S.O., Pisanti, N., Klau, G.W., Schoenhuth, A., Marschall, T. (2016) WhatsHap: fast and accurate read-based phasing. *BioRxiv*, doi: [10.1101/085050](https://www.biorxiv.org/content/10.1101/085050v2).  
+16. Garg, S., Martin, M., Marschall, T. (2016) Read-based phasing of related individuals. *Bioinformatics*, __32__, i234-i242, doi: [10.1093/bioinformatics/btw276](https://academic.oup.com/bioinformatics/article/32/12/i234/2288955).  
+17. Wickham, H., Averick, M., Bryan, J., Chang, W., D'Agostino McGowan, L., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T.L., Miller, E., Bache, S.M., Müller, K., Ooms, J., Robinson, D., Seidel, D.P., Spinu, V., Takahashi, K., Vaughan, D., Wilke, C., Woo, K. Yutani, H. (2019). Welcome to the Tidyverse. *J Open Source Softw*, __4__, 1686. DOI: [10.21105/joss.01686](https://joss.theoj.org/papers/10.21105/joss.01686).  
+18. Wickham, H., François, R., Henry, L., Müller, K. (2021) dplyr: a grammar of data manipulation. R package version 1.0.7 (https://dplyr.tidyverse.org/).  
+19. Wickham, H. (2016) *ggplot2: Elegant Graphics for Data Analysis.* Springer-Verlag, New York, USA.  
+20. Dowle, M., Srinivasan, A. (2021) data.table: extension of 'data.frame'. R package version 1.14.2. (https://r-datatable.com).  

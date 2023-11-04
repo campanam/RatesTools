@@ -34,23 +34,24 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2l. `gatk_java` specifies additional Java parameters for GATK operations. Enter the command-line Java options as a string.  
 2m. `filter_bams` determines whether to filter BAM alignments (e.g. for secondary alignments and duplicates) before genotyping. Set the value to true to filter.  
 2n. `region_filter` determines whether to remove low-quality regions from the called sites. Set to true to remove regions (recommended).
-2o. `gm_tmpdir` specifies the path to a temporary directory for GenMap [10].  
-2p. `gm_opts` specifies mapping parameters (as a string) for GenMap. Use cpus in the process configuration to set number of concurrent threads.  
-2q. `rm_species` specifies the species library for RepeatMasker [11].  
-2r. `rm_mask_opts` specifies parameters (as a string) for RepeatMasker. Use cpus in the process configuration to set number of concurrent threads.   
-2s. `rm_model_opts` specifies parameters (as a string) for RepeatModeler [12]. Use cpus in the process configuration to set number of concurrent threads and omit the `-lib` parameter.   
-2t. `indelpad` specifies the number of bases up- and downstream of an indel to remove.  
-2u. `prefix` specifies the file prefix for output files.  
-2v. `outdir` specifies the name of the output directory.  
-2w. `dam` specifies the name of the dam. This must match the name derivied from file globbing of the reads.  
-2x. `sire` specifies the name of the sire. This must match the name derivied from file globbing of the reads.  
-2y. `vcftools_site_filters` specifies the site-specific filters using VCFtools [13] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
-2z. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
-2aa. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
-2ab. `min_contig_length` specifies the minimum length (in bp) of contigs to retain before applying site and region filters.
-2ac. `min_filt_contig_length` specifies the minimum length (in bp) of contigs to retain after applying site and region filters.
-2ad. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
-2ae. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
+2o. `phase` determines whether to phase genotypes using WhatsHap trio-phasing.  
+2p. `gm_tmpdir` specifies the path to a temporary directory for GenMap [10].  
+2q. `gm_opts` specifies mapping parameters (as a string) for GenMap. Use cpus in the process configuration to set number of concurrent threads.  
+2r. `rm_species` specifies the species library for RepeatMasker [11].  
+2s. `rm_mask_opts` specifies parameters (as a string) for RepeatMasker. Use cpus in the process configuration to set number of concurrent threads.   
+2t. `rm_model_opts` specifies parameters (as a string) for RepeatModeler [12]. Use cpus in the process configuration to set number of concurrent threads and omit the `-lib` parameter.   
+2u. `indelpad` specifies the number of bases up- and downstream of an indel to remove.  
+2v. `prefix` specifies the file prefix for output files.  
+2w. `outdir` specifies the name of the output directory.  
+2x. `dam` specifies the name of the dam. This must match the name derivied from file globbing of the reads.  
+2y. `sire` specifies the name of the sire. This must match the name derivied from file globbing of the reads.  
+2z. `vcftools_site_filters` specifies the site-specific filters using VCFtools [13] as a string. Setting this value to "NULL" bypasses this filter. See the [VCFtools](https://vcftools.github.io/) documentation for details. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2aa. `gatk_site_filters` specifies the site-specific filters using GATK as a string. Setting this value 'NULL' bypasses this filter. See the [GATK](https://gatk.broadinstitute.org/) documentation for details. Be sure to use GATK 3 syntax for GATK 3 runs and GATK 4 syntax for GATK 4 runs. We recommend restricting to biallelic sites (either using VCFtools or GATK).  
+2ab. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
+2ac. `min_contig_length` specifies the minimum length (in bp) of contigs to retain before applying site and region filters.
+2ad. `min_filt_contig_length` specifies the minimum length (in bp) of contigs to retain after applying site and region filters.
+2ae. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
+2af. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
 
 3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
 
@@ -67,16 +68,17 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2d. `04_RepeatMasking`: Output of RepeatMasker and RepeatModeler.  
 2e. `05_ExcludedRegions`: A BED file of all genomic regions containining indels, repetitive sequence and low-mappability sequence. These regions are excluded from the analysis.  
 2f. `06_FilterChrVCFs`: All-sites VCF including only the chromosomes listed in the chromosome file specified in `params.chr_list`.  
-2g. `07_SplitTrioVCFs`: VCFs of all parent-offspring trios after splitting the all-sample joint-genotyping VCF.  
-2h. `08_gVCFs_GP_DQ`: Summary statistics and graphs of DP and GQ for all individuals.  
-2i. `09_SplitVCFs`: Trio VCFs split by chromosome for parallelization.  
-2j. `10_VCFtoolsSiteFilteredVCFs`: Trio chromosome VCFs filtered at the site level by VCFtools.  
-2k. `11_GATKSiteFilteredVCFs`: Trio chromosome VCFs filtered at the site level by GATK.  
-2l. `12_RegionFilteredVCFs`: Trio chromosome VCFs after removal of unreliable regions.  
-2m. `13_SplitCalcDNMLogs`: De novo mutations (DNMs) and DNM rates calculated per chromosome for each trio.  
-2n. `14_SummarizeDNMLogs`: Summarized DNMs and DNM rates for all chromosomes for each trio.  
-2o. `15_SummaryStats`: Summary statistics of the total number of sites retained after each filtration step and the number of each mutation class. It also identifies overlapping candidate mutations between siblings and recalculates mutation rate estimates assuming these sites are erroneous.  
-3. We provide example output of the `14_SummarizeDNMLogs` and `15_SummaryStats` files. A successful run should produce complete versions of these files with similar results.  
+2g. `07_TrioPhasedVCFs`: All-sites VCF after trio-phasing (optional output).  
+2h. `08_SplitTrioVCFs`: VCFs of all parent-offspring trios after splitting the all-sample joint-genotyping VCF.  
+2i. `09_gVCFs_GP_DQ`: Summary statistics and graphs of DP and GQ for all individuals.  
+2j. `10_SplitVCFs`: Trio VCFs split by chromosome for parallelization.  
+2k. `11_VCFtoolsSiteFilteredVCFs`: Trio chromosome VCFs filtered at the site level by VCFtools.  
+2l. `12_GATKSiteFilteredVCFs`: Trio chromosome VCFs filtered at the site level by GATK.  
+2m. `13_RegionFilteredVCFs`: Trio chromosome VCFs after removal of unreliable regions.  
+2n. `14_SplitCalcDNMLogs`: De novo mutations (DNMs) and DNM rates calculated per chromosome for each trio.  
+2o. `15_SummarizeDNMLogs`: Summarized DNMs and DNM rates for all chromosomes for each trio.  
+2p. `16_SummaryStats`: Summary statistics of the total number of sites retained after each filtration step and the number of each mutation class. It also identifies overlapping candidate mutations between siblings and recalculates mutation rate estimates assuming these sites are erroneous.  
+3. We provide example output of the `SummarizeDNMLogs` and `SummaryStats` files. A successful run should produce complete versions of these files with similar results.  
 
 ## References  
 1. Fan, Z., Silva, P., Gronau, I., Wang, S., Serres Armero, A., Schweizer, R.M., Ramirez, O., Pollinger, J., Galaverni, M., Ortega Del-Vecchyo, D., Du, L., Zhang, W., Zhang, Z., Xing, J., Vilà, C., Marques-Bonet, T., Godinho, R., Yue, B., Wayne, R.K. (2016) Worldwide patterns of genomic variation and admixture in gray wolves. *Genome Res*, __26__, 163-173. DOI:[10.1101/gr.197517.115](https://genome.cshlp.org/content/26/2/163.short).  

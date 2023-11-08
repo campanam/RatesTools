@@ -346,6 +346,7 @@ Initial script (plotDPGQ-clean.R)
 ## ratestools  
 ### Version 1.1.0  
 Haplotype phasing using WhatsHap  
+Fixed bug in repeatMaskRM that did not retain new masked files  
 
 ### Version 1.0.0  
 Upgraded to nextflow DSL2  

@@ -380,7 +380,7 @@ process repeatMaskRM {
 	path rm_lib
 	
 	output:
-	path "${refseq_masked}.masked.*", optional: true
+	path "${refseq_masked}.*", optional: true
 	path "${refseq_masked.simpleName}.RM.bed", emit: RMbed
 	
 	"""

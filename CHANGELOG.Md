@@ -101,6 +101,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 1.1.0  
+trio-phasing configuration  
+
 ### Version 1.0.0  
 Updated for RatesTools v. 1.0.0  
 
@@ -274,6 +277,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 1.1.0  
+phaseTrio process configuration  
+
 ### Version 1.0.0  
 Updated for RatesTools v. 1.0.0  
 
@@ -338,6 +344,10 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 1.1.0  
+Haplotype phasing using WhatsHap  
+Fixed bug in repeatMaskRM that did not retain new masked files  
+
 ### Version 1.0.0  
 Upgraded to nextflow DSL2  
 Readgroups added and alignment sorted during alignment process  

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# configure.sh script for RatesTools v1.0.0
+# configure.sh script for RatesTools v1.1.0
 
 #----------------------------------------------------------------------------------------
 # Michael G. Campana and Ellie E. Armstrong, 2020-2023
@@ -227,6 +227,21 @@ if `command -v java 2>&1 >/dev/null`; then # If java found, identify version
 		echo "Current Java environment is compatible with GATK."
 	else
 		echo "WARNING: GATK requires Java 1.8 or 1.17. Current Java environment is incompatible."
+	fi
+fi
+echo 'Phase trios using WhatsHap? (Y/N)'
+yes_no_answer
+if [ $answer == 'N' ]; then
+	sed -i '' 's/phase = true/phase = false/' $filename
+else
+	echo 'WhatsHap configuration...'
+	get_path_module whatshap
+	echo 'Use default settings for WhatsHap trio phasing? (Y/N)'
+	yes_no_answer
+	if [ $answer == 'N' ]; then
+		echo 'Enter options to pass to WhatsHap'
+		read whatshap_opts
+		sed -i '' "s/whatshap_opts = \"\"/whatshap_opts = \"$whatshap_opts\"/" $filename
 	fi
 fi
 echo 'Minimum length of contig before site filters?'

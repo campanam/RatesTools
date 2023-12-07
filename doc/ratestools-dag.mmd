@@ -14,15 +14,16 @@ flowchart TB
     v36["Channel.fromPath"]
     v38["min_contig_length"]
     v39["min_filt_contig_length"]
-    v44["min_contig_length"]
-    v45["min_filt_contig_length"]
-    v59["min_contig_length"]
-    v60["min_filt_contig_length"]
-    v62["refseq"]
+    v43["refseq"]
+    v49["min_contig_length"]
+    v50["min_filt_contig_length"]
     v64["min_contig_length"]
     v65["min_filt_contig_length"]
-    v68["min_contig_length"]
-    v69["min_filt_contig_length"]
+    v67["refseq"]
+    v69["min_contig_length"]
+    v70["min_filt_contig_length"]
+    v73["min_contig_length"]
+    v74["min_filt_contig_length"]
     end
     v1([prepareRef])
     v6([alignSeqs])
@@ -41,55 +42,60 @@ flowchart TB
     v28[" "]
     v31[" "]
     v41[" "]
-    v47["ok_vcf"]
-    v53[" "]
-    v54[" "]
-    v55[" "]
-    v75[" "]
-    v79[" "]
+    v45[" "]
+    v46[" "]
+    v52["ok_vcf"]
+    v58[" "]
+    v59[" "]
+    v60[" "]
+    v80[" "]
+    v84[" "]
     end
     v29([repeatModeler])
     v30([repeatMaskRM])
     v32([simplifyBed])
     v37([filterChr])
     v40([sanityCheckLogs])
-    v43([splitTrios])
+    v44([phaseTrio])
+    v48([splitTrios])
     subgraph logSanityTrio
-    v46([sanityCheckLogs])
+    v51([sanityCheckLogs])
     end
-    v50([pullDPGQ])
-    v52([plotDPGQ])
-    v56([splitVCFs])
-    v58([vcftoolsFilterSites])
+    v55([pullDPGQ])
+    v57([plotDPGQ])
+    v61([splitVCFs])
+    v63([vcftoolsFilterSites])
     subgraph logVcftoolsSanity
-    v61([sanityCheckLogs])
-    end
-    v63([gatkFilterSites])
-    subgraph logGatkSanity
     v66([sanityCheckLogs])
     end
-    v67([filterRegions])
-    subgraph logRegionSanity
-    v70([sanityCheckLogs])
+    v68([gatkFilterSites])
+    subgraph logGatkSanity
+    v71([sanityCheckLogs])
     end
-    v71([calcDNMRate])
-    v74([summarizeDNM])
-    v78([generateSummaryStats])
+    v72([filterRegions])
+    subgraph logRegionSanity
+    v75([sanityCheckLogs])
+    end
+    v76([calcDNMRate])
+    v79([summarizeDNM])
+    v83([generateSummaryStats])
     v3(( ))
     v8(( ))
     v17(( ))
-    v48(( ))
-    v51(( ))
-    v57(( ))
-    v72(( ))
-    v73(( ))
+    v42(( ))
+    v53(( ))
+    v56(( ))
+    v62(( ))
+    v77(( ))
+    v78(( ))
     v0 --> v1
     v1 --> v6
     v1 --> v11
     v1 --> v13
     v1 --> v16
     v1 --> v19
-    v1 --> v63
+    v1 --> v44
+    v1 --> v68
     v2 --> v3
     v5 --> v6
     v3 --> v6
@@ -102,6 +108,7 @@ flowchart TB
     v12 --> v13
     v13 --> v14
     v14 --> v16
+    v14 --> v42
     v15 --> v16
     v16 --> v17
     v18 --> v19
@@ -122,50 +129,56 @@ flowchart TB
     v29 --> v30
     v30 --> v31
     v30 --> v32
-    v32 --> v67
+    v32 --> v72
     v36 --> v37
     v37 --> v40
+    v37 --> v44
     v37 --> v3
     v38 --> v40
     v39 --> v40
     v40 --> v41
-    v40 --> v48
-    v3 --> v43
-    v43 --> v46
-    v43 --> v56
-    v43 --> v73
+    v40 --> v53
+    v43 --> v44
+    v42 --> v44
     v44 --> v46
-    v45 --> v46
-    v46 --> v47
-    v46 --> v48
-    v3 --> v50
+    v44 --> v45
+    v44 --> v3
+    v3 --> v48
+    v48 --> v51
+    v48 --> v61
+    v48 --> v78
+    v49 --> v51
     v50 --> v51
     v51 --> v52
-    v52 --> v55
-    v52 --> v54
-    v52 --> v53
+    v51 --> v53
+    v3 --> v55
+    v55 --> v56
     v56 --> v57
+    v57 --> v60
+    v57 --> v59
     v57 --> v58
-    v58 --> v61
-    v59 --> v61
-    v60 --> v61
-    v61 --> v63
-    v61 --> v48
+    v61 --> v62
     v62 --> v63
     v63 --> v66
     v64 --> v66
     v65 --> v66
-    v66 --> v67
-    v66 --> v48
-    v67 --> v70
-    v68 --> v70
-    v69 --> v70
+    v66 --> v68
+    v66 --> v53
+    v67 --> v68
+    v68 --> v71
+    v69 --> v71
     v70 --> v71
-    v70 --> v48
     v71 --> v72
-    v72 --> v74
-    v73 --> v74
+    v71 --> v53
+    v72 --> v75
+    v73 --> v75
     v74 --> v75
-    v74 --> v48
-    v48 --> v78
+    v75 --> v76
+    v75 --> v53
+    v76 --> v77
+    v77 --> v79
     v78 --> v79
+    v79 --> v80
+    v79 --> v53
+    v53 --> v83
+    v83 --> v84

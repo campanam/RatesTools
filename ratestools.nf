@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 1.0.0
+/* RatesTools version 1.1.0
 Michael G. Campana and Ellie E. Armstrong, 2020-2023
 Smithsonian Institution and Stanford University
 
@@ -380,7 +380,7 @@ process repeatMaskRM {
 	path rm_lib
 	
 	output:
-	path "${refseq_masked}.masked.*", optional: true
+	path "${refseq_masked}.*", optional: true
 	path "${refseq_masked.simpleName}.RM.bed", emit: RMbed
 	
 	"""
@@ -468,6 +468,43 @@ process filterChr {
 
 }
 
+process phaseTrio {
+
+	// Phase trio haplotypes using WhatsHap
+	
+	label 'whatshap'
+	label 'gzip'
+	publishDir "$params.outdir/07_TrioPhasedVCFs", mode: 'copy', pattern: '*phased.vcf.gz'
+	
+	input:
+	path invcf
+	path inbams
+	path refseq
+	path "*"
+	
+	output:
+	path "${params.prefix}.phased.vcf.gz", emit: vcf
+	path "${params.prefix}.ped"
+	path "${params.prefix}_phasing.log"
+	
+	"""
+	#!/usr/bin/env bash
+	echo \'FAM001 ${params.sire} 0 0 1 0\' > ${params.prefix}.ped
+	echo \'FAM001 ${params.dam} 0 0 2 0\' >> ${params.prefix}.ped
+	for i in *.*.bam; do
+		samp=\${i%.*.bam}
+		if [[ \$samp != ${params.sire} && \$samp != ${params.dam} ]]; then
+			echo \"FAM001 \$samp ${params.sire} ${params.dam} 0 0\" >> ${params.prefix}.ped
+		fi
+	done
+	gunzip -c ${invcf} > ${invcf.baseName}
+	whatshap phase --ped ${params.prefix}.ped --reference=${refseq} ${params.whatshap_opts} -o >(gzip > ${params.prefix}.phased.vcf.gz) ${invcf.baseName} *.bam
+	rm ${invcf.baseName}
+	cp .command.log ${params.prefix}_phasing.log
+	"""
+
+}
+
 process splitTrios {
 	
 	// Split samples into trios for analysis
@@ -475,7 +512,7 @@ process splitTrios {
 	label 'vcftools'
 	label 'gzip'
 	label 'bcftools'
-	publishDir "$params.outdir/07_SplitTrioVCFs", mode: 'copy', pattern: "${params.prefix}_offspring*.vcf.gz"
+	publishDir "$params.outdir/08_SplitTrioVCFs", mode: 'copy', pattern: "${params.prefix}_offspring*.vcf.gz"
 		
 	input:
 	tuple path(chr_vcf), val(sample_id)
@@ -497,7 +534,7 @@ process pullDPGQ {
 	// Extract DP/GQ values from autosome scaffolds to look at the distributions of DP and GQ for variant call sites
 
 	label 'bcftools'
-	publishDir "$params.outdir/08_gVCFs_DP_GQ", mode: 'copy'
+	publishDir "$params.outdir/09_gVCFs_DP_GQ", mode: 'copy'
 		
 	input:
 	tuple path(chrfilt), val(sample_id)
@@ -516,7 +553,7 @@ process plotDPGQ {
 	// Plot DP and GQ distributions
 	
 	label 'R'
-	publishDir "$params.outdir/08_gVCFs_DP_GQ", mode: 'copy'
+	publishDir "$params.outdir/09_gVCFs_DP_GQ", mode: 'copy'
 		
 	input:
 	path "*.txt"
@@ -538,7 +575,7 @@ process splitVCFs {
 	
 	label 'ruby'
 	label 'bgzip'
-	publishDir "$params.outdir/09_SplitVCFs", mode: 'copy'
+	publishDir "$params.outdir/10_SplitVCFs", mode: 'copy'
 		
 	input:
 	path chr_vcf
@@ -562,7 +599,7 @@ process vcftoolsFilterSites {
 	label 'vcftools'
 	label 'bcftools'
 	label 'bgzip'
-	publishDir "$params.outdir/10_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*sitefilt.vcf.gz'
+	publishDir "$params.outdir/11_VCFtoolsSiteFilteredVCFs", mode: 'copy', pattern: '*sitefilt.vcf.gz'
 		
 	input:
 	path split_vcf
@@ -595,7 +632,7 @@ process gatkFilterSites {
 	label 'tabix'
 	label 'vcftools'
 	label 'bcftools'
-	publishDir "$params.outdir/11_GATKSiteFilteredVCFs", mode: 'copy', pattern: '*gatksitefilt.vcf.gz'
+	publishDir "$params.outdir/12_GATKSiteFilteredVCFs", mode: 'copy', pattern: '*gatksitefilt.vcf.gz'
 		
 	input:
 	path site_vcf
@@ -646,7 +683,7 @@ process filterRegions {
 	label 'vcftools'
 	label 'tabix'
 	label 'gzip'
-	publishDir "$params.outdir/12_RegionFilteredVCFs", mode: 'copy', pattern: '*regionfilt.vcf.gz'
+	publishDir "$params.outdir/13_RegionFilteredVCFs", mode: 'copy', pattern: '*regionfilt.vcf.gz'
 	
 	input:
 	path site_vcf
@@ -732,7 +769,7 @@ process calcDNMRate {
 	// Calculate de novo mutations using calc_denovo_mutation_rate
 	
 	label 'ruby'
-	publishDir "$params.outdir/13_SplitCalcDNMLogs", mode: 'copy'
+	publishDir "$params.outdir/14_SplitCalcDNMLogs", mode: 'copy'
 		
 	input:
 	path splitvcf
@@ -753,7 +790,7 @@ process summarizeDNM {
 	label 'ruby'
 	label 'bcftools'
 	label 'gzip'
-	publishDir "$params.outdir/14_SummarizeDNMLogs", mode: 'copy'
+	publishDir "$params.outdir/15_SummarizeDNMLogs", mode: 'copy'
 		
 	input:
 	path "*"
@@ -819,7 +856,7 @@ process sanityCheckLogs {
 process generateSummaryStats {
 
 	label 'ruby'
-	publishDir "$params.outdir/15_SummaryStats", mode: "copy"
+	publishDir "$params.outdir/16_SummaryStats", mode: "copy"
 		
 	input:
 	path "*"
@@ -936,12 +973,30 @@ workflow {
 		if ( params.chr_file != 'NULL') {
 			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
 			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
-			trio = filterChr.out.chr_vcf.combine(trio_samples)
+			if (params.phase) {
+				if (params.filter_bams) {
+					phaseTrio(filterChr.out.chr_vcf, fixMate.out.collect(), params.refseq, prepareRef.out)
+				} else {
+					phaseTrio(filterChr.out.chr_vcf, realignIndels.out.collect(), params.refseq, prepareRef.out)
+				}
+				trio = phaseTrio.out.vcf.combine(trio_samples)
+			} else {
+				trio = filterChr.out.chr_vcf.combine(trio_samples)
+			}
 			splitTrios(trio) | logSanityTrio
 			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.sanelog)
 			allDPGQ = filterChr.out.chr_vcf.combine(all_samples)			
 		} else {
-			trio = genotypegVCFs.out.combine(trio_samples)
+			if (params.phase) {
+				if (params.filter_bams) {
+					phaseTrio(genotypegVCFs.out, fixMate.out.collect(), params.refseq, prepareRef.out)
+				} else {
+					phaseTrio(genotypegVCFs.out, realignIndels.out.collect(), params.refseq, prepareRef.out)
+				}
+				trio = phaseTrio.out.vcf.combine(trio_samples)
+			} else {
+				trio = genotypegVCFs.out.combine(trio_samples)
+			}
 			splitTrios(trio) | logSanityTrio
 			log_trio_sanity = logSanityTrio.out.sanelog
 			allDPGQ = genotypegVCFs.out.combine(all_samples)

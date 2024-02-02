@@ -2,8 +2,8 @@
 
 #----------------------------------------------------------------------------------------
 # dnm_summary_stats
-DNMSUMSTATSVER = "1.0.0"
-# Michael G. Campana and Ellie E. Armstrong, 2022-2023
+DNMSUMSTATSVER = "1.1.0"
+# Michael G. Campana and Ellie E. Armstrong, 2022-2024
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -152,7 +152,7 @@ end
 #----------------------------------------------------------------------------------------
 if ARGV[0].nil?
 	# If no parameters passed, print help screen
-	format_splash('dnm_summary_stats', DNMSUMSTATSVER, '<logs_directory> <output_prefix> > <out.csv>')
+	format_splash('dnm_summary_stats', DNMSUMSTATSVER, '<logs_directory> <output_prefix> <DNM_clump_range> > <out.csv>')
 else
 	$individuals = [] # Array of individual names
 	$allsites = nil # Total number of sites before filtration
@@ -163,6 +163,7 @@ else
 	$regionsites = {} # Hash of site counts after region filtering
 	$candidates = {} # Hash of mutation site counts to identify sibling overlaps
 	$totalbases = {} # Hash indexing total site counts to individuals
+	$dnmclump = ARGV[2] # Number of bases to search for clumped DNM candidates. Default of 0.
 	
 	# Get individual names
 	Dir.foreach(ARGV[0] + "/") do |f1|
@@ -214,9 +215,50 @@ else
 	for outindiv in outindivs
 		classify_sites(outindiv)
 	end
-	puts "\nCandidate Sites Overlapping Between Offspring"
-	total_overlap = 0
+	total_overlap = 0 # Both overlapping individuals and overlapping sites
 	$sfindv = {} # Hash of single-forward counts per individual
+	if $dnmclump > 0 # Don't bother if no clumping
+		puts "\nClumped Candidate DNM Sites"
+		sorted_candidates = {} # Hash to put in sites keyed by chr
+		for key in $candidates.keys
+			key_chr = key.split(":")[0]
+			key_snp = key.split(":")[1].to_i
+			if sorted_candidates[key].nil?
+				sorted_candidates[key] = [key_snp]
+			else
+				sorted_candidates[key].push(key_snp)
+			end
+		end
+		for key in sorted_candidates.key
+			sorted_sites = sorted_candidates[key].sort
+			if sorted_sites.size < 2 # Ignore case when clumped sites impossible
+				prev_site = sorted_sites[0]
+				for i in 1 ... sorted_sites.size
+					if sorted_sites[i] <= prev_site
+						removed_site = key + ":" + prev_site.to_s
+						total_overlap += 1
+						prev_site = sorted_sites[i]
+						puts removed_site
+						for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
+							$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
+						end
+						$candidates.delete(removed_site)
+					end
+				end
+				if sorted_sites[-1] == prev_site # Check the last site for being in a clump
+					removed_site = key + ":" + prev_site.to_s
+					total_overlap += 1
+					prev_site = sorted_sites[i]
+					puts removed_site
+					for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
+						$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
+					end
+					$candidates.delete(removed_site)
+				end
+			end
+		end
+	end
+	puts "\nRemaining Candidate Sites Overlapping Between Offspring"
 	for key in $candidates.keys
 		if $candidates[key][0] > 1
 			puts key

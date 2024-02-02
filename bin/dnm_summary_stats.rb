@@ -223,7 +223,7 @@ else
 		for key in $candidates.keys
 			key_chr = key.split(":")[0]
 			key_snp = key.split(":")[1].to_i
-			if sorted_candidates[key].nil?
+			if sorted_candidates[key_chr].nil?
 				sorted_candidates[key_chr] = [key_snp]
 			else
 				sorted_candidates[key_chr].push(key_snp)

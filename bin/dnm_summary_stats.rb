@@ -231,7 +231,7 @@ else
 		end
 		for key in sorted_candidates.keys
 			sorted_sites = sorted_candidates[key].sort
-			if sorted_sites.size < 2 # Ignore case when clumped sites impossible
+			if sorted_sites.size > 2 # Ignore case when clumped sites impossible
 				prev_site = sorted_sites[0]
 				for i in 1 ... sorted_sites.size
 					if sorted_sites[i] <= prev_site

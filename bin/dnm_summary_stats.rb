@@ -61,7 +61,11 @@ def classify_sites(outindiv)
 			if start
 				snp_array = line[0..-2].split("\t")
 				snpsite = snp_array[0] + ':' + snp_array[1]
-				$candidates[snpsite].nil? ? $candidates[snpsite] = [1,[]] :  $candidates[snpsite][0] += 1 # Structure is array of [total_number, [individuals for single-forward mutation]]
+				if $candidates[snpsite].nil? 
+					$candidates[snpsite] = [1,[],[outindiv]] 
+				else $candidates[snpsite][0] += 1 # Structure is array of [total_number, [individuals for single-forward mutation][all individuals with site]]
+					$candidates[snpsite][2].push(outindiv)
+				end
 				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
 				alleles.delete("<non_ref>") if alleles.include?("<non_ref>")
 				alleles.delete(".") if alleles.include?(".") # Ignore for non-polymorphic sites
@@ -215,7 +219,7 @@ else
 	for outindiv in outindivs
 		classify_sites(outindiv)
 	end
-	total_overlap = 0 # Both overlapping individuals and overlapping sites
+	$total_removed = {} # Hash of total overlapping individuals and clumped sites per individual
 	$sfindv = {} # Hash of single-forward counts per individual
 	if $dnmclump > 0 # Don't bother if no clumping
 		puts "\nClumped Candidate DNM Sites"
@@ -236,23 +240,27 @@ else
 				for i in 1 ... sorted_sites.size
 					if sorted_sites[i] <= prev_site + $dnmclump
 						removed_site = key + ":" + prev_site.to_s
-						total_overlap += 1
-						prev_site = sorted_sites[i]
 						puts removed_site
 						for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
 							$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
 						end
+						for tindv in $candidates[removed_site][2] # Code to count total number of removed sites
+							$total_removed[tindv].nil? ? $total_removed[tindv] = 1 : $total_removed[tindv] += 1
+						end
 						$candidates.delete(removed_site)
+						if i == sorted_sites.size - 1 # Add last removed site if goes to end
+							removed_site = key + ":" + sorted_sites[i].to_s
+							puts removed_site
+							for sfindv in $candidates[removed_site][1]
+								$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] += 1
+							end
+							for tindv in $candidates[removed_site][2]
+								$total_removed[tindv].nil? ? $total_removed[tindv] = 1 : $total_removed[tindv] += 1
+							end
+							$candidates.delete(removed_site)
+						end
 					end
-				end
-				if sorted_sites[-1] == prev_site # Check the last site for being in a clump
-					removed_site = key + ":" + prev_site.to_s
-					total_overlap += 1
-					puts removed_site
-					for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
-						$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
-					end
-					$candidates.delete(removed_site)
+					prev_site = sorted_sites[i]
 				end
 			end
 		end
@@ -261,16 +269,18 @@ else
 	for key in $candidates.keys
 		if $candidates[key][0] > 1
 			puts key
-			total_overlap +=1
 			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
 				$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
 			end
+			for tindv in $candidates[key][2]
+				$total_removed[tindv].nil? ? $total_removed[tindv] = 1 : $total_removed[tindv] +=1
+			end
 		end
 	end
-	puts "\nOffspring,Single-ForwardOverlappingSites,TotalOverlappingSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
+	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
 	for key in $sfindv.keys
 		srate = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate single-forward rate
-		arate = ($totalbases[key][1]-total_overlap).to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
-		puts key + "," + $sfindv[key].to_s + "," + total_overlap.to_s + "," + srate.to_s + "," + arate.to_s
+		arate = ($totalbases[key][1]-$total_removed[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
+		puts key + "," + $sfindv[key].to_s + "," + $total_removed[key].to_s + "," + srate.to_s + "," + arate.to_s
 	end
 end

@@ -248,7 +248,6 @@ else
 				if sorted_sites[-1] == prev_site # Check the last site for being in a clump
 					removed_site = key + ":" + prev_site.to_s
 					total_overlap += 1
-					prev_site = sorted_sites[i]
 					puts removed_site
 					for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
 						$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1

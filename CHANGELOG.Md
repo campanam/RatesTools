@@ -1,5 +1,5 @@
 # CHANGE LOG  
-Michael G. Campana & Ellie E. Armstrong, 2019-2023  
+Michael G. Campana & Ellie E. Armstrong, 2019-2024  
 Smithsonian Institution  
 Stanford University  
 
@@ -173,6 +173,9 @@ Redundant methods (Parser, gz_open_file) moved to denovolib
 gz_open_file improved to version in BaitsTools 1.6.6  
 
 ## dnm_summary_stats  
+### Version 1.1.0  
+Automatically removes clumped DNM candidates  
+
 ### Version 1.0.0  
 Updated for ratestools 1.0.0  
 Added handling for more mutation classes  
@@ -277,6 +280,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 1.1.1  
+DNM clump option  
+
 ### Version 1.1.0  
 phaseTrio process configuration  
 
@@ -344,6 +350,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 1.1.1  
+Automatic DNM clump removal  
+
 ### Version 1.1.0  
 Haplotype phasing using WhatsHap  
 Fixed bug in repeatMaskRM that did not retain new masked files  

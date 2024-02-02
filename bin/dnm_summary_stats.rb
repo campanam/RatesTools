@@ -234,7 +234,7 @@ else
 			if sorted_sites.size > 1 # Ignore case when clumped sites impossible
 				prev_site = sorted_sites[0]
 				for i in 1 ... sorted_sites.size
-					if sorted_sites[i] <= prev_site
+					if sorted_sites[i] <= prev_site + $dnmclump
 						removed_site = key + ":" + prev_site.to_s
 						total_overlap += 1
 						prev_site = sorted_sites[i]

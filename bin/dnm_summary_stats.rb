@@ -224,9 +224,9 @@ else
 			key_chr = key.split(":")[0]
 			key_snp = key.split(":")[1].to_i
 			if sorted_candidates[key].nil?
-				sorted_candidates[key] = [key_snp]
+				sorted_candidates[key_chr] = [key_snp]
 			else
-				sorted_candidates[key].push(key_snp)
+				sorted_candidates[key_chr].push(key_snp)
 			end
 		end
 		for key in sorted_candidates.keys

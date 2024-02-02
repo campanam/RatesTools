@@ -163,7 +163,7 @@ else
 	$regionsites = {} # Hash of site counts after region filtering
 	$candidates = {} # Hash of mutation site counts to identify sibling overlaps
 	$totalbases = {} # Hash indexing total site counts to individuals
-	$dnmclump = ARGV[2] # Number of bases to search for clumped DNM candidates. Default of 0.
+	$dnmclump = ARGV[2].to_i # Number of bases to search for clumped DNM candidates. Default of 0.
 	
 	# Get individual names
 	Dir.foreach(ARGV[0] + "/") do |f1|

@@ -229,7 +229,7 @@ else
 				sorted_candidates[key].push(key_snp)
 			end
 		end
-		for key in sorted_candidates.key
+		for key in sorted_candidates.keys
 			sorted_sites = sorted_candidates[key].sort
 			if sorted_sites.size < 2 # Ignore case when clumped sites impossible
 				prev_site = sorted_sites[0]

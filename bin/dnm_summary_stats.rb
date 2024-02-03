@@ -132,7 +132,7 @@ def classify_sites(outindiv)
 				getmutationcnts = false
 				$totalbases[outindiv][1] = cnts[1..3].sum
 				$totalbases[outindiv][2] = cnts[1]
-			elsif line == 'Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:\n'
+			elsif line == "Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:\n"
 				getbootcnts = true
 			elsif getbootcnts
 				meanallsites = line.split[1].to_f

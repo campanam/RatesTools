@@ -23,6 +23,9 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.12.3  
+Fixed missing bootstrap parameter in command-line output in log  
+
 ### Version 0.12.2  
 Update file headers  
 

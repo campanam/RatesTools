@@ -56,6 +56,7 @@ def classify_sites(outindiv)
 	otherscnt = 0
 	start = false # Flag to collect data
 	getmutationcnts = false # Flag to collect mutation count data
+	getbootcnts = false # Flag to collect bootstrap count data
 	File.open(ARGV[1] + "_offspring" + outindiv + "_summary.log") do |f3|
 		while line = f3.gets
 			if start
@@ -131,6 +132,12 @@ def classify_sites(outindiv)
 				getmutationcnts = false
 				$totalbases[outindiv][1] = cnts[1..3].sum
 				$totalbases[outindiv][2] = cnts[1]
+			elsif line == 'Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:\n'
+				getbootcnts = true
+			elsif getbootcnts
+				meanallsites = line.split[1].to_f
+				meansingleforward = line.split[3].to_f
+				$bootstrapmeans[outindiv] = [meanallsites,meansingleforward]
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")
 				@off_index = header_arr.index(outindiv)
@@ -167,6 +174,7 @@ else
 	$regionsites = {} # Hash of site counts after region filtering
 	$candidates = {} # Hash of mutation site counts to identify sibling overlaps
 	$totalbases = {} # Hash indexing total site counts to individuals
+	$bootstrapmeans = {} # Hash indexing boostrap mean values by individuals
 	$dnmclump = ARGV[2].to_i # Number of bases to search for clumped DNM candidates. Default of 0.
 	
 	# Get individual names
@@ -284,3 +292,4 @@ else
 		puts key + "," + $sfindv[key].to_s + "," + $total_removed[key].to_s + "," + ($totalbases[key][2]-$sfindv[key]).to_s + "," + ($totalbases[key][1]-$total_removed[key]).to_s + "," + srate.to_s + "," + arate.to_s
 	end
 end
+print $bootstrapmeans

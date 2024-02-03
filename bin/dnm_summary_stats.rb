@@ -299,7 +299,7 @@ unless ARGV[3].nil? # Do not bother if no bootstrapped data
 	for key in $bootstrapmeans.keys
 		sf_correction_factor = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][2].to_f
 		sf_corrected_mean = sf_correction_factor * $bootstrapmeans[key][0]
-		sf_corrected_se = sf_corrected_mean/Math.sqrt(ARGV[3])
+		sf_corrected_se = sf_corrected_mean/Math.sqrt(ARGV[3].to_i)
 		sf_corrected_crit = 1.96 * sf_corrected_se
 		sf_corrected_ci = (sf_corrected_mean - sf_corrected_crit).to_s + '...' + (sf_corrected_mean + sf_corrected_crit).to_s
 		all_correction_factor = ($totalbases[key][1]-$total_removed[key]).to_f/$totalbases[key][1].to_f

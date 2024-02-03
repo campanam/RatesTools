@@ -2,8 +2,8 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.12.2"
-# Michael G. Campana and Ellie E. Armstrong, 2019-2023
+CALCDENOVOVER = "0.12.3"
+# Michael G. Campana and Ellie E. Armstrong, 2019-2024
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -343,7 +343,7 @@ end
 #-----------------------------------------------------------------------------------------
 def print_options # Print options used at startup to output
 	puts "calc_denovo_mutation_rate " + CALCDENOVOVER + " started with parameters:"
-	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s
+	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s + '-b ' + $options.bootstrap.to_s
 	cmdline << " -k -m " + $options.mu.to_s + " -t " + $options.theta.to_s + " -c " + $options.cutoff.to_s if $options.kochDNp
 	cmdline << " --parhom" if $options.parhom
 	cmdline << " --minAD1" if $options.minAD1

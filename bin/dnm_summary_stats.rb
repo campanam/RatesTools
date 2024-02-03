@@ -277,10 +277,10 @@ else
 			end
 		end
 	end
-	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
+	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RemainingSingle-ForwardSites,RemainingTotalSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
 	for key in $sfindv.keys
 		srate = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate single-forward rate
 		arate = ($totalbases[key][1]-$total_removed[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
-		puts key + "," + $sfindv[key].to_s + "," + $total_removed[key].to_s + "," + srate.to_s + "," + arate.to_s
+		puts key + "," + $sfindv[key].to_s + "," + $total_removed[key].to_s + "," + $totalbases[key][2]-$sfindv[key] + "," + $totalbases[key][1]-$total_removed[key] + "," + srate.to_s + "," + arate.to_s
 	end
 end

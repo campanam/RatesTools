@@ -135,6 +135,7 @@ def classify_sites(outindiv)
 			elsif line == "Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:\n"
 				getbootcnts = true
 			elsif getbootcnts
+				getbootcnts = false
 				meanallsites = line.split[1].to_f
 				meansingleforward = line.split[3].to_f
 				$bootstrapmeans[outindiv] = [meanallsites,meansingleforward]

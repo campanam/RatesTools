@@ -57,7 +57,7 @@ def classify_sites(outindiv)
 	start = false # Flag to collect data
 	getmutationcnts = false # Flag to collect mutation count data
 	getbootcnts = false # Flag to collect bootstrap count data
-	File.open(ARGV[1] + "_offspring" + outindiv + "_summary.log") do |f3|
+	File.open(ARGV[0] + '/' + ARGV[1] + "_offspring" + outindiv + "_summary.log") do |f3|
 		while line = f3.gets
 			if start
 				snp_array = line[0..-2].split("\t")

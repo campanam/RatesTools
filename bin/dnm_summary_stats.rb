@@ -281,12 +281,17 @@ else
 		if $candidates[key][0] > 1
 			puts key
 			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
-				$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
+				$sfindv[sfindv] +=1
 			end
 			for tindv in $candidates[key][2]
-				$total_removed[tindv].nil? ? $total_removed[tindv] = 1 : $total_removed[tindv] +=1
+				$total_removed[tindv] +=1
 			end
+			$candidates.delete(key)
 		end
+	end
+	puts "\nSurviving Candidate DNM Sites (Across Individuals)"
+	for key in $candidates.keys
+		puts key
 	end
 	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RemainingSingle-ForwardSites,RemainingTotalSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
 	for key in $sfindv.keys

@@ -270,7 +270,7 @@ else
 							end
 							$candidates.delete(removed_site)
 						end
-					elsif sorted_sites[i-1] <= prev_site + $dnmclump # Handling for numerical gap
+					elsif (sorted_sites[i-1] - sorted_sites[i-2]).abs <= $dnmclump # Handling for numerical gap
 						removed_site = key + ":" + prev_site.to_s
 						puts removed_site
 						for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations

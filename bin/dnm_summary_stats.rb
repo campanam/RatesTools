@@ -315,12 +315,12 @@ unless ARGV[3].nil? # Do not bother if no bootstrapped data
 	puts "\nOffspring,Single-ForwardCorrectedMean,Single-ForwardCorrectedSE,Single-ForwardCorrected95%C.I.,AllSitesCorrectedMean,AllSitesCorrectedSE,AllSitesCorrected95%C.I."
 	for key in $bootstrapmeans.keys
 		sf_correction_factor = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][2].to_f
-		sf_corrected_mean = sf_correction_factor * $bootstrapmeans[key][0]
+		sf_corrected_mean = sf_correction_factor * $bootstrapmeans[key][1]
 		sf_corrected_se = sf_corrected_mean/Math.sqrt(ARGV[3].to_i)
 		sf_corrected_crit = 1.96 * sf_corrected_se
 		sf_corrected_ci = (sf_corrected_mean - sf_corrected_crit).to_s + '...' + (sf_corrected_mean + sf_corrected_crit).to_s
 		all_correction_factor = ($totalbases[key][1]-$total_removed[key]).to_f/$totalbases[key][1].to_f
-		all_corrected_mean = all_correction_factor * $bootstrapmeans[key][1]
+		all_corrected_mean = all_correction_factor * $bootstrapmeans[key][0]
 		all_corrected_se = all_corrected_mean/Math.sqrt(ARGV[3].to_i)
 		all_corrected_crit = 1.96 * all_corrected_se
 		all_corrected_ci = (all_corrected_mean - all_corrected_crit).to_s + '...' + (all_corrected_mean + all_corrected_crit).to_s

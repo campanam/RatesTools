@@ -225,11 +225,13 @@ else
 		puts outindiv + "," + $allsites + "," + $chrsites + "," + $triosites[indiv].to_s + "," + $vcf_filtsites[indiv].to_s + "," + $gatk_filtsites[indiv].to_s + "," + $regionsites[indiv].to_s
 		
 	end
-	for outindiv in outindivs
-		classify_sites(outindiv)
-	end
 	$total_removed = {} # Hash of total overlapping individuals and clumped sites per individual
 	$sfindv = {} # Hash of single-forward counts per individual
+	for outindiv in outindivs
+		classify_sites(outindiv)
+		$total_removed[outindiv] = 0 # Initialize total removed site count to zero
+		$sfindv[outindiv] = 0 # Initialize removed single-forward site count to zero
+	end		
 	if $dnmclump > 0 # Don't bother if no clumping
 		puts "\nClumped Candidate DNM Sites"
 		sorted_candidates = {} # Hash to put in sites keyed by chr
@@ -251,20 +253,20 @@ else
 						removed_site = key + ":" + prev_site.to_s
 						puts removed_site
 						for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
-							$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
+							$sfindv[sfindv] +=1
 						end
 						for tindv in $candidates[removed_site][2] # Code to count total number of removed sites
-							$total_removed[tindv].nil? ? $total_removed[tindv] = 1 : $total_removed[tindv] += 1
+							$total_removed[tindv] += 1
 						end
 						$candidates.delete(removed_site)
 						if i == sorted_sites.size - 1 # Add last removed site if goes to end
 							removed_site = key + ":" + sorted_sites[i].to_s
 							puts removed_site
 							for sfindv in $candidates[removed_site][1]
-								$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] += 1
+								$sfindv[sfindv] += 1
 							end
 							for tindv in $candidates[removed_site][2]
-								$total_removed[tindv].nil? ? $total_removed[tindv] = 1 : $total_removed[tindv] += 1
+								$total_removed[tindv] += 1
 							end
 							$candidates.delete(removed_site)
 						end

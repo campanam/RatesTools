@@ -864,10 +864,10 @@ process generateSummaryStats {
 	val dnm_bootstraps
 	
 	output:
-	path "summary_stats.csv"
+	path "${params.prefix}_summary_stats.csv"
 	
 	"""
-	dnm_summary_stats.rb . ${params.prefix} ${dnm_clump} ${dnm_bootstraps} > summary_stats.csv
+	dnm_summary_stats.rb . ${params.prefix} ${dnm_clump} ${dnm_bootstraps} > ${params.prefix}_summary_stats.csv
 	"""
 
 }

@@ -355,6 +355,8 @@ Initial script (plotDPGQ-clean.R)
 ## ratestools  
 ### Version 1.1.1  
 Automatic DNM clump removal  
+Automatic recalculation of confidence intervals  
+Output summary stats includes file prefix  
 
 ### Version 1.1.0  
 Haplotype phasing using WhatsHap  

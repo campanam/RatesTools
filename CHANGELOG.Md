@@ -105,6 +105,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 1.1.1  
+Updates for revised dnm_summary_stats script  
+
 ### Version 1.1.0  
 trio-phasing configuration  
 

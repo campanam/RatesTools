@@ -51,14 +51,16 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2ac. `chr_file` specifies the path to the list of chromosomes to retain. Set the value to "NULL" to ignore this filter.  
 2ad. `min_contig_length` specifies the minimum length (in bp) of contigs to retain before applying site and region filters.
 2ae. `min_filt_contig_length` specifies the minimum length (in bp) of contigs to retain after applying site and region filters.
-2af. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
-2ag. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
+2af. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.
+2ag. `dnm_clump` species the number of bases in a window to consider a DNM candidate clump. 0 does not removed clumps.  
+2ah. `dnm_bootstraps` specifies the number of bootstrap replicates used in dnm_opts in order to recalculate confidence intervals. *NB: Future revisions will likely infer this value from the dnm_opts parameter*.  
+2ai. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
 
-3. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
+4. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
 
-4. Configure the executor profiles for your system. If you are running locally, the standard local profile provided should be sufficient (but may need some adaptation depending on your hardware). The number of threads for parallelizable software (BWA, SAMtools, GATK, GenMap, RepeatMasker, RepeatModeler) can be controlled using the $task.cpus variable for each process. Executor profiles are passed to the pipeline using the config file specified at runtime using the `-c` option. If you are running on a cluster or a cloud service, consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and your system administrators to optimize the parameter profile.  
+5. Configure the executor profiles for your system. If you are running locally, the standard local profile provided should be sufficient (but may need some adaptation depending on your hardware). The number of threads for parallelizable software (BWA, SAMtools, GATK, GenMap, RepeatMasker, RepeatModeler) can be controlled using the $task.cpus variable for each process. Executor profiles are passed to the pipeline using the config file specified at runtime using the `-c` option. If you are running on a cluster or a cloud service, consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) and your system administrators to optimize the parameter profile.  
 
-5. Place the final configuration file into the run base directory.  
+6. Place the final configuration file into the run base directory.  
 
 ## Run the Analysis  
 1. Execute the analysis using the command: `nextflow run campanam/RatesTools -r <version> -c <config_file.config>`. You can use the `-bg` option to send the Nextflow process to the background (useful for cluster systems) and the `-profile <profile_name>` option to specify your custom parameter profile.  
@@ -78,7 +80,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2m. `13_RegionFilteredVCFs`: Trio chromosome VCFs after removal of unreliable regions.  
 2n. `14_SplitCalcDNMLogs`: De novo mutations (DNMs) and DNM rates calculated per chromosome for each trio.  
 2o. `15_SummarizeDNMLogs`: Summarized DNMs and DNM rates for all chromosomes for each trio.  
-2p. `16_SummaryStats`: Summary statistics of the total number of sites retained after each filtration step and the number of each mutation class. It also identifies overlapping candidate mutations between siblings and recalculates mutation rate estimates assuming these sites are erroneous.  
+2p. `16_SummaryStats`: Summary statistics of the total number of sites retained after each filtration step and the number of each mutation class. It also identifies and removes clumped candidate mutations and overlapping candidate mutations between siblings. The script then recalculates mutation rate estimates and confidence intervals assuming these sites are erroneous.  
 3. We provide example output of the `SummarizeDNMLogs` and `SummaryStats` files. A successful run should produce complete versions of these files with similar results.  
 
 ## References  

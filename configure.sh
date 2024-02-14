@@ -1,9 +1,9 @@
 #! /bin/bash
 
-# configure.sh script for RatesTools v1.1.0
+# configure.sh script for RatesTools v1.1.1
 
 #----------------------------------------------------------------------------------------
-# Michael G. Campana and Ellie E. Armstrong, 2020-2023
+# Michael G. Campana and Ellie E. Armstrong, 2020-2024
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 

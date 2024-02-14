@@ -1,5 +1,5 @@
 # CHANGE LOG  
-Michael G. Campana & Ellie E. Armstrong, 2019-2023  
+Michael G. Campana & Ellie E. Armstrong, 2019-2024  
 Smithsonian Institution  
 Stanford University  
 
@@ -7,22 +7,26 @@ Stanford University
 1. [calc_denovo_mutation_rate](#calc_denovo_mutation_rate)  
 2. [configure.sh](#configuresh)  
 3. [denovolib](#denovolib)  
-4. [filterGM](#filtergm)  
-5. [indels2bed](#indels2bed)  
-6. [kochDNp](#kochdnp)  
-7. [logstats](#logstats)  
-8. [nextflow_split](#nextflow_split)  
-9. [nextflow.config](#nextflowconfig)  
-10. [plotDPGQ](#plotDPGQ)  
-11. [ratestools](#ratestools)  
-12. [RM2bed](#rm2bed)  
-13. [simplify_bed](#simplify_bed)  
-14. [simplify_sorted_bed](#simplify_sorted_bed)  
-15. [summarize_denovo](#summarize_denovo)  
-16. [Deprecated](#deprecated)  
+4. [dnm_summary_stats](#dnm_summary_stats)
+5. [filterGM](#filtergm)  
+6. [indels2bed](#indels2bed)  
+7. [kochDNp](#kochdnp)  
+8. [logstats](#logstats)  
+9. [nextflow_split](#nextflow_split)  
+10. [nextflow.config](#nextflowconfig)  
+11. [plotDPGQ](#plotDPGQ)  
+12. [ratestools](#ratestools)  
+13. [RM2bed](#rm2bed)  
+14. [simplify_bed](#simplify_bed)  
+15. [simplify_sorted_bed](#simplify_sorted_bed)  
+16. [summarize_denovo](#summarize_denovo)  
+17. [Deprecated](#deprecated)  
 
 
 ## calc_denovo_mutation_rate  
+### Version 0.12.3  
+Fixed missing bootstrap parameter in command-line output in log  
+
 ### Version 0.12.2  
 Update file headers  
 
@@ -101,6 +105,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 1.1.1  
+Updates for revised dnm_summary_stats script  
+
 ### Version 1.1.0  
 trio-phasing configuration  
 
@@ -173,6 +180,10 @@ Redundant methods (Parser, gz_open_file) moved to denovolib
 gz_open_file improved to version in BaitsTools 1.6.6  
 
 ## dnm_summary_stats  
+### Version 1.1.1  
+Automatically removes clumped DNM candidates  
+Recalculates adjusted confidence intervals  
+
 ### Version 1.0.0  
 Updated for ratestools 1.0.0  
 Added handling for more mutation classes  
@@ -277,6 +288,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 1.1.1  
+DNM clump option  
+
 ### Version 1.1.0  
 phaseTrio process configuration  
 
@@ -344,6 +358,11 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 1.1.1  
+Automatic DNM clump removal  
+Automatic recalculation of confidence intervals  
+Output summary stats includes file prefix  
+
 ### Version 1.1.0  
 Haplotype phasing using WhatsHap  
 Fixed bug in repeatMaskRM that did not retain new masked files  

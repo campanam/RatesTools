@@ -1,6 +1,6 @@
 # RatesTools  
 
-__Michael G. Campana and Ellie E. Armstrong, 2019-2023__  
+__Michael G. Campana and Ellie E. Armstrong, 2019-2024__  
 Smithsonian Institution  
 Stanford University  
 
@@ -100,7 +100,7 @@ Sample,Library,Read1,Read2
 RatesTools assumes bidirectional sequencing for each library, but allows for multiple sequenced libraries per individual. RatesTools will merge the libraries by sample name assuming the libraries are independent. If an individual library has been sequenced multiple times, concatenate the reads from the library and treat as a single bidirectionally sequenced file.  
 
 ### Platform-Specific Configuration  
-Given the wide-variety of computing architectures and operating systems, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes an example of a 'standard' [configuration profile](https://www.nextflow.io/docs/latest/config.html#config-profiles) for a local installation using modulefiles and a 'conda' configuration that installs all dependencies using Conda. Example configuration profiles for the analyses described in [Armstrong & Campana 2022](https://doi.org/10.1101/2022.07.18.500472) are provided in the [Figshare repository](https://dx.doi.org/10.25573/data.20250288). Please consult your computing staff to optimize the profile settings for your hardware. We recommend storing configuration profiles in a system-wide central location for access by all users.  
+Given the wide-variety of computing architectures and operating systems, we cannot provide specific optimized configurations for your computing system. The `nextflow.config` file includes an example of a 'standard' [configuration profile](https://www.nextflow.io/docs/latest/config.html#config-profiles) for a local installation using modulefiles and a 'conda' configuration that installs all dependencies using Conda. Example configuration profiles for the analyses described in [Armstrong & Campana 2023](https://doi.org/10.1093/bioinformatics/btac784) are provided in the [Figshare repository](https://dx.doi.org/10.25573/data.20250288). Please consult your computing staff to optimize the profile settings for your hardware. We recommend storing configuration profiles in a system-wide central location for access by all users.  
 
 ## Running the Pipeline  
 Enter `nextflow run campanam/RatesTools -r <version> -c <config_file>` to run the pipeline, where `version` is the installed RatesTools release. Append `-resume` to restart a previous run or `-bg` to run RatesTools in the background. If you developed platform-specific configuration profiles, you can specify this using the `-profile <PROFILE>` option. See the Nextflow documentation for details. Final data are written to the specified output directory and its subdirectories.  

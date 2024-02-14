@@ -2,8 +2,8 @@
 
 #----------------------------------------------------------------------------------------
 # dnm_summary_stats
-DNMSUMSTATSVER = "1.0.0"
-# Michael G. Campana and Ellie E. Armstrong, 2022-2023
+DNMSUMSTATSVER = "1.1.1"
+# Michael G. Campana and Ellie E. Armstrong, 2022-2024
 # Smithsonian Institution and Stanford University
 
 # CC0: To the extent possible under law, the Smithsonian Institution and Stanford 
@@ -56,12 +56,17 @@ def classify_sites(outindiv)
 	otherscnt = 0
 	start = false # Flag to collect data
 	getmutationcnts = false # Flag to collect mutation count data
-	File.open(ARGV[1] + "_offspring" + outindiv + "_summary.log") do |f3|
+	getbootcnts = false # Flag to collect bootstrap count data
+	File.open(ARGV[0] + '/' + ARGV[1] + "_offspring" + outindiv + "_summary.log") do |f3|
 		while line = f3.gets
 			if start
 				snp_array = line[0..-2].split("\t")
 				snpsite = snp_array[0] + ':' + snp_array[1]
-				$candidates[snpsite].nil? ? $candidates[snpsite] = [1,[]] :  $candidates[snpsite][0] += 1 # Structure is array of [total_number, [individuals for single-forward mutation]]
+				if $candidates[snpsite].nil? 
+					$candidates[snpsite] = [1,[],[outindiv]] 
+				else $candidates[snpsite][0] += 1 # Structure is array of [total_number, [individuals for single-forward mutation][all individuals with site]]
+					$candidates[snpsite][2].push(outindiv)
+				end
 				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
 				alleles.delete("<non_ref>") if alleles.include?("<non_ref>")
 				alleles.delete(".") if alleles.include?(".") # Ignore for non-polymorphic sites
@@ -127,6 +132,13 @@ def classify_sites(outindiv)
 				getmutationcnts = false
 				$totalbases[outindiv][1] = cnts[1..3].sum
 				$totalbases[outindiv][2] = cnts[1]
+			elsif line == "Offspring\tMean_AllSites\t95%C.I._Allsites\tMean_Single-ForwardOnly\t95%C.I._Single-ForwardOnly:\n"
+				getbootcnts = true
+			elsif getbootcnts
+				getbootcnts = false
+				meanallsites = line.split[1].to_f
+				meansingleforward = line.split[3].to_f
+				$bootstrapmeans[outindiv] = [meanallsites,meansingleforward]
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")
 				@off_index = header_arr.index(outindiv)
@@ -152,7 +164,7 @@ end
 #----------------------------------------------------------------------------------------
 if ARGV[0].nil?
 	# If no parameters passed, print help screen
-	format_splash('dnm_summary_stats', DNMSUMSTATSVER, '<logs_directory> <output_prefix> > <out.csv>')
+	format_splash('dnm_summary_stats', DNMSUMSTATSVER, '<logs_directory> <output_prefix> <DNM_clump_range> [bootstraps] > <out.csv>')
 else
 	$individuals = [] # Array of individual names
 	$allsites = nil # Total number of sites before filtration
@@ -163,6 +175,8 @@ else
 	$regionsites = {} # Hash of site counts after region filtering
 	$candidates = {} # Hash of mutation site counts to identify sibling overlaps
 	$totalbases = {} # Hash indexing total site counts to individuals
+	$bootstrapmeans = {} # Hash indexing boostrap mean values by individuals
+	$dnmclump = ARGV[2].to_i # Number of bases to search for clumped DNM candidates. Default of 0.
 	
 	# Get individual names
 	Dir.foreach(ARGV[0] + "/") do |f1|
@@ -211,25 +225,105 @@ else
 		puts outindiv + "," + $allsites + "," + $chrsites + "," + $triosites[indiv].to_s + "," + $vcf_filtsites[indiv].to_s + "," + $gatk_filtsites[indiv].to_s + "," + $regionsites[indiv].to_s
 		
 	end
+	$total_removed = {} # Hash of total overlapping individuals and clumped sites per individual
+	$sfindv = {} # Hash of single-forward counts per individual
 	for outindiv in outindivs
 		classify_sites(outindiv)
-	end
-	puts "\nCandidate Sites Overlapping Between Offspring"
-	total_overlap = 0
-	$sfindv = {} # Hash of single-forward counts per individual
-	for key in $candidates.keys
-		if $candidates[key][0] > 1
-			puts key
-			total_overlap +=1
-			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
-				$sfindv[sfindv].nil? ? $sfindv[sfindv] = 1 : $sfindv[sfindv] +=1
+		$total_removed[outindiv] = 0 # Initialize total removed site count to zero
+		$sfindv[outindiv] = 0 # Initialize removed single-forward site count to zero
+	end		
+	if $dnmclump > 0 # Don't bother if no clumping
+		puts "\nClumped Candidate DNM Sites"
+		sorted_candidates = {} # Hash to put in sites keyed by chr
+		for key in $candidates.keys
+			key_chr = key.split(":")[0]
+			key_snp = key.split(":")[1].to_i
+			if sorted_candidates[key_chr].nil?
+				sorted_candidates[key_chr] = [key_snp]
+			else
+				sorted_candidates[key_chr].push(key_snp)
+			end
+		end
+		for key in sorted_candidates.keys
+			sorted_sites = sorted_candidates[key].sort
+			prev_site = sorted_sites[0]
+			if sorted_sites.size > 1 # Ignore case when clumped sites impossible
+				for i in 1 ... sorted_sites.size
+					if sorted_sites[i] <= prev_site + $dnmclump
+						removed_site = key + ":" + prev_site.to_s
+						puts removed_site
+						for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
+							$sfindv[sfindv] +=1
+						end
+						for tindv in $candidates[removed_site][2] # Code to count total number of removed sites
+							$total_removed[tindv] += 1
+						end
+						$candidates.delete(removed_site)
+						if i == sorted_sites.size - 1 # Add last removed site if goes to end
+							removed_site = key + ":" + sorted_sites[i].to_s
+							puts removed_site
+							for sfindv in $candidates[removed_site][1]
+								$sfindv[sfindv] += 1
+							end
+							for tindv in $candidates[removed_site][2]
+								$total_removed[tindv] += 1
+							end
+							$candidates.delete(removed_site)
+						end
+					elsif (sorted_sites[i-1] - sorted_sites[i-2]).abs <= $dnmclump # Handling for numerical gap
+						removed_site = key + ":" + prev_site.to_s
+						puts removed_site
+						for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
+							$sfindv[sfindv] +=1
+						end
+						for tindv in $candidates[removed_site][2] # Code to count total number of removed sites
+							$total_removed[tindv] += 1
+						end
+						$candidates.delete(removed_site)
+					end
+					prev_site = sorted_sites[i]
+				end
 			end
 		end
 	end
-	puts "\nOffspring,Single-ForwardOverlappingSites,TotalOverlappingSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
+	puts "\nRemaining Candidate Sites Overlapping Between Offspring"
+	for key in $candidates.keys
+		if $candidates[key][0] > 1
+			puts key
+			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
+				$sfindv[sfindv] +=1
+			end
+			for tindv in $candidates[key][2]
+				$total_removed[tindv] +=1
+			end
+			$candidates.delete(key)
+		end
+	end
+	puts "\nSurviving Candidate DNM Sites (Across Individuals)"
+	for key in $candidates.keys
+		puts key
+	end
+	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RemainingSingle-ForwardSites,RemainingTotalSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
 	for key in $sfindv.keys
 		srate = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate single-forward rate
-		arate = ($totalbases[key][1]-total_overlap).to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
-		puts key + "," + $sfindv[key].to_s + "," + total_overlap.to_s + "," + srate.to_s + "," + arate.to_s
+		arate = ($totalbases[key][1]-$total_removed[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
+		puts key + "," + $sfindv[key].to_s + "," + $total_removed[key].to_s + "," + ($totalbases[key][2]-$sfindv[key]).to_s + "," + ($totalbases[key][1]-$total_removed[key]).to_s + "," + srate.to_s + "," + arate.to_s
+	end
+end
+
+unless ARGV[3].nil? # Do not bother if no bootstrapped data
+	puts "\nOffspring,Single-ForwardCorrectedMean,Single-ForwardCorrectedSE,Single-ForwardCorrected95%C.I.,AllSitesCorrectedMean,AllSitesCorrectedSE,AllSitesCorrected95%C.I."
+	for key in $bootstrapmeans.keys
+		sf_correction_factor = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][2].to_f
+		sf_corrected_mean = sf_correction_factor * $bootstrapmeans[key][1]
+		sf_corrected_se = sf_corrected_mean/Math.sqrt(ARGV[3].to_i)
+		sf_corrected_crit = 1.96 * sf_corrected_se
+		sf_corrected_ci = (sf_corrected_mean - sf_corrected_crit).to_s + '...' + (sf_corrected_mean + sf_corrected_crit).to_s
+		all_correction_factor = ($totalbases[key][1]-$total_removed[key]).to_f/$totalbases[key][1].to_f
+		all_corrected_mean = all_correction_factor * $bootstrapmeans[key][0]
+		all_corrected_se = all_corrected_mean/Math.sqrt(ARGV[3].to_i)
+		all_corrected_crit = 1.96 * all_corrected_se
+		all_corrected_ci = (all_corrected_mean - all_corrected_crit).to_s + '...' + (all_corrected_mean + all_corrected_crit).to_s
+		puts key + "," + sf_corrected_mean.to_s + "," + sf_corrected_se.to_s + "," + sf_corrected_ci + "," + all_corrected_mean.to_s + ',' + all_corrected_se.to_s + ',' + all_corrected_ci
 	end
 end

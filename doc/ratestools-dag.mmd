@@ -24,6 +24,8 @@ flowchart TB
     v70["min_filt_contig_length"]
     v73["min_contig_length"]
     v74["min_filt_contig_length"]
+    v83["dnm_clump"]
+    v84["dnm_bootstraps"]
     end
     v1([prepareRef])
     v6([alignSeqs])
@@ -49,7 +51,7 @@ flowchart TB
     v59[" "]
     v60[" "]
     v80[" "]
-    v84[" "]
+    v86[" "]
     end
     v29([repeatModeler])
     v30([repeatMaskRM])
@@ -78,7 +80,7 @@ flowchart TB
     end
     v76([calcDNMRate])
     v79([summarizeDNM])
-    v83([generateSummaryStats])
+    v85([generateSummaryStats])
     v3(( ))
     v8(( ))
     v17(( ))
@@ -180,5 +182,7 @@ flowchart TB
     v78 --> v79
     v79 --> v80
     v79 --> v53
-    v53 --> v83
-    v83 --> v84
+    v83 --> v85
+    v84 --> v85
+    v53 --> v85
+    v85 --> v86

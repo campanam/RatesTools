@@ -1,5 +1,5 @@
 # RatesTools Contributing Guidelines  
-Michael G. Campana and Ellie E. Armstrong, 2019-2023  
+Michael G. Campana and Ellie E. Armstrong, 2019-2024  
 Smithsonian Institution  
 Stanford University
 

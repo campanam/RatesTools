@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# configure.sh script for RatesTools v1.1.1
+# configure.sh script for RatesTools v1.1.2
 
 #----------------------------------------------------------------------------------------
 # Michael G. Campana and Ellie E. Armstrong, 2020-2024

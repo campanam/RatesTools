@@ -180,6 +180,9 @@ Redundant methods (Parser, gz_open_file) moved to denovolib
 gz_open_file improved to version in BaitsTools 1.6.6  
 
 ## dnm_summary_stats  
+### Version 1.1.2  
+Fixes bug that incorrectly calculated adjusted standard errors  
+
 ### Version 1.1.1  
 Automatically removes clumped DNM candidates  
 Recalculates adjusted confidence intervals  
@@ -498,6 +501,9 @@ Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to
 
 
 ## summarize_denovo  
+### Version 1.1.2  
+Fixed output '..' instead of '...' for CI ranges  
+
 ### Version 0.5.6  
 Update file headers  
 

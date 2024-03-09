@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # dnm_summary_stats
-DNMSUMSTATSVER = "1.1.1"
+DNMSUMSTATSVER = "1.1.2"
 # Michael G. Campana and Ellie E. Armstrong, 2022-2024
 # Smithsonian Institution and Stanford University
 
@@ -137,8 +137,10 @@ def classify_sites(outindiv)
 			elsif getbootcnts
 				getbootcnts = false
 				meanallsites = line.split[1].to_f
+				stderrallsites = (line.split[2].split('..')[1].to_f - meanallsites)/1.96
 				meansingleforward = line.split[3].to_f
-				$bootstrapmeans[outindiv] = [meanallsites,meansingleforward]
+				stderrsingleforward = (line.split[4].split('...')[1].to_f - meansingleforward)/1.96
+				$bootstrapmeans[outindiv] = [meanallsites,meansingleforward,stderrallsites,stderrsingleforward]
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")
 				@off_index = header_arr.index(outindiv)
@@ -316,12 +318,12 @@ unless ARGV[3].nil? # Do not bother if no bootstrapped data
 	for key in $bootstrapmeans.keys
 		sf_correction_factor = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][2].to_f
 		sf_corrected_mean = sf_correction_factor * $bootstrapmeans[key][1]
-		sf_corrected_se = sf_corrected_mean/Math.sqrt(ARGV[3].to_i)
+		sf_corrected_se = $bootstrapmeans[key][3] * sf_correction_factor
 		sf_corrected_crit = 1.96 * sf_corrected_se
 		sf_corrected_ci = (sf_corrected_mean - sf_corrected_crit).to_s + '...' + (sf_corrected_mean + sf_corrected_crit).to_s
 		all_correction_factor = ($totalbases[key][1]-$total_removed[key]).to_f/$totalbases[key][1].to_f
 		all_corrected_mean = all_correction_factor * $bootstrapmeans[key][0]
-		all_corrected_se = all_corrected_mean/Math.sqrt(ARGV[3].to_i)
+		all_corrected_se = $bootstrapmeans[key][2] * all_correction_factor
 		all_corrected_crit = 1.96 * all_corrected_se
 		all_corrected_ci = (all_corrected_mean - all_corrected_crit).to_s + '...' + (all_corrected_mean + all_corrected_crit).to_s
 		puts key + "," + sf_corrected_mean.to_s + "," + sf_corrected_se.to_s + "," + sf_corrected_ci + "," + all_corrected_mean.to_s + ',' + all_corrected_se.to_s + ',' + all_corrected_ci

@@ -109,7 +109,7 @@ else
 										@current_mean = line_arr[i].to_f
 										$total_boot_rate[line_arr[0]][i-1] += @current_mean * @current_contig_bp.to_f
 									when 2,4
-										crit = @current_mean - line_arr[i].split("..")[0].to_f
+										crit = @current_mean - line_arr[i].split("...")[0].to_f
 										$total_boot_rate[line_arr[0]][i-1] += crit * @current_contig_bp.to_f
 									end
 								end

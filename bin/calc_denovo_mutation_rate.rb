@@ -288,11 +288,11 @@ def mean(values) # Calculate mean of an array of values
 	return values.sum.to_f/values.size.to_f
 end
 #-----------------------------------------------------------------------------------------
-def conf95(values) # Calculate 95% confidence interval for an array of values
+def conf95(values) # Calculate bootstrap 95% confidence interval for an array of values
 	meanval = mean(values)
 	sdnum = values.map { |x| (x - meanval) ** 2 }
 	stdev = Math.sqrt(sdnum.sum/(values.size.to_f - 1.0))
-	critval = 1.96 * stdev/Math.sqrt(values.size.to_f)
+	critval = 1.96 * stdev # This is a bootstrap standard error which equals the stdev. So no dividing by sqrt of sample size
 	finalstring = meanval.to_s + "\t" + (meanval - critval).to_s + ".." + (meanval + critval).to_s
 	return finalstring
 end

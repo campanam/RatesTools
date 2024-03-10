@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# configure.sh script for RatesTools v1.1.2
+# configure.sh script for RatesTools v1.2.0
 
 #----------------------------------------------------------------------------------------
 # Michael G. Campana and Ellie E. Armstrong, 2020-2024
@@ -339,9 +339,6 @@ fi
 echo 'Enter number of bases to consider a DNM candidate clump. 0 does not removed clumps.'
 read dnmclump
 sed -i '' "s/dnm_clump = 100/dnm_clump = $dnmclump/" $filename
-echo 'Enter number of bootstrap replicates used for calculating mutation rate confidence interval.'
-read dnmbootstraps
-sed -i '' "s/dnm_bootstraps = 100/dnm_bootstraps = $dnmbootstraps/" $filename
 echo 'Send emails regarding pipeline completion status and encountered errors? (Y/N)'
 yes_no_answer
 if [ $answer == 'Y' ]; then

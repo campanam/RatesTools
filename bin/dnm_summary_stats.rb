@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # dnm_summary_stats
-DNMSUMSTATSVER = "1.1.2"
+DNMSUMSTATSVER = "1.2.0"
 # Michael G. Campana and Ellie E. Armstrong, 2022-2024
 # Smithsonian Institution and Stanford University
 
@@ -57,6 +57,7 @@ def classify_sites(outindiv)
 	start = false # Flag to collect data
 	getmutationcnts = false # Flag to collect mutation count data
 	getbootcnts = false # Flag to collect bootstrap count data
+	$bootstrapped_data = false # Flag that data is bootstrapped
 	File.open(ARGV[0] + '/' + ARGV[1] + "_offspring" + outindiv + "_summary.log") do |f3|
 		while line = f3.gets
 			if start
@@ -127,6 +128,7 @@ def classify_sites(outindiv)
 				$totalbases[outindiv] = [line.split(":")[1].to_i,0,0] # Total callable bases, total mutations, single-forward mutations
 			elsif line == "Offspring\tSingle-Forward\tDouble-Forward\tBackward\n"
 				getmutationcnts = true
+				$bootstrapped_data = true
 			elsif getmutationcnts
 				cnts = line.strip.split.map { |x| x.to_i }
 				getmutationcnts = false
@@ -166,7 +168,7 @@ end
 #----------------------------------------------------------------------------------------
 if ARGV[0].nil?
 	# If no parameters passed, print help screen
-	format_splash('dnm_summary_stats', DNMSUMSTATSVER, '<logs_directory> <output_prefix> <DNM_clump_range> [bootstraps] > <out.csv>')
+	format_splash('dnm_summary_stats', DNMSUMSTATSVER, '<logs_directory> <output_prefix> <DNM_clump_range> > <out.csv>')
 else
 	$individuals = [] # Array of individual names
 	$allsites = nil # Total number of sites before filtration
@@ -313,7 +315,7 @@ else
 	end
 end
 
-unless ARGV[3].nil? # Do not bother if no bootstrapped data
+if $bootstrapped_data # Do not bother if no bootstrapped data
 	puts "\nOffspring,Single-ForwardCorrectedMean,Single-ForwardCorrectedSE,Single-ForwardCorrected95%C.I.,AllSitesCorrectedMean,AllSitesCorrectedSE,AllSitesCorrected95%C.I."
 	for key in $bootstrapmeans.keys
 		sf_correction_factor = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][2].to_f

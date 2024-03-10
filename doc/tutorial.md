@@ -53,8 +53,7 @@ Here we provide a brief tutorial for running RatesTools. This tutorial assumes t
 2ae. `min_filt_contig_length` specifies the minimum length (in bp) of contigs to retain after applying site and region filters.
 2af. `dnm_opts` specifies the options for calc_denovo_mutation_rate.rb as a string. See the [documentation](ruby_r_scripts.md#calc_denovo_mutation_raterb) for details.  
 2ag. `dnm_clump` species the number of bases in a window to consider a DNM candidate clump. 0 does not removed clumps.  
-2ah. `dnm_bootstraps` specifies the number of bootstrap replicates used in dnm_opts in order to recalculate confidence intervals. *NB: Future revisions will likely infer this value from the dnm_opts parameter. For now, the -b option in dnm_opts and dnm_bootstraps must both be specified*.  
-2ai. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
+2ah. `email` specifies an email address to send alerts regarding pipeline completion, termination and errors. Set to "NULL" to turn off email alerts.  
 
 4. Update the module list. In the `modules` directive, there is a list of software. Enter the name of any modulefiles needed for each program. If no modules are needed, leave the value as an empty string.  
 

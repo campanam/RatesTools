@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "0.12.3"
+CALCDENOVOVER = "1.1.2"
 # Michael G. Campana and Ellie E. Armstrong, 2019-2024
 # Smithsonian Institution and Stanford University
 
@@ -290,7 +290,7 @@ end
 #-----------------------------------------------------------------------------------------
 def conf95(values) # Calculate 95% confidence interval for an array of values
 	meanval = mean(values)
-	sdnum = values.map { |x| (x - meanval) * (x + meanval) }
+	sdnum = values.map { |x| (x - meanval) ** 2 }
 	stdev = Math.sqrt(sdnum.sum/(values.size.to_f - 1.0))
 	critval = 1.96 * stdev/Math.sqrt(values.size.to_f)
 	finalstring = meanval.to_s + "\t" + (meanval - critval).to_s + ".." + (meanval + critval).to_s

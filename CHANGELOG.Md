@@ -24,6 +24,9 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 1.1.2  
+Fixed a bug in calculating the 95% confidence interval  
+
 ### Version 0.12.3  
 Fixed missing bootstrap parameter in command-line output in log  
 

@@ -137,9 +137,9 @@ def classify_sites(outindiv)
 			elsif getbootcnts
 				getbootcnts = false
 				meanallsites = line.split[1].to_f
-				stderrallsites = (line.split[2].split('...')[1].to_f - meanallsites)/1.96
+				stderrallsites = (line.split[2].split('..')[1].to_f - meanallsites)/1.96
 				meansingleforward = line.split[3].to_f
-				stderrsingleforward = (line.split[4].split('...')[1].to_f - meansingleforward)/1.96
+				stderrsingleforward = (line.split[4].split('..')[1].to_f - meansingleforward)/1.96
 				$bootstrapmeans[outindiv] = [meanallsites,meansingleforward,stderrallsites,stderrsingleforward]
 			elsif line[0..5] == "#CHROM"
 				header_arr = line[0..-2].split("\t")

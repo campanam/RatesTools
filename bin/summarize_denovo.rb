@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # summarize_denovo
-SUMMARIZEDENOVOVER = "1.1.2"
+SUMMARIZEDENOVOVER = "0.5.6"
 # Michael G. Campana and Ellie E. Armstrong, 2020-2024
 # Smithsonian Institution and Stanford University
 
@@ -24,7 +24,7 @@ require_relative 'denovolib'
 
 def mean_ci(mean, crit) # Calculate mean and confidence interval for bootstrapped results and return formatted output line
 	bootdenom = $bootstrap_bp.to_f # bootdenom does NOT need to be multiplied by 2 (already done during previous bootstrapped calculation)
-	return (mean/bootdenom).to_s + "\t" + ((mean-crit)/bootdenom).to_s + "..." + ((mean+crit)/bootdenom).to_s
+	return (mean/bootdenom).to_s + "\t" + ((mean-crit)/bootdenom).to_s + ".." + ((mean+crit)/bootdenom).to_s
 end
 #----------------------------------------------------------------------------------------
 def print_summary # Print results from unbootstrapped and then bootstrapped results
@@ -109,7 +109,7 @@ else
 										@current_mean = line_arr[i].to_f
 										$total_boot_rate[line_arr[0]][i-1] += @current_mean * @current_contig_bp.to_f
 									when 2,4
-										crit = @current_mean - line_arr[i].split("...")[0].to_f
+										crit = @current_mean - line_arr[i].split("..")[0].to_f
 										$total_boot_rate[line_arr[0]][i-1] += crit * @current_contig_bp.to_f
 									end
 								end

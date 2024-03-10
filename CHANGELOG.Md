@@ -501,9 +501,6 @@ Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to
 
 
 ## summarize_denovo  
-### Version 1.1.2  
-Fixed output '..' instead of '...' for CI ranges  
-
 ### Version 0.5.6  
 Update file headers  
 

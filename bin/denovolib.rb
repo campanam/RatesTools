@@ -106,12 +106,16 @@ def print_results # Method to print basic results
 		puts offspr + "\t" + $total_denovo[offspr].join("\t")
 	end
 	puts "\nInferred mutation rates:"
-	puts "Offspring\tAllsites\tSingle-ForwardOnly"
+	puts "Offspring\tSingle-ForwardOnly\tSingle-ForwardOnly95%BinomialConfidence\tAllSites\tAllSites95%BinomialConfidence"
 	for offspr in $total_denovo.keys
 		sitedenom = 2 * $total_sites.to_f
 		# Get sum of de novo mutations. Double-forward mutations (index 1) count as two mutations, but were already duplicated during mutation count
 		dnm_sum = ($total_denovo[offspr][0] + $total_denovo[offspr][1] + $total_denovo[offspr][2]).to_f
-		puts offspr + "\t" + (dnm_sum/sitedenom).to_s + "\t" + ($total_denovo[offspr][0].to_f/sitedenom).to_s
+		sconf = `Rscript -e 'library(Hmisc, quietly = TRUE);binconf(x = #{$total_denovo[offspr][0]}, n = #{sitedenom}, alpha = 0.05)'` # Get single-forward binomial confidence interval
+		sconf2 = sconf.split("\n")[-1].split[1..2].join('...')
+		aconf = `Rscript -e 'library(Hmisc, quietly = TRUE);binconf(x = #{dnm_sum}, n = #{sitedenom}, alpha = 0.05)'` # Get all-sites binomial confidence interval
+		aconf2 = sconf.split("\n")[-1].split[1..2].join('...')
+		puts offspr + "\t" + ($total_denovo[offspr][0].to_f/sitedenom).to_s + "\t" + sconf2 + "\t" + (dnm_sum/sitedenom).to_s + "\t" + aconf2
 	end
 end
 #-----------------------------------------------------------------------------------------

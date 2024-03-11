@@ -139,6 +139,7 @@ Removed thread parameters
 ## denovolib  
 ### Version 1.2.0  
 Fixed bug that doubled double-forward mutations in the rate estimates  
+Added binomial confidence intervals using Hmisc  
 
 ### Version 0.8.2  
 Update file headers  
@@ -315,7 +316,7 @@ Script to correct vcftools site overflow glitch using bcftools stats
 ## nextflow.config  
 ### Version 1.2.0  
 Removal of redundant dnm_bootstraps parameter  
-Update conda dependencies for generateSummaryStats  
+Update conda dependencies for generateSummaryStatsm, calcDNMRate, summarizeDNM  
 
 ### Version 1.1.1  
 DNM clump option  

@@ -239,8 +239,8 @@ def read_vcf # Method to read vcf
 								adepth.map! { |x| x/total_depth } # Convert allele coverages to frequencies
 								genotype = depth_to_alleles(adepth, $options.minAF)
 							end
-							snp_array[i] << ':' + genotype # Add DNM_GT field to sample
 						end
+						snp_array[i] << ':' + genotype # Add DNM_GT field to sample
 						pl_array = []
 						if $options.kochDNp
 							if pl.nil?

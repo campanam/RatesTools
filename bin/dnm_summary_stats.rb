@@ -40,20 +40,46 @@ def extract_site_count(count, logpattern, indiv)
 	end
 end
 #----------------------------------------------------------------------------------------
+def update_counts(class_hash,mutclass) # Update number and individuals for types of mutations
+	case class_hash
+	when $mutclasses
+		if $mutclasses[mutclass].nil? 
+			$otherscnt += 1
+		else
+			$mutclasses[mutclass] += 1
+			$candidates[snpsite][0].push(outindiv) # Add to single-forward array
+		end
+	when $dfclasses
+		if $dfclasses[mutclass].nil? # Dumps all other mutations into other.
+			$otherscnt += 2 
+		else 
+			$dfclasses[mutclass] += 2 
+			$candidates[snpsite][1].push(outindiv) # Add to double-forward array
+		end
+	when $backclasses
+		if $backclasses[mutclass].nil? # Dumps all other mutations into other
+			$otherscnt += 1
+		else
+			$backclasses[mutclass] += 1
+			$candidates[snpsite][2].push(outindiv) # Add to backward array
+		end
+	end
+end
+#----------------------------------------------------------------------------------------
 def classify_sites(outindiv)
 	# Single-Forward Mutations
-	mutclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
+	$mutclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
 					"T->G" => 0, "C->T" => 0, "C->G" => 0, "C->A" => 0, "G->T" => 0,
 					"G->A" => 0, "G->C" => 0 }
 	# Double-forward mutations
-	dfclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
+	$dfclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
 					"T->G" => 0, "C->T" => 0, "C->G" => 0, "C->A" => 0, "G->T" => 0,
 					"G->A" => 0, "G->C" => 0 }
 	# Backward mutations
-	backclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
+	$backclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
 					"T->G" => 0, "C->T" => 0, "C->G" => 0, "C->A" => 0, "G->T" => 0,
 					"G->A" => 0, "G->C" => 0 }
-	otherscnt = 0
+	$otherscnt = 0
 	start = false # Flag to collect data
 	getmutationcnts = false # Flag to collect mutation count data
 	getbootcnts = false # Flag to collect bootstrap count data
@@ -63,11 +89,7 @@ def classify_sites(outindiv)
 			if start
 				snp_array = line[0..-2].split("\t")
 				snpsite = snp_array[0] + ':' + snp_array[1]
-				if $candidates[snpsite].nil? 
-					$candidates[snpsite] = [1,[],[outindiv]] 
-				else $candidates[snpsite][0] += 1 # Structure is array of [total_number, [individuals for single-forward mutation][all individuals with site]]
-					$candidates[snpsite][2].push(outindiv)
-				end
+				$candidates[snpsite] = [[],[],[]] if $candidates[snpsite].nil? # Structure is array of [[individuals for single-forward mutation],[double-forward individuals],[back mutations individuals]]
 				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
 				alleles.delete("<non_ref>") if alleles.include?("<non_ref>")
 				alleles.delete(".") if alleles.include?(".") # Ignore for non-polymorphic sites
@@ -85,44 +107,34 @@ def classify_sites(outindiv)
 				# Basic handling assuming biallelic SNPs, single-forward, parental homozygous. Dumps all other types into "other".
 				if par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [0,1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}" # Dumps all other mutations into other
-					if mutclasses[mutclass].nil? 
-						otherscnt += 1
-					else
-						mutclasses[mutclass] += 1
-						$candidates[snpsite][1].push(outindiv) # Add to single-forward array
-					end
+					update_counts($mutclasses,mutclass)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0,1]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					if mutclasses[mutclass].nil?  # Dumps all other mutations into other
-						otherscnt += 1
-					else
-						mutclasses[mutclass] += 1
-						$candidates[snpsite][1].push(outindiv) # Add to single-forward array
-					end
+					update_counts($mutclasses,mutclass)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					dfclasses[mutclass].nil? ? otherscnt += 2 : dfclasses[mutclass] += 2 # Dumps all other mutations into other.
+					update_counts($dfclasses,mutclass)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					dfclasses[mutclass].nil? ? otherscnt += 2 : dfclasses[mutclass] += 2 # Dumps all other mutations into other
+					update_counts($dfclasses,mutclass)
 				elsif par_genotypes[0] == [0,1] && par_genotypes[1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+					update_counts($backclasses,mutclass)
 				elsif par_genotypes[0] == [0] && par_genotypes[0,1] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+					update_counts($backclasses,mutclass)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [0] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+					update_counts($backclasses,mutclass)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [0] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+					update_counts($backclasses,mutclass)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [1] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+					update_counts($backclasses,mutclass)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other
+					update_counts($backclasses,mutclass)
 				end
 			elsif line[0..30] == "Total number of retained sites:"
 				$totalbases[outindiv] = [line.split(":")[1].to_i,0,0] # Total callable bases, total mutations, single-forward mutations
@@ -151,19 +163,19 @@ def classify_sites(outindiv)
 		end	
 	end
 	puts "\n" + outindiv + " Mutation Classes\nSingle-Forward,Count"
-	for mut in mutclasses.keys
-		puts mut + "," + mutclasses[mut].to_s
+	for mut in $mutclasses.keys
+		puts mut + "," + $mutclasses[mut].to_s
 	end
 	puts "\nDouble-Forward,Count"
-	for mut in dfclasses.keys
-		puts mut + "," + dfclasses[mut].to_s
+	for mut in $dfclasses.keys
+		puts mut + "," + $dfclasses[mut].to_s
 	end
 	puts "\nBackward,Count"
-	for mut in backclasses.keys
-		puts mut + "," + backclasses[mut].to_s
+	for mut in $backclasses.keys
+		puts mut + "," + $backclasses[mut].to_s
 	end
 	puts "\nIndels/Other,Count"
-	puts "Total: " + otherscnt.to_s
+	puts "Total: " + $otherscnt.to_s
 end
 #----------------------------------------------------------------------------------------
 if ARGV[0].nil?
@@ -256,18 +268,24 @@ else
 					if sorted_sites[i] <= prev_site + $dnmclump
 						removed_site = key + ":" + prev_site.to_s
 						puts removed_site
-						for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
+						for sfindv in $candidates[removed_site][0] # Code to count number of single-forward mutations
 							$sfindv[sfindv] +=1
 						end
-						for tindv in $candidates[removed_site][2] # Code to count total number of removed sites
+						for tindv in $candidates[removed_site][1] # Code to count total number of double-forward removed sites
+							$total_removed[tindv] += 2
+						end
+						for tindv in $candidates[removed_site][2] # Code to count total number of backward removed sites
 							$total_removed[tindv] += 1
 						end
 						$candidates.delete(removed_site)
 						if i == sorted_sites.size - 1 # Add last removed site if goes to end
 							removed_site = key + ":" + sorted_sites[i].to_s
 							puts removed_site
-							for sfindv in $candidates[removed_site][1]
+							for sfindv in $candidates[removed_site][0]
 								$sfindv[sfindv] += 1
+							end
+							for tindv in $candidates[removed_site][1]
+								$total_removed[tindv] += 2
 							end
 							for tindv in $candidates[removed_site][2]
 								$total_removed[tindv] += 1
@@ -277,10 +295,13 @@ else
 					elsif (sorted_sites[i-1] - sorted_sites[i-2]).abs <= $dnmclump # Handling for numerical gap
 						removed_site = key + ":" + prev_site.to_s
 						puts removed_site
-						for sfindv in $candidates[removed_site][1] # Code to count number of single-forward mutations
+						for sfindv in $candidates[removed_site][0] # Code to count number of single-forward mutations
 							$sfindv[sfindv] +=1
 						end
-						for tindv in $candidates[removed_site][2] # Code to count total number of removed sites
+						for tindv in $candidates[removed_site][1] # Code to count total number of double-forward removed sites
+							$total_removed[tindv] += 2
+						end
+						for tindv in $candidates[removed_site][2] # Code to count total number of backward removed sites
 							$total_removed[tindv] += 1
 						end
 						$candidates.delete(removed_site)

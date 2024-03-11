@@ -108,7 +108,7 @@ def classify_sites(outindiv)
 						par_genotypes.push(genotype)
 					end
 				end
-				# Basic handling assuming biallelic SNPs, single-forward, parental homozygous. Dumps all other types into "other".
+				# Handling for SNP class mutational spectra. Dumps other types of mutations into 'other'
 				if par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [0,1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}" # Dumps all other mutations into other
 					update_counts($mutclasses,mutclass,snpsite,outindiv)

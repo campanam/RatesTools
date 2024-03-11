@@ -49,6 +49,8 @@ Program information options (Do not use other options with the following):
 `-v, --version`: Show program version.  
 `-h, --help`: Show help.  
 
+*NB: Double-forward sites count as two mutations, so the number of identified double-forward mutations is twice the number of observed double-forward sites.*  
+
 ## denovolib.rb  
 This script provides a library of methods and classes used by the remaining Ruby scripts in the RatesTools pipeline.  
 
@@ -56,6 +58,8 @@ This script provides a library of methods and classes used by the remaining Ruby
 The dnm_summary_stats.rb script summarizes retained site counts from the various filtration steps of the RatesTools pipeline. It also classifies DNM by their substitution class. It optionally removes clumped candidates and sites overlapping between siblings. It then recalculates mutation rates and confidence intervals. It will output a list of retained sites to standard error.  
 
 Usage is: `dnm_summary_stats.rb <logs_directory> <output_prefix> <clump_window_range_in_bp> > <out.csv> 2> <retained sites.tsv>`.  
+
+*NB: Double-forward sites count as two mutations, so the number of identified double-forward mutations is twice the number of observed double-forward sites.*  
 
 ## filterGM.rb  
 The filterGM.rb script filters a GenMap [2] mappability bed file. The user specifies a mappability cut-off above which to retain sites (default behavior). Optionally, the user can output regions below the cut-off (e.g. for subsequent removal) by appending 'exclude' to the command line. Input files with the final extension '.gz' are assumed to be gzip-compressed.  
@@ -119,6 +123,9 @@ Usage: `RM2bed.rb <in_RM.txt[.gz]> > <out.bed>`.
 summarize_denovo.rb calculates the genomic DNM rate from a directory of per-chromosome calc_denovo_mutation_rate.rb logs.  
 
 Usage: `summarize_denovo.rb <directory> > <out.txt>`.  
+
+*NB: Double-forward sites count as two mutations, so the number of identified double-forward mutations is twice the number of observed double-forward sites.*  
+
 
 ## References  
 1. Koch, E.M., Schweizer, R.M., Schweizer, T.M., Stahler, D.R., Smith, D.W., Wayne, R.K., Novembre, J. (2019). De novo mutation rate estimation in wolves of known pedigree. *Mol Biol Evol*, __36__, 2536-2547, doi: [10.1093/molbev/msz159](https://academic.oup.com/mbe/article/36/11/2536/5531468?login=true).  

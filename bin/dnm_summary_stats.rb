@@ -40,7 +40,7 @@ def extract_site_count(count, logpattern, indiv)
 	end
 end
 #----------------------------------------------------------------------------------------
-def update_counts(class_hash,mutclass) # Update number and individuals for types of mutations
+def update_counts(class_hash,mutclass,snpsite,outindiv) # Update number and individuals for types of mutations
 	case class_hash
 	when $mutclasses
 		if $mutclasses[mutclass].nil? 
@@ -107,34 +107,34 @@ def classify_sites(outindiv)
 				# Basic handling assuming biallelic SNPs, single-forward, parental homozygous. Dumps all other types into "other".
 				if par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [0,1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}" # Dumps all other mutations into other
-					update_counts($mutclasses,mutclass)
+					update_counts($mutclasses,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0,1]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($mutclasses,mutclass)
+					update_counts($mutclasses,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					update_counts($dfclasses,mutclass)
+					update_counts($dfclasses,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($dfclasses,mutclass)
+					update_counts($dfclasses,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0,1] && par_genotypes[1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($backclasses,mutclass)
+					update_counts($backclasses,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[0,1] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					update_counts($backclasses,mutclass)
+					update_counts($backclasses,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [0] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					update_counts($backclasses,mutclass)
+					update_counts($backclasses,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [0] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($backclasses,mutclass)
+					update_counts($backclasses,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [1] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					update_counts($backclasses,mutclass)
+					update_counts($backclasses,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($backclasses,mutclass)
+					update_counts($backclasses,mutclass,snpsite,outindiv)
 				end
 			elsif line[0..30] == "Total number of retained sites:"
 				$totalbases[outindiv] = [line.split(":")[1].to_i,0,0] # Total callable bases, total mutations, single-forward mutations
@@ -238,8 +238,7 @@ else
 		end
 		outindiv = indiv.gsub(ARGV[1] + "_offspring", "")
 		outindivs.push(outindiv)
-		puts outindiv + "," + $allsites + "," + $chrsites + "," + $triosites[indiv].to_s + "," + $vcf_filtsites[indiv].to_s + "," + $gatk_filtsites[indiv].to_s + "," + $regionsites[indiv].to_s
-		
+		puts outindiv + "," + $allsites + "," + $chrsites + "," + $triosites[indiv].to_s + "," + $vcf_filtsites[indiv].to_s + "," + $gatk_filtsites[indiv].to_s + "," + $regionsites[indiv].to_s		
 	end
 	$total_removed = {} # Hash of total overlapping individuals and clumped sites per individual
 	$sfindv = {} # Hash of single-forward counts per individual

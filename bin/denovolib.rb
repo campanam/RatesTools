@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # denovolib
-DENOVOLIBVER = "0.8.2"
+DENOVOLIBVER = "1.2.0"
 # Michael G. Campana and Ellie E. Armstrong, 2022-2023
 # Smithsonian Institution and Stanford University
 
@@ -109,8 +109,8 @@ def print_results # Method to print basic results
 	puts "Offspring\tAllsites\tSingle-ForwardOnly"
 	for offspr in $total_denovo.keys
 		sitedenom = 2 * $total_sites.to_f
-		# Get sum of de novo mutations. Double-forward mutations (index 1) count as two mutations.
-		dnm_sum = ($total_denovo[offspr][0] + 2 * $total_denovo[offspr][1] + $total_denovo[offspr][2]).to_f
+		# Get sum of de novo mutations. Double-forward mutations (index 1) count as two mutations, but were already duplicated during mutation count
+		dnm_sum = ($total_denovo[offspr][0] + $total_denovo[offspr][1] + $total_denovo[offspr][2]).to_f
 		puts offspr + "\t" + (dnm_sum/sitedenom).to_s + "\t" + ($total_denovo[offspr][0].to_f/sitedenom).to_s
 	end
 end

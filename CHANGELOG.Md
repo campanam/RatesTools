@@ -27,6 +27,7 @@ Stanford University
 ### Version 1.2.0  
 Fixed minor spacing bug in output of command line options  
 Add DNM_GT tag for genotypes used after minAF and minAD1 processing  
+Fixed bug that doubled double-forward mutations in the rate estimates  
 
 ### Version 1.1.2  
 Fixed bugs in calculating the bootstrapped 95% confidence interval  
@@ -136,6 +137,9 @@ $launchDir instead of $baseDir
 Removed thread parameters  
 
 ## denovolib  
+### Version 1.2.0  
+Fixed bug that doubled double-forward mutations in the rate estimates  
+
 ### Version 0.8.2  
 Update file headers  
 

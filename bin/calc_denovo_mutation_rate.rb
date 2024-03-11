@@ -329,8 +329,8 @@ def bootstrap_results # Calculate bootstrapped results using predefined bootstra
 		puts "Offspring\tAllsites\tSingle-ForwardOnly"
 		for offspr in bootstrap_denovo.keys
 			bootdenom = 2 * current_bootstrap_length.to_f
-			# Get sum of de novo mutations. Double-forward mutations (index 1) count as two mutations.
-			boot_dnm_sum = (bootstrap_denovo[offspr][0] + 2 * bootstrap_denovo[offspr][1] + bootstrap_denovo[offspr][2]).to_f
+			# Get sum of de novo mutations. Double-forward mutations (index 1) count as two mutations, but were already doubled when counting number of mutations.
+			boot_dnm_sum = (bootstrap_denovo[offspr][0] + bootstrap_denovo[offspr][1] + bootstrap_denovo[offspr][2]).to_f
 			puts offspr + "\t" + (boot_dnm_sum/bootdenom).to_s + "\t" + (bootstrap_denovo[offspr][0].to_f/bootdenom).to_s
 			$bootstraps[offspr][0].push(bootstrap_denovo[offspr].sum.to_f/bootdenom)
 			$bootstraps[offspr][1].push(bootstrap_denovo[offspr][0].to_f/bootdenom)

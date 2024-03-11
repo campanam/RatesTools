@@ -72,7 +72,7 @@ def classify_sites(outindiv)
 				alleles.delete("<non_ref>") if alleles.include?("<non_ref>")
 				alleles.delete(".") if alleles.include?(".") # Ignore for non-polymorphic sites
 				tags = snp_array[8].split(":") # Get indexes of GT tags
-				gt = tags.index("GT")
+				gt = tags.index("DNM_GT")
 				par_genotypes = [] # Array of parental genotypes
 				for i in 9...snp_array.size # There should always be 3 samples if using RatesTools pipeline. Will break if using calc_denovo_mutation_rate within more individuals.
 					genotype = snp_array[i].split(":")[gt].gsub("|", "/").split("/").uniq.map { |x| x.to_i }
@@ -101,10 +101,10 @@ def classify_sites(outindiv)
 					end
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					dfclasses[mutclass].nil? ? otherscnt += 1 : dfclasses[mutclass] += 1 # Dumps all other mutations into other
+					dfclasses[mutclass].nil? ? otherscnt += 2 : dfclasses[mutclass] += 2 # Dumps all other mutations into other.
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					dfclasses[mutclass].nil? ? otherscnt += 1 : dfclasses[mutclass] += 1 # Dumps all other mutations into other
+					dfclasses[mutclass].nil? ? otherscnt += 2 : dfclasses[mutclass] += 2 # Dumps all other mutations into other
 				elsif par_genotypes[0] == [0,1] && par_genotypes[1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
 					backclasses[mutclass].nil? ? otherscnt += 1 : backclasses[mutclass] += 1 # Dumps all other mutations into other

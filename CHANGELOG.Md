@@ -192,6 +192,9 @@ gz_open_file improved to version in BaitsTools 1.6.6
 ## dnm_summary_stats  
 ### Version 1.2.0  
 Removal of redundant dnm_bootstraps parameter  
+Uses DNM_GT tag to correctly count number of sites after filtering  
+Correctly counts double-forward sites as two mutations  
+Bug fixes in number of all-sites removed  
 
 ### Version 1.1.2  
 Fixes bug that incorrectly calculated adjusted standard errors  

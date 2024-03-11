@@ -344,10 +344,12 @@ else
 		scount = $totalbases[key][2]-$sfindv[key] # Number of single-forward sites
 		srate = scount.to_f/$totalbases[key][0].to_f/2.to_f # recalculate single-forward rate
 		sconf = `Rscript -e 'library(Hmisc, quietly = TRUE);binconf(x = #{scount}, n = #{$totalbases[key][0] * 2}, alpha = 0.05)'` # Get single-forward binomial confidence interval
+		sconf2 = sconf.split("\n")[-1].split[1..2].join('...')
 		acount = $totalbases[key][1]-$total_removed[key] # Number of all-sites mutations
 		arate = acount.to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
 		aconf = `Rscript -e 'library(Hmisc, quietly = TRUE);binconf(x = #{acount}, n = #{$totalbases[key][0] * 2}, alpha = 0.05)'` # Get all-sites binomial confidence interval
-		puts key + "," + $sfindv[key].to_s + "," + $total_removed[key].to_s + "," + ($totalbases[key][2]-$sfindv[key]).to_s + "," + ($totalbases[key][1]-$total_removed[key]).to_s + "," + srate.to_s + "," + sconf + "," + arate.to_s + "," + aconf
+		aconf2 = aconf.split("\n")[-1].split[1..2].join('...')
+		puts key + "," + $sfindv[key].to_s + "," + $total_removed[key].to_s + "," + ($totalbases[key][2]-$sfindv[key]).to_s + "," + ($totalbases[key][1]-$total_removed[key]).to_s + "," + srate.to_s + "," + sconf2 + "," + arate.to_s + "," + aconf2
 	end
 end
 

@@ -89,7 +89,11 @@ def classify_sites(outindiv)
 			if start
 				snp_array = line[0..-2].split("\t")
 				snpsite = snp_array[0] + ':' + snp_array[1]
-				$candidates[snpsite] = [[],[],[]] if $candidates[snpsite].nil? # Structure is array of [[individuals for single-forward mutation],[double-forward individuals],[back mutations individuals]]
+				if $candidates[snpsite].nil? # Structure is array of [[individuals for single-forward mutation],[double-forward individuals],[back mutations individuals], number of individuals sharing this site]
+					$candidates[snpsite] = [[],[],[],1]
+				else
+					$candidates[snpsite][3]  += 1
+				end
 				alleles = ([snp_array[3]] + snp_array[4].split(",")).flatten.uniq # Get alleles
 				alleles.delete("<non_ref>") if alleles.include?("<non_ref>")
 				alleles.delete(".") if alleles.include?(".") # Ignore for non-polymorphic sites
@@ -312,7 +316,7 @@ else
 	end
 	puts "\nRemaining Candidate Sites Overlapping Between Offspring"
 	for key in $candidates.keys
-		if $candidates[key][0] > 1
+		if $candidates[key][3] > 1
 			puts key
 			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
 				$sfindv[sfindv] +=1

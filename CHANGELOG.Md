@@ -194,6 +194,7 @@ gz_open_file improved to version in BaitsTools 1.6.6
 Removal of redundant dnm_bootstraps parameter  
 Uses DNM_GT tag to correctly count number of sites after filtering  
 Correctly counts double-forward sites as two mutations  
+Calculates binomial confidence intervals using R package Hmisc  
 Bug fixes in number of all-sites removed  
 Outputs a TSV list of sites retained to standard error for VCF processing  
 

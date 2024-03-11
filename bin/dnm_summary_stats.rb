@@ -273,7 +273,7 @@ else
 						puts removed_site
 						for sfindv in $candidates[removed_site][0] # Code to count number of single-forward mutations
 							$sfindv[sfindv] +=1
-							$total_removed[tindv] += 1
+							$total_removed[sfindv] += 1
 						end
 						for tindv in $candidates[removed_site][1] # Code to count total number of double-forward removed sites
 							$total_removed[tindv] += 2
@@ -287,7 +287,7 @@ else
 							puts removed_site
 							for sfindv in $candidates[removed_site][0]
 								$sfindv[sfindv] += 1
-								$total_removed[tindv] += 1
+								$total_removed[sfindv] += 1
 							end
 							for tindv in $candidates[removed_site][1]
 								$total_removed[tindv] += 2
@@ -302,7 +302,7 @@ else
 						puts removed_site
 						for sfindv in $candidates[removed_site][0] # Code to count number of single-forward mutations
 							$sfindv[sfindv] +=1
-							$total_removed[tindv] += 1
+							$total_removed[sfindv] += 1
 						end
 						for tindv in $candidates[removed_site][1] # Code to count total number of double-forward removed sites
 							$total_removed[tindv] += 2
@@ -323,7 +323,7 @@ else
 			puts key
 			for sfindv in $candidates[key][0] # Code to count number of single-forward mutations
 				$sfindv[sfindv] +=1
-				$total_removed[tindv] += 1
+				$total_removed[sfindv] += 1
 			end
 			for tindv in $candidates[key][1] # Code to count number of double-forward mutations
 				$total_removed[tindv] +=2

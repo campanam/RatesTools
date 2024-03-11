@@ -814,7 +814,7 @@ process summarizeDNM {
 		fi
 	done
 	for sumlog in *summary.log; do
-		bcftools view -h \${sumlog/_summary.log/.chrfilt.recode.vcf.gz} > header.txt
+		bcftools view -h \${sumlog/_summary.log/.vcf.gz} > header.txt
 		val=`grep -n \'#CHROM\' \$sumlog | cut -d \':\' -f 1`
 		total=`wc -l \$sumlog | cut -d \' \' -f 1`
 		let lncount=\$total-\$val

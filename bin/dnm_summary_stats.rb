@@ -339,11 +339,15 @@ else
 		puts key
 		$stderr.puts key.gsub(':',"\t") # Creates a list of retained SNPs for VCFtools site filtering
 	end
-	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RemainingSingle-ForwardSites,RemainingTotalSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
+	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RemainingSingle-ForwardSites,RemainingTotalSites,RecalcSingle-ForwardRate,Single-Forward95%BinomialConfidence,RecalcAllsitesRate,AllSites95%BinomialConfidence"
 	for key in $sfindv.keys
-		srate = ($totalbases[key][2]-$sfindv[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate single-forward rate
-		arate = ($totalbases[key][1]-$total_removed[key]).to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
-		puts key + "," + $sfindv[key].to_s + "," + $total_removed[key].to_s + "," + ($totalbases[key][2]-$sfindv[key]).to_s + "," + ($totalbases[key][1]-$total_removed[key]).to_s + "," + srate.to_s + "," + arate.to_s
+		scount = $totalbases[key][2]-$sfindv[key] # Number of single-forward sites
+		srate = scount.to_f/$totalbases[key][0].to_f/2.to_f # recalculate single-forward rate
+		sconf = `Rscript -e 'library(Hmisc, quietly = TRUE);binconf(x = #{scount}, n = #{$totalbases[key][0] * 2}, alpha = 0.05)'` # Get single-forward binomial confidence interval
+		acount = $totalbases[key][1]-$total_removed[key] # Number of all-sites mutations
+		arate = acount.to_f/$totalbases[key][0].to_f/2.to_f # recalculate all mutation rate rate
+		aconf = `Rscript -e 'library(Hmisc, quietly = TRUE);binconf(x = #{acount}, n = #{$totalbases[key][0] * 2}, alpha = 0.05)'` # Get all-sites binomial confidence interval
+		puts key + "," + $sfindv[key].to_s + "," + $total_removed[key].to_s + "," + ($totalbases[key][2]-$sfindv[key]).to_s + "," + ($totalbases[key][1]-$total_removed[key]).to_s + "," + srate.to_s + "," + sconf + "," + arate.to_s + "," + aconf
 	end
 end
 

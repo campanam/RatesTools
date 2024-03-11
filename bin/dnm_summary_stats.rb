@@ -318,10 +318,13 @@ else
 	for key in $candidates.keys
 		if $candidates[key][3] > 1
 			puts key
-			for sfindv in $candidates[key][1] # Code to count number of single-forward mutations
+			for sfindv in $candidates[key][0] # Code to count number of single-forward mutations
 				$sfindv[sfindv] +=1
 			end
-			for tindv in $candidates[key][2]
+			for tindv in $candidates[key][1] # Code to count number of double-forward mutations
+				$total_removed[tindv] +=2
+			end
+			for tindv in $candidates[key][2] # Code to count number of backward mutations
 				$total_removed[tindv] +=1
 			end
 			$candidates.delete(key)

@@ -53,9 +53,9 @@ Program information options (Do not use other options with the following):
 This script provides a library of methods and classes used by the remaining Ruby scripts in the RatesTools pipeline.  
 
 ## dnm_summary_stats.rb  
-The dnm_summary_stats.rb script summarizes retained site counts from the various filtration steps of the RatesTools pipeline. It also classifies DNM by their substitution class. It optionally removes clumped candidates and sites overlapping between siblings. It then recalculates mutation rates and confidence intervals.  
+The dnm_summary_stats.rb script summarizes retained site counts from the various filtration steps of the RatesTools pipeline. It also classifies DNM by their substitution class. It optionally removes clumped candidates and sites overlapping between siblings. It then recalculates mutation rates and confidence intervals. It will output a list of retained sites to standard error.  
 
-Usage is: `dnm_summary_stats.rb <logs_directory> <output_prefix> <clump_window_range_in_bp> > <out.csv>`.  
+Usage is: `dnm_summary_stats.rb <logs_directory> <output_prefix> <clump_window_range_in_bp> > <out.csv> 2> <retained sites.tsv>`.  
 
 ## filterGM.rb  
 The filterGM.rb script filters a GenMap [2] mappability bed file. The user specifies a mappability cut-off above which to retain sites (default behavior). Optionally, the user can output regions below the cut-off (e.g. for subsequent removal) by appending 'exclude' to the command line. Input files with the final extension '.gz' are assumed to be gzip-compressed.  

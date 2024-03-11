@@ -184,7 +184,7 @@ end
 #----------------------------------------------------------------------------------------
 if ARGV[0].nil?
 	# If no parameters passed, print help screen
-	format_splash('dnm_summary_stats', DNMSUMSTATSVER, '<logs_directory> <output_prefix> <DNM_clump_range> > <out.csv>')
+	format_splash('dnm_summary_stats', DNMSUMSTATSVER, '<logs_directory> <output_prefix> <DNM_clump_range> > <out.csv> 2> <retained sites.tsv>')
 else
 	$individuals = [] # Array of individual names
 	$allsites = nil # Total number of sites before filtration
@@ -337,6 +337,7 @@ else
 	puts "\nSurviving Candidate DNM Sites (Across Individuals)"
 	for key in $candidates.keys
 		puts key
+		$stderr.puts key.gsub(':',"\t") # Creates a list of retained SNPs for VCFtools site filtering
 	end
 	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RemainingSingle-ForwardSites,RemainingTotalSites,RecalcSingle-ForwardRate,RecalcAllsitesRate"
 	for key in $sfindv.keys

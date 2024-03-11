@@ -195,6 +195,7 @@ Removal of redundant dnm_bootstraps parameter
 Uses DNM_GT tag to correctly count number of sites after filtering  
 Correctly counts double-forward sites as two mutations  
 Bug fixes in number of all-sites removed  
+Outputs a TSV list of sites retained to standard error for VCF processing  
 
 ### Version 1.1.2  
 Fixes bug that incorrectly calculated adjusted standard errors  
@@ -309,6 +310,7 @@ Script to correct vcftools site overflow glitch using bcftools stats
 ## nextflow.config  
 ### Version 1.2.0  
 Removal of redundant dnm_bootstraps parameter  
+Update conda dependencies for generateSummaryStats  
 
 ### Version 1.1.1  
 DNM clump option  
@@ -383,6 +385,7 @@ Initial script (plotDPGQ-clean.R)
 ### Version 1.2.0  
 Removal of redundant dnm_bootstraps parameter  
 Fixed header bug on candidates VCF  
+Outputs clump- and sibling-filtered candidates VCF  
 
 ### Version 1.1.1  
 Automatic DNM clump removal  

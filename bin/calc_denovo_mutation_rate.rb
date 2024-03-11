@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------------------------
 # calc_denovo_mutation_rate
-CALCDENOVOVER = "1.1.2"
+CALCDENOVOVER = "1.2.0"
 # Michael G. Campana and Ellie E. Armstrong, 2019-2024
 # Smithsonian Institution and Stanford University
 
@@ -209,6 +209,7 @@ def read_vcf # Method to read vcf
 					ad = tags.index("AD") if tags.include?("AD")
 					pl = tags.index("PL") if tags.include?("PL")
 					gt = tags.index("GT")
+					snp_array[8] << ':DNM_GT' # Make custom tag for genotype after DNM candidate filtering
 					for i in 9...snp_array.size
 						genotype = snp_array[i].split(":")[gt]
 						if $options.minAD1
@@ -238,6 +239,7 @@ def read_vcf # Method to read vcf
 								adepth.map! { |x| x/total_depth } # Convert allele coverages to frequencies
 								genotype = depth_to_alleles(adepth, $options.minAF)
 							end
+							snp_array[i] << ':' + genotype # Add DNM_GT field to sample
 						end
 						pl_array = []
 						if $options.kochDNp
@@ -272,7 +274,7 @@ def read_vcf # Method to read vcf
 							break # maybe save a bit of processing
 						end
 					end
-					$mutations << line if printline
+					$mutations << snp_array.join("\t") + "\n" if printline # Print updated genotype line
 				end
 			end
 		end
@@ -343,7 +345,7 @@ end
 #-----------------------------------------------------------------------------------------
 def print_options # Print options used at startup to output
 	puts "calc_denovo_mutation_rate " + CALCDENOVOVER + " started with parameters:"
-	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s + '-b ' + $options.bootstrap.to_s
+	cmdline = "-i " + $options.infile + " -s " + $options.sire + " -d " + $options.dam + " -w " + $options.window.to_s + " -S " + $options.step.to_s + " -l " + $options.minbslen.to_s + " -M " + $options.minwindows.to_s + ' -b ' + $options.bootstrap.to_s
 	cmdline << " -k -m " + $options.mu.to_s + " -t " + $options.theta.to_s + " -c " + $options.cutoff.to_s if $options.kochDNp
 	cmdline << " --parhom" if $options.parhom
 	cmdline << " --minAD1" if $options.minAD1

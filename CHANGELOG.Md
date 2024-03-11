@@ -24,6 +24,10 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 1.2.0  
+Fixed minor spacing bug in output of command line options  
+Add DNM_GT tag for genotypes used after minAF and minAD1 processing  
+
 ### Version 1.1.2  
 Fixed bugs in calculating the bootstrapped 95% confidence interval  
 

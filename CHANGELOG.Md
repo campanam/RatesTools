@@ -24,8 +24,13 @@ Stanford University
 
 
 ## calc_denovo_mutation_rate  
+### Version 1.2.0  
+Fixed minor spacing bug in output of command line options  
+Add DNM_GT tag for genotypes used after minAF and minAD1 processing  
+Fixed bug that doubled double-forward mutations in the rate estimates  
+
 ### Version 1.1.2  
-Fixed a bug in calculating the 95% confidence interval  
+Fixed bugs in calculating the bootstrapped 95% confidence interval  
 
 ### Version 0.12.3  
 Fixed missing bootstrap parameter in command-line output in log  
@@ -108,6 +113,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 1.2.0  
+Removal of redundant dnm_bootstraps parameter  
+
 ### Version 1.1.1  
 Updates for revised dnm_summary_stats script  
 
@@ -129,6 +137,10 @@ $launchDir instead of $baseDir
 Removed thread parameters  
 
 ## denovolib  
+### Version 1.2.0  
+Fixed bug that doubled double-forward mutations in the rate estimates  
+Added binomial confidence intervals using Hmisc  
+
 ### Version 0.8.2  
 Update file headers  
 
@@ -183,6 +195,15 @@ Redundant methods (Parser, gz_open_file) moved to denovolib
 gz_open_file improved to version in BaitsTools 1.6.6  
 
 ## dnm_summary_stats  
+### Version 1.2.0  
+Removal of redundant dnm_bootstraps parameter  
+Uses DNM_GT tag to correctly count number of sites after filtering  
+Correctly counts double-forward sites as two mutations  
+Calculates binomial confidence intervals using R package Hmisc  
+Bug fixes in number of all-sites removed  
+Outputs a TSV list of sites retained to standard error for VCF processing  
+Outputs filtered mutational spectra  
+
 ### Version 1.1.2  
 Fixes bug that incorrectly calculated adjusted standard errors  
 
@@ -294,6 +315,10 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 1.2.0  
+Removal of redundant dnm_bootstraps parameter  
+Update conda dependencies for generateSummaryStatsm, calcDNMRate, summarizeDNM  
+
 ### Version 1.1.1  
 DNM clump option  
 
@@ -364,6 +389,11 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 1.2.0  
+Removal of redundant dnm_bootstraps parameter  
+Fixed header bug on candidates VCF  
+Outputs clump- and sibling-filtered candidates VCF  
+
 ### Version 1.1.1  
 Automatic DNM clump removal  
 Automatic recalculation of confidence intervals  
@@ -501,7 +531,6 @@ Outputs usage if no parameters specified
 
 ### Version 0.1.0  
 Initial script to convert [RepeatMasker](http://www.repeatmasker.org/) output to BED format  
-
 
 ## summarize_denovo  
 ### Version 0.5.6  

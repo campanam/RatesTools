@@ -73,6 +73,7 @@ RatesTools requires the following external dependencies. See the documentation f
 RatesTools requires the following R packages installed in your R environment:  
 * [tidyverse](https://www.tidyverse.org/) [17] v. 1.3.1 with [dplyr](https://CRAN.R-project.org/package=dplyr) [18] v. 1.0.7  and [ggplot2](https://ggplot2.tidyverse.org/) [19] v. 3.3.5.
 * [data.table](https://rdatatable.gitlab.io/data.table/) [20] v. 1.14.2  
+* [Hmisc](https://CRAN.R-project.org/package=Hmisc) [21] v.5.1-1  
 
 ### Conda-Assisted Installation of Java Dependencies  
 To assist installation and execution of the Java dependencies, we provide built-in options to install GATK and Picard through Conda. See the [tutorial](doc/tutorial.md) for details.  
@@ -126,3 +127,4 @@ Enter `nextflow run campanam/RatesTools -r <version> -c <config_file>` to run th
 18. Wickham, H., François, R., Henry, L., Müller, K. (2021) dplyr: a grammar of data manipulation. R package version 1.0.7 (https://dplyr.tidyverse.org/).  
 19. Wickham, H. (2016) *ggplot2: Elegant Graphics for Data Analysis.* Springer-Verlag, New York, USA.  
 20. Dowle, M., Srinivasan, A. (2021) data.table: extension of 'data.frame'. R package version 1.14.2. (https://r-datatable.com).  
+21. Harrell, F.E., Jr. (2023) Hmisc: Harrell miscellaneous. R package version 5.1-1. (https://CRAN.R-project.org/package=Hmisc).  

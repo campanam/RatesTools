@@ -814,7 +814,7 @@ process summarizeDNM {
 		fi
 	done
 	for sumlog in *summary.log; do
-		bcftools view -h \${sumlog/_summary.log/.chrfilt.recode.vcf.gz} > header.txt
+		bcftools view -h \${sumlog/_summary.log/.vcf.gz} > header.txt
 		val=`grep -n \'#CHROM\' \$sumlog | cut -d \':\' -f 1`
 		total=`wc -l \$sumlog | cut -d \' \' -f 1`
 		let lncount=\$total-\$val
@@ -861,13 +861,17 @@ process generateSummaryStats {
 	input:
 	path "*"
 	val dnm_clump
-	val dnm_bootstraps
+	path "*"
 	
 	output:
 	path "${params.prefix}_summary_stats.csv"
+	path "*.filtered.vcf.gz"
 	
 	"""
-	dnm_summary_stats.rb . ${params.prefix} ${dnm_clump} ${dnm_bootstraps} > ${params.prefix}_summary_stats.csv
+	dnm_summary_stats.rb . ${params.prefix} ${dnm_clump} > ${params.prefix}_summary_stats.csv 2> sites.tsv
+	for vcf in *candidates.vcf.gz; do
+		vcftools --gzvcf \${vcf} --positions sites.tsv --recode -c | gzip > \${vcf%.vcf.gz}.filtered.vcf.gz
+	done
 	"""
 
 }
@@ -1017,5 +1021,5 @@ workflow {
 			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
 			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
 		}
-		generateSummaryStats(all_logs_sanity.collect(), params.dnm_clump, params.dnm_bootstraps)
+		generateSummaryStats(all_logs_sanity.collect(), params.dnm_clump, summarizeDNM.out.vcf.collect())
 }

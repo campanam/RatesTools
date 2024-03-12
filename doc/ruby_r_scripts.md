@@ -22,7 +22,7 @@ Here we document the usage and functions of the Ruby scripts included in the Rat
 14. [References](#references)  
 
 ## calc_denovo_mutation_rate.rb  
-The calc_denovo_mutation_rate.rb script calculates the genomic de novo mutation (DNM) rate from a multi-individual all-sites VCF. The script can optionally perform block bootstrapping to estimate the confidence interval for the estimated DNM rates. All individuals that are not specified as either the 'sire' or 'dam' are assumed to be offspring of the specified individuals. Results are printed to STDOUT.  
+The calc_denovo_mutation_rate.rb script calculates the genomic de novo mutation (DNM) rate from a multi-individual all-sites VCF. The script can optionally perform block bootstrapping to estimate the confidence interval for the estimated DNM rates. All individuals that are not specified as either the 'sire' or 'dam' are assumed to be offspring of the specified individuals. Genotypes used by the script after adjusting for the --minAD1 and --minAF filters are printed to the VCF tag DNM_GT. Results are printed to STDOUT.  
 
 Basic usage is: `calc_denovo_mutation_rate.rb [options]`. Help is available using `calc_denovo_mutation_rate.rb -h`.  
 

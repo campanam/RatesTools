@@ -202,6 +202,7 @@ Correctly counts double-forward sites as two mutations
 Calculates binomial confidence intervals using R package Hmisc  
 Bug fixes in number of all-sites removed  
 Outputs a TSV list of sites retained to standard error for VCF processing  
+Outputs filtered mutational spectra  
 
 ### Version 1.1.2  
 Fixes bug that incorrectly calculated adjusted standard errors  

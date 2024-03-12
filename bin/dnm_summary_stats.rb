@@ -47,21 +47,21 @@ def update_counts(class_hash,mutclass,snpsite,outindiv) # Update number and indi
 			$otherscnt += 1
 		else
 			$mutclasses[mutclass] += 1
-			$candidates[snpsite][0].push(outindiv) # Add to single-forward array
+			$candidates[snpsite][0].push([outindiv,mutclass]) # Add to single-forward array
 		end
 	when $dfclasses
 		if $dfclasses[mutclass].nil? # Dumps all other mutations into other.
 			$otherscnt += 2 
 		else 
 			$dfclasses[mutclass] += 2 
-			$candidates[snpsite][1].push(outindiv) # Add to double-forward array
+			$candidates[snpsite][1].push([outindiv,mutclass]) # Add to double-forward array
 		end
 	when $backclasses
 		if $backclasses[mutclass].nil? # Dumps all other mutations into other
 			$otherscnt += 1
 		else
 			$backclasses[mutclass] += 1
-			$candidates[snpsite][2].push(outindiv) # Add to backward array
+			$candidates[snpsite][2].push([outindiv,mutclass]) # Add to backward array
 		end
 	end
 end
@@ -272,28 +272,28 @@ else
 						removed_site = key + ":" + prev_site.to_s
 						puts removed_site
 						for sfindv in $candidates[removed_site][0] # Code to count number of single-forward mutations
-							$sfindv[sfindv] +=1
-							$total_removed[sfindv] += 1
+							$sfindv[sfindv[0]] +=1
+							$total_removed[sfindv[0]] += 1
 						end
 						for tindv in $candidates[removed_site][1] # Code to count total number of double-forward removed sites
-							$total_removed[tindv] += 2
+							$total_removed[tindv[0]] += 2
 						end
 						for tindv in $candidates[removed_site][2] # Code to count total number of backward removed sites
-							$total_removed[tindv] += 1
+							$total_removed[tindv[0]] += 1
 						end
 						$candidates.delete(removed_site)
 						if i == sorted_sites.size - 1 # Add last removed site if goes to end
 							removed_site = key + ":" + sorted_sites[i].to_s
 							puts removed_site
 							for sfindv in $candidates[removed_site][0]
-								$sfindv[sfindv] += 1
-								$total_removed[sfindv] += 1
+								$sfindv[sfindv[0]] += 1
+								$total_removed[sfindv[0]] += 1
 							end
 							for tindv in $candidates[removed_site][1]
-								$total_removed[tindv] += 2
+								$total_removed[tindv[0]] += 2
 							end
 							for tindv in $candidates[removed_site][2]
-								$total_removed[tindv] += 1
+								$total_removed[tindv[0]] += 1
 							end
 							$candidates.delete(removed_site)
 						end
@@ -301,14 +301,14 @@ else
 						removed_site = key + ":" + prev_site.to_s
 						puts removed_site
 						for sfindv in $candidates[removed_site][0] # Code to count number of single-forward mutations
-							$sfindv[sfindv] +=1
-							$total_removed[sfindv] += 1
+							$sfindv[sfindv[0]] +=1
+							$total_removed[sfindv[0]] += 1
 						end
 						for tindv in $candidates[removed_site][1] # Code to count total number of double-forward removed sites
-							$total_removed[tindv] += 2
+							$total_removed[tindv[0]] += 2
 						end
 						for tindv in $candidates[removed_site][2] # Code to count total number of backward removed sites
-							$total_removed[tindv] += 1
+							$total_removed[tindv[0]] += 1
 						end
 						$candidates.delete(removed_site)
 					end
@@ -322,14 +322,14 @@ else
 		if $candidates[key][3] > 1
 			puts key
 			for sfindv in $candidates[key][0] # Code to count number of single-forward mutations
-				$sfindv[sfindv] +=1
-				$total_removed[sfindv] += 1
+				$sfindv[sfindv[0]] +=1
+				$total_removed[sfindv[0]] += 1
 			end
 			for tindv in $candidates[key][1] # Code to count number of double-forward mutations
-				$total_removed[tindv] +=2
+				$total_removed[tindv[0]] +=2
 			end
 			for tindv in $candidates[key][2] # Code to count number of backward mutations
-				$total_removed[tindv] +=1
+				$total_removed[tindv[0]] +=1
 			end
 			$candidates.delete(key)
 		end

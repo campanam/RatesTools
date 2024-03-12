@@ -287,7 +287,7 @@ else
 						end
 						for tindv in $candidates[removed_site][2] # Code to count total number of backward removed sites
 							$total_removed[tindv[0]] += 1
-							$backclasses[tindv[1] -= 1 # Update mutational spectra
+							$backclasses[tindv[1]] -= 1 # Update mutational spectra
 						end
 						$candidates.delete(removed_site)
 						if i == sorted_sites.size - 1 # Add last removed site if goes to end
@@ -304,7 +304,7 @@ else
 							end
 							for tindv in $candidates[removed_site][2]
 								$total_removed[tindv[0]] += 1
-								$backclasses[tindv[1] -= 1 # Update mutational spectra
+								$backclasses[tindv[1]] -= 1 # Update mutational spectra
 							end
 							$candidates.delete(removed_site)
 						end
@@ -322,7 +322,7 @@ else
 						end
 						for tindv in $candidates[removed_site][2] # Code to count total number of backward removed sites
 							$total_removed[tindv[0]] += 1
-							$backclasses[tindv[1] -= 1 # Update mutational spectra
+							$backclasses[tindv[1]] -= 1 # Update mutational spectra
 						end
 						$candidates.delete(removed_site)
 					end
@@ -346,7 +346,7 @@ else
 			end
 			for tindv in $candidates[key][2] # Code to count number of backward mutations
 				$total_removed[tindv[0]] +=1
-				$backclasses[tindv[1] -= 1 # Update mutational spectra
+				$backclasses[tindv[1]] -= 1 # Update mutational spectra
 			end
 			$candidates.delete(key)
 		end

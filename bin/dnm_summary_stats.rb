@@ -281,6 +281,8 @@ else
 						for sfindv in $candidates[removed_site][0] # Code to count number of single-forward mutations
 							$sfindv[sfindv[0]] +=1
 							$total_removed[sfindv[0]] += 1
+							$stderr.puts sfindv
+							$stderr.puts $spectra
 							$spectra[sfindv][0] -= 1 # Update mutational spectra
 						end
 						for tindv in $candidates[removed_site][1] # Code to count total number of double-forward removed sites

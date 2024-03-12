@@ -67,7 +67,7 @@ def update_counts(class_hash,mutclass,snpsite,outindiv) # Update number and indi
 end
 #----------------------------------------------------------------------------------------
 def print_spectrum(outindiv) # Print mutational spectra
-	puts outindiv + " Mutation Classes"
+	puts "\n" + outindiv + " Mutation Classes"
 	puts "Single-Forward,Count"
 	for mut in $spectra[outindiv][0].keys
 		puts mut + "," + $spectra[outindiv][0][mut].to_s
@@ -182,7 +182,6 @@ def classify_sites(outindiv)
 			end
 		end	
 	end
-	puts "\nRaw Mutational Spectra:"
 	$spectra[outindiv] = [$mutclasses.dup, $dfclasses.dup, $backclasses.dup]
 	print_spectrum(outindiv)
 	puts "\nIndels/Other,Count"
@@ -254,6 +253,7 @@ else
 	end
 	$total_removed = {} # Hash of total overlapping individuals and clumped sites per individual
 	$sfindv = {} # Hash of single-forward counts per individual
+	print "\nRaw Mutational Spectra:"
 	for outindiv in outindivs
 		classify_sites(outindiv)
 		$total_removed[outindiv] = 0 # Initialize total removed site count to zero
@@ -359,7 +359,7 @@ else
 		puts key
 		$stderr.puts key.gsub(':',"\t") # Creates a list of retained SNPs for VCFtools site filtering
 	end
-	puts "\nFiltered Mutational Spectra:"
+	print "\nFiltered Mutational Spectra:"
 	for key in $spectra.keys
 		print_spectrum(key)
 	end

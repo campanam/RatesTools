@@ -184,6 +184,7 @@ def classify_sites(outindiv)
 	puts outindiv + " Mutation Classes\nSingle-Forward,Count"
 	print_spectrum
 	$spectra[outindiv] = [$mutclasses.dup, $dfclasses.dup, $backclasses.dup]
+	print $spectra
 	puts "\nIndels/Other,Count"
 	puts "Total: " + $otherscnt.to_s
 end

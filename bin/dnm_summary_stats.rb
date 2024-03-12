@@ -42,21 +42,21 @@ end
 #----------------------------------------------------------------------------------------
 def update_counts(class_hash,mutclass,snpsite,outindiv) # Update number and individuals for types of mutations
 	case class_hash
-	when $mutclasses
+	when 'sf'
 		if $mutclasses[mutclass].nil? 
 			$otherscnt += 1
 		else
 			$mutclasses[mutclass] += 1
 			$candidates[snpsite][0].push([outindiv,mutclass]) # Add to single-forward array
 		end
-	when $dfclasses
+	when 'df'
 		if $dfclasses[mutclass].nil? # Dumps all other mutations into other.
 			$otherscnt += 2 
 		else 
 			$dfclasses[mutclass] += 2 
 			$candidates[snpsite][1].push([outindiv,mutclass]) # Add to double-forward array
 		end
-	when $backclasses
+	when 'bk'
 		if $backclasses[mutclass].nil? # Dumps all other mutations into other
 			$otherscnt += 1
 		else
@@ -124,42 +124,37 @@ def classify_sites(outindiv)
 						par_genotypes.push(genotype)
 					end
 				end
-				if outindiv == 'Tamoon'
-					$stderr.print off_genotype
-					$stderr.print par_genotypes[0]
-					$stderr.print par_genotypes[1]
-				end
 				# Handling for SNP class mutational spectra. Dumps other types of mutations into 'other'
 				if par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [0,1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}" # Dumps all other mutations into other
-					update_counts($mutclasses,mutclass,snpsite,outindiv)
+					update_counts('sf',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0,1]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($mutclasses,mutclass,snpsite,outindiv)
+					update_counts('sf',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					update_counts($dfclasses,mutclass,snpsite,outindiv)
+					update_counts('df',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($dfclasses,mutclass,snpsite,outindiv)
+					update_counts('df's,mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0,1] && par_genotypes[1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($backclasses,mutclass,snpsite,outindiv)
+					update_counts('bk',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[0,1] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					update_counts($backclasses,mutclass,snpsite,outindiv)
+					update_counts('bk',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [0] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					update_counts($backclasses,mutclass,snpsite,outindiv)
+					update_counts('bk',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [0] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($backclasses,mutclass,snpsite,outindiv)
+					update_counts('bk',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [1] && off_genotype == [1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}"
-					update_counts($backclasses,mutclass,snpsite,outindiv)
+					update_counts('bk',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0] && par_genotypes[1] == [1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts($backclasses,mutclass,snpsite,outindiv)
+					update_counts('bk',mutclass,snpsite,outindiv)
 				end
 			elsif line[0..30] == "Total number of retained sites:"
 				$totalbases[outindiv] = [line.split(":")[1].to_i,0,0] # Total callable bases, total mutations, single-forward mutations

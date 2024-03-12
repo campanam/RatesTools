@@ -870,7 +870,7 @@ process generateSummaryStats {
 	"""
 	dnm_summary_stats.rb . ${params.prefix} ${dnm_clump} > ${params.prefix}_summary_stats.csv 2> sites.tsv
 	for vcf in *candidates.vcf.gz; do
-		vcftools --gzvcf \${vcf} --positions sites.tsv --recode -c | gzip \${vcf%.vcf.gz}.filtered.vcf.gz
+		vcftools --gzvcf \${vcf} --positions sites.tsv --recode -c | gzip > \${vcf%.vcf.gz}.filtered.vcf.gz
 	done
 	"""
 

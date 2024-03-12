@@ -136,7 +136,7 @@ def classify_sites(outindiv)
 					update_counts('df',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [1] && par_genotypes[1] == [1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
-					update_counts('df's,mutclass,snpsite,outindiv)
+					update_counts('df',mutclass,snpsite,outindiv)
 				elsif par_genotypes[0] == [0,1] && par_genotypes[1] && off_genotype == [0]
 					mutclass = "#{alleles[1]}->#{alleles[0]}"
 					update_counts('bk',mutclass,snpsite,outindiv)

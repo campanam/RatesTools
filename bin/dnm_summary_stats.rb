@@ -124,6 +124,11 @@ def classify_sites(outindiv)
 						par_genotypes.push(genotype)
 					end
 				end
+				if outindiv == 'Tamoon'
+					$stderr.print off_genotype
+					$stderr.print par_genotypes[0]
+					$stderr.print par_genotypes[1]
+				end
 				# Handling for SNP class mutational spectra. Dumps other types of mutations into 'other'
 				if par_genotypes[0] == [0] && par_genotypes[1] == [0] && off_genotype == [0,1]
 					mutclass = "#{alleles[0]}->#{alleles[1]}" # Dumps all other mutations into other

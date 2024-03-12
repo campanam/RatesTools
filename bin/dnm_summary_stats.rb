@@ -66,17 +66,19 @@ def update_counts(class_hash,mutclass,snpsite,outindiv) # Update number and indi
 	end
 end
 #----------------------------------------------------------------------------------------
-def print_spectrum # Print mutational spectra
-	for mut in $mutclasses.keys
-		puts mut + "," + $mutclasses[mut].to_s
+def print_spectrum(outindiv) # Print mutational spectra
+	puts outindiv + " Mutation Classes"
+	puts "Single-Forward,Count"
+	for mut in $spectra[outindiv][0].keys
+		puts mut + "," + $spectra[outindiv][0][mut].to_s
 	end
 	puts "\nDouble-Forward,Count"
-	for mut in $dfclasses.keys
-		puts mut + "," + $dfclasses[mut].to_s
+	for mut in $spectra[outindiv][1].keys
+		puts mut + "," + $spectra[outindiv][1][mut].to_s
 	end
 	puts "\nBackward,Count"
-	for mut in $backclasses.keys
-		puts mut + "," + $backclasses[mut].to_s
+	for mut in $spectra[outindiv][2].keys
+		puts mut + "," + $spectra[outindiv][2][mut].to_s
 	end
 end
 #----------------------------------------------------------------------------------------
@@ -181,9 +183,8 @@ def classify_sites(outindiv)
 		end	
 	end
 	puts "\nRaw Mutational Spectra:"
-	puts outindiv + " Mutation Classes\nSingle-Forward,Count"
-	print_spectrum
 	$spectra[outindiv] = [$mutclasses.dup, $dfclasses.dup, $backclasses.dup]
+	print_spectrum(outindiv)
 	puts "\nIndels/Other,Count"
 	puts "Total: " + $otherscnt.to_s
 end
@@ -359,7 +360,9 @@ else
 		$stderr.puts key.gsub(':',"\t") # Creates a list of retained SNPs for VCFtools site filtering
 	end
 	puts "\nFiltered Mutational Spectra:"
-	print_spectrum
+	for key in $spectra.keys
+		print_spectrum(key)
+	end
 	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RemainingSingle-ForwardSites,RemainingTotalSites,RecalcSingle-ForwardRate,Single-Forward95%BinomialConfidence,RecalcAllsitesRate,AllSites95%BinomialConfidence"
 	for key in $sfindv.keys
 		scount = $totalbases[key][2]-$sfindv[key] # Number of single-forward sites

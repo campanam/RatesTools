@@ -66,6 +66,20 @@ def update_counts(class_hash,mutclass,snpsite,outindiv) # Update number and indi
 	end
 end
 #----------------------------------------------------------------------------------------
+def print_spectrum # Print mutational spectra
+	for mut in $mutclasses.keys
+		puts mut + "," + $mutclasses[mut].to_s
+	end
+	puts "\nDouble-Forward,Count"
+	for mut in $dfclasses.keys
+		puts mut + "," + $dfclasses[mut].to_s
+	end
+	puts "\nBackward,Count"
+	for mut in $backclasses.keys
+		puts mut + "," + $backclasses[mut].to_s
+	end
+end
+#----------------------------------------------------------------------------------------
 def classify_sites(outindiv)
 	# Single-Forward Mutations
 	$mutclasses = { "A->T" => 0, "A->C" => 0, "A->G" => 0, "T->A" => 0, "T->C" => 0,
@@ -166,18 +180,9 @@ def classify_sites(outindiv)
 			end
 		end	
 	end
-	puts "\n" + outindiv + " Mutation Classes\nSingle-Forward,Count"
-	for mut in $mutclasses.keys
-		puts mut + "," + $mutclasses[mut].to_s
-	end
-	puts "\nDouble-Forward,Count"
-	for mut in $dfclasses.keys
-		puts mut + "," + $dfclasses[mut].to_s
-	end
-	puts "\nBackward,Count"
-	for mut in $backclasses.keys
-		puts mut + "," + $backclasses[mut].to_s
-	end
+	puts "\nRaw Mutational Spectra:"
+	puts outindiv + " Mutation Classes\nSingle-Forward,Count"
+	print_spectrum
 	puts "\nIndels/Other,Count"
 	puts "Total: " + $otherscnt.to_s
 end
@@ -274,12 +279,15 @@ else
 						for sfindv in $candidates[removed_site][0] # Code to count number of single-forward mutations
 							$sfindv[sfindv[0]] +=1
 							$total_removed[sfindv[0]] += 1
+							$mutclasses[sfindv[1]] -= 1 # Update mutational spectra
 						end
 						for tindv in $candidates[removed_site][1] # Code to count total number of double-forward removed sites
 							$total_removed[tindv[0]] += 2
+							$dfclasses[tindv[1]] -= 2 # Update mutational spectra
 						end
 						for tindv in $candidates[removed_site][2] # Code to count total number of backward removed sites
 							$total_removed[tindv[0]] += 1
+							$backclasses[tindv[1] -= 1 # Update mutational spectra
 						end
 						$candidates.delete(removed_site)
 						if i == sorted_sites.size - 1 # Add last removed site if goes to end
@@ -288,12 +296,15 @@ else
 							for sfindv in $candidates[removed_site][0]
 								$sfindv[sfindv[0]] += 1
 								$total_removed[sfindv[0]] += 1
+								$mutclasses[sfindv[1]] -= 1 # Update mutational spectra
 							end
 							for tindv in $candidates[removed_site][1]
 								$total_removed[tindv[0]] += 2
+								$dfclasses[tindv[1]] -= 2 # Update mutational spectra
 							end
 							for tindv in $candidates[removed_site][2]
 								$total_removed[tindv[0]] += 1
+								$backclasses[tindv[1] -= 1 # Update mutational spectra
 							end
 							$candidates.delete(removed_site)
 						end
@@ -303,12 +314,15 @@ else
 						for sfindv in $candidates[removed_site][0] # Code to count number of single-forward mutations
 							$sfindv[sfindv[0]] +=1
 							$total_removed[sfindv[0]] += 1
+							$mutclasses[sfindv[1]] -= 1 # Update mutational spectra
 						end
 						for tindv in $candidates[removed_site][1] # Code to count total number of double-forward removed sites
 							$total_removed[tindv[0]] += 2
+							$dfclasses[tindv[1]] -= 2 # Update mutational spectra
 						end
 						for tindv in $candidates[removed_site][2] # Code to count total number of backward removed sites
 							$total_removed[tindv[0]] += 1
+							$backclasses[tindv[1] -= 1 # Update mutational spectra
 						end
 						$candidates.delete(removed_site)
 					end
@@ -324,12 +338,15 @@ else
 			for sfindv in $candidates[key][0] # Code to count number of single-forward mutations
 				$sfindv[sfindv[0]] +=1
 				$total_removed[sfindv[0]] += 1
+				$mutclasses[sfindv[1]] -= 1 # Update mutational spectra
 			end
 			for tindv in $candidates[key][1] # Code to count number of double-forward mutations
 				$total_removed[tindv[0]] +=2
+				$dfclasses[tindv[1]] -= 2 # Update mutational spectra
 			end
 			for tindv in $candidates[key][2] # Code to count number of backward mutations
 				$total_removed[tindv[0]] +=1
+				$backclasses[tindv[1] -= 1 # Update mutational spectra
 			end
 			$candidates.delete(key)
 		end
@@ -339,6 +356,8 @@ else
 		puts key
 		$stderr.puts key.gsub(':',"\t") # Creates a list of retained SNPs for VCFtools site filtering
 	end
+	puts "\nFiltered Mutational Spectra:"
+	print_spectrum
 	puts "\nOffspring,Single-ForwardRemovedSites,TotalRemovedSites,RemainingSingle-ForwardSites,RemainingTotalSites,RecalcSingle-ForwardRate,Single-Forward95%BinomialConfidence,RecalcAllsitesRate,AllSites95%BinomialConfidence"
 	for key in $sfindv.keys
 		scount = $totalbases[key][2]-$sfindv[key] # Number of single-forward sites

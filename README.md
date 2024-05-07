@@ -25,9 +25,9 @@ To the extent possible under law, the Smithsonian Institution and Stanford Unive
 
 ## Citation  
 We politely request that this work be cited as:  
-Armstrong, E.E. & M.G. Campana. 2023. RatesTools: a Nextflow pipeline for detecting *de novo* germline mutations in pedigree sequence data. *Bioinformatics*. 39: btac784. doi: [10.1093/bioinformatics/btac784](https://doi.org/10.1093/bioinformatics/btac784).  
+Armstrong, E.E. & M.G. Campana. 2023. RatesTools: a Nextflow pipeline for detecting *de novo* germline mutations in pedigree sequence data. *Bioinformatics*. 39: btac784. DOI: [10.1093/bioinformatics/btac784](https://doi.org/10.1093/bioinformatics/btac784).  
 
-Preprint available on *bioRxiv*. doi: [10.1101/2022.07.18.500472](https://doi.org/10.1101/2022.07.18.500472).  
+Preprint available on *bioRxiv*. DOI: [10.1101/2022.07.18.500472](https://doi.org/10.1101/2022.07.18.500472).  
 
 ## Conda-Assisted Installation  
 We provide a configuration profile "conda" in the default configuration file (`nextflow.config`) that installs all dependencies using [Conda](https://docs.conda.io/en/latest/). As of RatesTools 1.0.0, we recommend (and default to) the use of [Mamba](https://mamba.readthedocs.io/en/latest/) for environment construction. Using this profile, the user only needs to install [Nextflow](https://www.nextflow.io/) [1], Conda/Mamba and the RatesTools pipeline:  
@@ -118,13 +118,13 @@ Enter `nextflow run campanam/RatesTools -r <version> -c <config_file>` to run th
 7. Broad Institute (2020). Picard v. 2.23.8 (https://broadinstitute.github.io/picard/).  
 8. Tarasov, A., Vilella, A.J., Cuppen, E., Nijman, I.J., Prins, P. (2015) Sambamba: fast processing of NGS alignment formats. *Bioinformatics*, __31__, 2032–2034. DOI: [10.1093/bioinformatics/btv098](https://academic.oup.com/bioinformatics/article/31/12/2032/214758).  
 9. Danecek, P., Auton, A., Abecasis, G., Albers, C.A., Banks, E., DePristo, M.A., Handsaker, R.E., Lunter, G., Marth, G.T., Sherry, S.T., McVean, G., Durbin, R. (2011) The variant call format and VCFtools. *Bioinformatics*, __27__, 2156–2158. DOI: [10.1093/bioinformatics/btr330](https://academic.oup.com/bioinformatics/article/27/15/2156/402296).  
-10. Pockrandt, C., Alzamel, M., Iliopoulos, C.S., Reinert, K. (2020) GenMap: ultra-fast computation of genome mappability. *Bioinformatics*, __36__, 3687–3692, doi: [10.1093/bioinformatics/btaa222](https://academic.oup.com/bioinformatics/article/36/12/3687/5815974).  
+10. Pockrandt, C., Alzamel, M., Iliopoulos, C.S., Reinert, K. (2020) GenMap: ultra-fast computation of genome mappability. *Bioinformatics*, __36__, 3687–3692, DOI: [10.1093/bioinformatics/btaa222](https://academic.oup.com/bioinformatics/article/36/12/3687/5815974).  
 11. Reinert, K., Dadi, T.H., Ehrhardt, M., Hauswedell, H., Mehringer, S., Rahn, R., Kim. J., Pockrandt, C., Winkler, J., Siragusa, E., Urgese, G., Weese, D. (2017) The SeqAn C++ template library for efficient sequence analysis: A resource for programmers. *J Biotechnol*, __261__, 157-168. DOI: [10.1016/j.jbiotec.2017.07.017](https://www.sciencedirect.com/science/article/pii/S0168165617315420?via%3Dihub).  
 12. Smit, A.F.A., Hubley, R., Green, P. (2013-2015) *RepeatMasker Open-4.0*. (http://www.repeatmasker.org).  
 13. Flynn, J.M., Hubley, R., Goubert, C., Rosen, J. Clark,. A.G., Feschotte, C., Smit, A.F. (2020) RepeatModeler2 for automated genomic discovery of transposable element families. *Proc Natl Acad Sci U S A*, __117__, 9451-9457. DOI: [10.1073/pnas.1921046117](https://www.pnas.org/content/117/17/9451.short).  
-14. Quinlan, A.R., Hall, I.M. (2010) BEDTools: a flexible suite of utilities for comparing genomic features. *Bioinformatics*, __26__, 841-842, doi: [10.1093/bioinformatics/btq0333](https://academic.oup.com/bioinformatics/article/26/6/841/244688).  
-15. Martin, M., Patterson, M., Garg, S., Fischer, S.O., Pisanti, N., Klau, G.W., Schoenhuth, A., Marschall, T. (2016) WhatsHap: fast and accurate read-based phasing. *BioRxiv*, doi: [10.1101/085050](https://www.biorxiv.org/content/10.1101/085050v2).  
-16. Garg, S., Martin, M., Marschall, T. (2016) Read-based phasing of related individuals. *Bioinformatics*, __32__, i234-i242, doi: [10.1093/bioinformatics/btw276](https://academic.oup.com/bioinformatics/article/32/12/i234/2288955).  
+14. Quinlan, A.R., Hall, I.M. (2010) BEDTools: a flexible suite of utilities for comparing genomic features. *Bioinformatics*, __26__, 841-842, DOI: [10.1093/bioinformatics/btq0333](https://academic.oup.com/bioinformatics/article/26/6/841/244688).  
+15. Martin, M., Patterson, M., Garg, S., Fischer, S.O., Pisanti, N., Klau, G.W., Schoenhuth, A., Marschall, T. (2016) WhatsHap: fast and accurate read-based phasing. *BioRxiv*, DOI: [10.1101/085050](https://www.biorxiv.org/content/10.1101/085050v2).  
+16. Garg, S., Martin, M., Marschall, T. (2016) Read-based phasing of related individuals. *Bioinformatics*, __32__, i234-i242, DOI: [10.1093/bioinformatics/btw276](https://academic.oup.com/bioinformatics/article/32/12/i234/2288955).  
 17. Wickham, H., Averick, M., Bryan, J., Chang, W., D'Agostino McGowan, L., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T.L., Miller, E., Bache, S.M., Müller, K., Ooms, J., Robinson, D., Seidel, D.P., Spinu, V., Takahashi, K., Vaughan, D., Wilke, C., Woo, K. Yutani, H. (2019). Welcome to the Tidyverse. *J Open Source Softw*, __4__, 1686. DOI: [10.21105/joss.01686](https://joss.theoj.org/papers/10.21105/joss.01686).  
 18. Wickham, H., François, R., Henry, L., Müller, K. (2021) dplyr: a grammar of data manipulation. R package version 1.0.7 (https://dplyr.tidyverse.org/).  
 19. Wickham, H. (2016) *ggplot2: Elegant Graphics for Data Analysis.* Springer-Verlag, New York, USA.  

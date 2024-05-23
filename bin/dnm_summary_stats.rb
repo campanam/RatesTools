@@ -211,45 +211,9 @@ else
 			$individuals.push(f1[0..-13])
 		end
 	end
-	# Get allsites and chrsites if chrfilt.log exists.
-	if File.exist?(ARGV[0] + "/chrfilt.log")
-		File.open(ARGV[0] + "/chrfilt.log") do |f1|
-			while line = f1.gets
-				line_arr = line.split
-				$chrsites = line_arr[3]
-				$allsites = line_arr[-2]
-			end
-		end
-	end
-	# Get trio sites and fill in allsites/chrsites if chrfilt.log does not exist
-	Dir.foreach(ARGV[0] + "/") do |f2|
-		if f2[-9..-1] == '_trio.log'
-			@individual = f2[0..-10]
-			File.open(ARGV[0] + "/" + f2) do |f3|
-				while line = f3.gets
-					line_arr = line.split
-					if $allsites.nil?
-						$allsites = line_arr[-2]
-						$chrsites = line_arr[-2]
-					end
-					$triosites[@individual] = line_arr[3]
-				end
-			end
-		end
-	end
-	puts "Individual,AllSites,ChrSites,TrioSites,VCFtoolsFiltSites,GATKFiltSites,RegionFiltSites"
 	outindivs = []
 	for indiv in $individuals
-		extract_site_count($vcf_filtsites, '.sitefilt.log', indiv)
-		extract_site_count($gatk_filtsites, '.gatksitefilt.log', indiv)
-		if Dir.glob(ARGV[0]+ "/*regionfilt.log").any? # Handling for when region filters are turned off
-			extract_site_count($regionsites, '.regionfilt.log', indiv)
-		else
-			$regionsites = $gatk_filtsites
-		end
 		outindiv = indiv.gsub(ARGV[1] + "_offspring", "")
-		outindivs.push(outindiv)
-		puts outindiv + "," + $allsites + "," + $chrsites + "," + $triosites[indiv].to_s + "," + $vcf_filtsites[indiv].to_s + "," + $gatk_filtsites[indiv].to_s + "," + $regionsites[indiv].to_s		
 	end
 	$total_removed = {} # Hash of total overlapping individuals and clumped sites per individual
 	$sfindv = {} # Hash of single-forward counts per individual

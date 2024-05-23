@@ -955,6 +955,7 @@ workflow logRegionSanity {
 workflow {
 	main:
 		prev_vcf_ch = channel.fromPath(params.filt_vcf)
+		prev_vcf_ch.view()
 		calcDNMRate(prev_vcf_ch)
 		trio_vcf_ch = channel.fromPath(params.trio_vcf)
 		summarizeDNM(calcDNMRate.out.collect(),trio_vcf_ch.collect())

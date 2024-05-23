@@ -954,72 +954,8 @@ workflow logRegionSanity {
 
 workflow {
 	main:
-		prepareRef(params.refseq)
-		read_data = Channel.fromPath(params.libraries).splitCsv(header:true).map { row -> tuple(row.Sample, row.Library, file(params.readDir + row.Read1), file(params.readDir + row.Read2), '@RG\\tID:' + row.Library + '\\tSM:' + row.Sample + '\\tLB:ILLUMINA\\tPL:ILLUMINA') }
-		alignSeqs(read_data, params.refseq, prepareRef.out) | markDuplicates
-		mergeLibraries(markDuplicates.out.groupTuple(by: 1)) // Need unique samples matched with their file paths
-		realignIndels(mergeLibraries.out, params.refseq, prepareRef.out)
-		if (params.filter_bams) {
-			filterBAMs(realignIndels.out, params.refseq, prepareRef.out) | fixMate
-			callVariants(fixMate.out, params.refseq, prepareRef.out)
-		} else {
-			callVariants(realignIndels.out, params.refseq, prepareRef.out)
-		}
-		genotypegVCFs(callVariants.out.collect(), params.refseq, prepareRef.out)
-		if (params.region_filter) {
-			maskIndels(genotypegVCFs.out)
-			genMapIndex(params.refseq, params.gm_tmpdir) | genMapMap
-			repeatMask(params.refseq, params.rm_species)
-			repeatModeler(repeatMask.out.rm1)
-			repeatMaskRM(repeatMask.out.rm1, repeatMask.out.rm1_out, repeatModeler.out)
-			simplifyBed(genMapMap.out, maskIndels.out, repeatMaskRM.out.RMbed)
-		}
-		all_samples = read_data.map {it -> it[0]}.unique()
-		trio_samples = all_samples.filter { it != params.sire && it != params.dam } // Need new channel after filtering this one to remove dam and sire from offspring lists
-		if ( params.chr_file != 'NULL') {
-			filterChr(genotypegVCFs.out, channel.fromPath(params.chr_file))
-			sanityCheckLogs(filterChr.out.chr_tmp, genotypegVCFs.out, filterChr.out.chr_vcf, 0, 0)
-			if (params.phase) {
-				if (params.filter_bams) {
-					phaseTrio(filterChr.out.chr_vcf, fixMate.out.collect(), params.refseq, prepareRef.out)
-				} else {
-					phaseTrio(filterChr.out.chr_vcf, realignIndels.out.collect(), params.refseq, prepareRef.out)
-				}
-				trio = phaseTrio.out.vcf.combine(trio_samples)
-			} else {
-				trio = filterChr.out.chr_vcf.combine(trio_samples)
-			}
-			splitTrios(trio) | logSanityTrio
-			log_trio_sanity = sanityCheckLogs.out.log.mix(logSanityTrio.out.sanelog)
-			allDPGQ = filterChr.out.chr_vcf.combine(all_samples)			
-		} else {
-			if (params.phase) {
-				if (params.filter_bams) {
-					phaseTrio(genotypegVCFs.out, fixMate.out.collect(), params.refseq, prepareRef.out)
-				} else {
-					phaseTrio(genotypegVCFs.out, realignIndels.out.collect(), params.refseq, prepareRef.out)
-				}
-				trio = phaseTrio.out.vcf.combine(trio_samples)
-			} else {
-				trio = genotypegVCFs.out.combine(trio_samples)
-			}
-			splitTrios(trio) | logSanityTrio
-			log_trio_sanity = logSanityTrio.out.sanelog
-			allDPGQ = genotypegVCFs.out.combine(all_samples)
-		}
-		pullDPGQ(allDPGQ)
-		plotDPGQ(pullDPGQ.out.collect())
-		splitVCFs(splitTrios.out.trio_vcf) | flatten | vcftoolsFilterSites | logVcftoolsSanity
-		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, params.refseq, prepareRef.out) | logGatkSanity
-		if (params.region_filter) { 
-			filterRegions(logGatkSanity.out.ok_vcf, simplifyBed.out) | logRegionSanity
-			calcDNMRate(logRegionSanity.out.ok_vcf)
-			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.mix(logRegionSanity.out.sanelog, logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
-		} else {
-			calcDNMRate(logGatkSanity.out.ok_vcf)
-			summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-			all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
-		}
+		calcDNMRate(channel.fromPath(params.filt_vcf)
+		summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
+		all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
 		generateSummaryStats(all_logs_sanity.collect(), params.dnm_clump, summarizeDNM.out.vcf.collect())
 }

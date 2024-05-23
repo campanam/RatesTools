@@ -214,6 +214,7 @@ else
 	outindivs = []
 	for indiv in $individuals
 		outindiv = indiv.gsub(ARGV[1] + "_offspring", "")
+		outindivs.push(outindiv)
 	end
 	$total_removed = {} # Hash of total overlapping individuals and clumped sites per individual
 	$sfindv = {} # Hash of single-forward counts per individual

@@ -955,8 +955,8 @@ workflow logRegionSanity {
 workflow {
 	main:
 		calcDNMRate(channel.fromPath(params.filt_vcf))
-		summarizeDNM(calcDNMRate.out.collect(),splitTrios.out.trio_vcf.collect())
-		all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
-		generateSummaryStats(all_logs_sanity.collect(), params.dnm_clump, summarizeDNM.out.vcf.collect())
+		summarizeDNM(calcDNMRate.out.collect(),channel.fromPath(params.trio_vcf).collect())
+		//all_logs_sanity = log_trio_sanity.mix(logGatkSanity.out.sanelog, logVcftoolsSanity.out.sanelog, summarizeDNM.out.log)
+		//generateSummaryStats(all_logs_sanity.collect(), params.dnm_clump, summarizeDNM.out.vcf.collect())
 	}
 }

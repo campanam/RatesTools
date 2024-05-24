@@ -389,6 +389,9 @@ First version integrated into pipeline
 Initial script (plotDPGQ-clean.R)  
 
 ## ratestools  
+### Version 1.2.1  
+Fixed region filter bypass bgzip bug  
+
 ### Version 1.2.0  
 Removal of redundant dnm_bootstraps parameter  
 Fixed header bug on candidates VCF  

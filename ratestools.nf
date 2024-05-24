@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-/* RatesTools version 1.1.2
+/* RatesTools version 1.2.1
 Michael G. Campana and Ellie E. Armstrong, 2020-2024
 Smithsonian Institution and Stanford University
 
@@ -777,9 +777,17 @@ process calcDNMRate {
 	output:
 	path "${splitvcf.simpleName}.log"
 	
-	"""
-	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${params.sire} -d ${params.dam} ${params.dnm_opts} > ${splitvcf.simpleName}.log
-	"""
+	script:
+	if (params.region_filter)
+		"""
+		calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${params.sire} -d ${params.dam} ${params.dnm_opts} > ${splitvcf.simpleName}.log
+		"""
+	else
+		"""
+		gunzip -f ${splitvcf}
+		calc_denovo_mutation_rate.rb -i ${splitvcf.baseName} -s ${params.sire} -d ${params.dam} ${params.dnm_opts} > ${splitvcf.simpleName}.log
+		rm ${splitvcf.baseName}
+		"""
 
 }
 

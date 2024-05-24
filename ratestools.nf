@@ -784,7 +784,7 @@ process calcDNMRate {
 		"""
 	else
 		"""
-		gunzip ${splitvcf}
+		gunzip -f ${splitvcf}
 		calc_denovo_mutation_rate.rb -i ${splitvcf.baseName} -s ${params.sire} -d ${params.dam} ${params.dnm_opts} > ${splitvcf.simpleName}.log
 		rm ${splitvcf.baseName}
 		"""

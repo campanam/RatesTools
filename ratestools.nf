@@ -777,9 +777,17 @@ process calcDNMRate {
 	output:
 	path "${splitvcf.simpleName}.log"
 	
-	"""
-	calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${params.sire} -d ${params.dam} ${params.dnm_opts} > ${splitvcf.simpleName}.log
-	"""
+	script:
+	if (params.region_filter)
+		"""
+		calc_denovo_mutation_rate.rb -i ${splitvcf} -s ${params.sire} -d ${params.dam} ${params.dnm_opts} > ${splitvcf.simpleName}.log
+		"""
+	else
+		"""
+		gunzip ${splifvcf}
+		calc_denovo_mutation_rate.rb -i ${splitvcf.baseName} -s ${params.sire} -d ${params.dam} ${params.dnm_opts} > ${splitvcf.simpleName}.log
+		rm ${splitvcf.baseName}
+		"""
 
 }
 

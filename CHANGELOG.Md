@@ -315,6 +315,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 1.2.2  
+Updated R channel to conda-forge  
+
 ### Version 1.2.0  
 Removal of redundant dnm_bootstraps parameter  
 Update conda dependencies for generateSummaryStatsm, calcDNMRate, summarizeDNM  

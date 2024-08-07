@@ -422,23 +422,19 @@ process simplifyBed {
 	
 	label 'bedtools'
 		publishDir "$params.outdir/05_ExcludedRegions", mode: 'copy'
-	
-	input:
-	//path indel_bed
-	//path rm_bed
-	//path gm_bed
+
 	
 	output:
 	path "${params.prefix}_excluded_reduced.bed"
 	
 	"""
 	#!/usr/bin/env bash
-	cat ${indel_bed} ${rm_bed} ${gm_bed} | sort -k1,1 -k2,2n | cut -f1-3 > tmp.bed
-	if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
-		bedtools merge -i tmp.bed > ${params.prefix}_excluded_reduced.bed
-	else
-		touch ${params.prefix}_excluded_reduced.bed
-	fi
+	#cat ${indel_bed} ${rm_bed} ${gm_bed} | sort -k1,1 -k2,2n | cut -f1-3 > tmp.bed
+	#if [ ! "\$(wc -l < tmp.bed)" -eq 0 ]; then
+	#	bedtools merge -i tmp.bed > ${params.prefix}_excluded_reduced.bed
+	#else
+	#	touch ${params.prefix}_excluded_reduced.bed
+	#fi
 	"""
 
 }

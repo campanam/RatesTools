@@ -424,9 +424,9 @@ process simplifyBed {
 		publishDir "$params.outdir/05_ExcludedRegions", mode: 'copy'
 	
 	input:
-	path indel_bed
-	path rm_bed
-	path gm_bed
+	//path indel_bed
+	//path rm_bed
+	//path gm_bed
 	
 	output:
 	path "${params.prefix}_excluded_reduced.bed"
@@ -963,6 +963,7 @@ workflow logRegionSanity {
 workflow {
 	main:
 		prepareRef(params.refseq)
+		simplifyBed // Dummy process
 		prev_vcf_ch = Channel.fromPath(params.filt_vcf)
 		gatkFilterSites(prev_vcf_ch, params.refseq, prepareRef.out) | logGatkSanity
 		filterRegions(logGatkSanity.out.ok_vcf, simplifyBed.out) | logRegionSanity

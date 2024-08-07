@@ -113,6 +113,9 @@ Bootstrapping
 Initial script to calculate point estimate de novo mutation rate  
 
 ## configure.sh  
+### Version 1.2.3  
+Updated ReadPosRankSum default filter  
+
 ### Version 1.2.0  
 Removal of redundant dnm_bootstraps parameter  
 
@@ -315,6 +318,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 1.2.3  
+Updated ReadPosRankSum default filter  
+
 ### Version 1.2.2  
 Updated R channel to conda-forge  
 

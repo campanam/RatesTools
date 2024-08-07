@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# configure.sh script for RatesTools v1.2.0
+# configure.sh script for RatesTools v1.2.3
 
 #----------------------------------------------------------------------------------------
 # Michael G. Campana and Ellie E. Armstrong, 2020-2024
@@ -266,20 +266,20 @@ fi
 echo 'Filter sites using GATK? (Y/N)'
 yes_no_answer
 if [ $answer == 'N' ]; then
-	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'NULL'/" $filename
+	sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < -3 || ReadPosRankSum > 3 || MQRankSum < -12.5\"\'/gatk_site_filters = \'NULL'/" $filename
 else
-	echo 'Use default GATK site filters (QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5)? (Y/N)'
+	echo 'Use default GATK site filters (QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < -3 || ReadPosRankSum > 3 || MQRankSum < -12.5)? (Y/N)'
 	yes_no_answer
 	if [[ $answer == 'Y' && $gatkver == 4 ]]; then
 		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression/gatk_site_filters = \'--filter-name \"filter\" --filter-expression/" $filename
 	elif [[ $answer == 'N' && $gatkver == 3 ]]; then
 		echo 'Enter filters to pass to GATK.'
 		read gatk_site_filters
-		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filterName \"filter\" --filterExpression \'$gatk_site_filters\'/" $filename
+		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < -3 || ReadPosRankSum > 3 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filterName \"filter\" --filterExpression \'$gatk_site_filters\'/" $filename
 	elif [[ $answer == 'N' && $gatkver == 4 ]]; then
 		echo 'Enter filters to pass to GATK.'
 		read gatk_site_filters
-		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < 15 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filter-name \"filter\" --filter-expression \'$gatk_site_filters\'/" $filename
+		sed -i '' "s/gatk_site_filters = \'--filterName \"filter\" --filterExpression \"QUAL < 30.0 || QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 3.0 || ReadPosRankSum < -3 || ReadPosRankSum > 3 || MQRankSum < -12.5\"\'/gatk_site_filters = \'--filter-name \"filter\" --filter-expression \'$gatk_site_filters\'/" $filename
 	fi
 fi
 echo 'Remove low-mappability and low-quality regions? (Y/N)'

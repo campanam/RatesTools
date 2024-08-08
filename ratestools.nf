@@ -964,11 +964,17 @@ workflow {
 	main:
 		prepareRef(params.refseq)
 		prev_vcf_ch = Channel.fromPath(params.filt_vcf)
-		gatkFilterSites(prev_vcf_ch, params.refseq, prepareRef.out) | logGatkSanity
-		filterRegions(logGatkSanity.out.ok_vcf, params.regbed) | logRegionSanity
-		calcDNMRate(logRegionSanity.out.ok_vcf)
 		trio_vcf_ch = Channel.fromPath(params.trio_vcf)
-		summarizeDNM(calcDNMRate.out.collect(),trio_vcf_ch.collect())
-		all_logs_sanity = logRegionSanity.out.sanelog.mix(logGatkSanity.out.sanelog, summarizeDNM.out.log)
+		gatkFilterSites(prev_vcf_ch, params.refseq, prepareRef.out) | logGatkSanity
+		if (params.region_filter) { 
+			filterRegions(logGatkSanity.out.ok_vcf, params.regbed) | logRegionSanity
+			calcDNMRate(logRegionSanity.out.ok_vcf)
+			summarizeDNM(calcDNMRate.out.collect(),trio_vcf_ch.collect())
+			all_logs_sanity = logRegionSanity.out.sanelog.mix(logGatkSanity.out.sanelog, summarizeDNM.out.log)
+		} else {
+			calcDNMRate(logGatkSanity.out.ok_vcf)
+			summarizeDNM(calcDNMRate.out.collect(),trio_vcf_ch.collect())
+			all_logs_sanity = logGatkSanity.out.sanelog.mix(summarizeDNM.out.log)
+		}
 		generateSummaryStats(all_logs_sanity.collect(), params.dnm_clump, summarizeDNM.out.vcf.collect())
 }

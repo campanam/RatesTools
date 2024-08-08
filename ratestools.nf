@@ -965,8 +965,7 @@ workflow {
 		prepareRef(params.refseq)
 		prev_vcf_ch = Channel.fromPath(params.filt_vcf)
 		gatkFilterSites(prev_vcf_ch, params.refseq, prepareRef.out) | logGatkSanity
-		regbed_ch = Channel.fromPath(params.regbed)
-		filterRegions(logGatkSanity.out.ok_vcf, regbed_ch) | logRegionSanity
+		filterRegions(logGatkSanity.out.ok_vcf, params.regbed) | logRegionSanity
 		calcDNMRate(logRegionSanity.out.ok_vcf)
 		trio_vcf_ch = Channel.fromPath(params.trio_vcf)
 		summarizeDNM(calcDNMRate.out.collect(),trio_vcf_ch.collect())

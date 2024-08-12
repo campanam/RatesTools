@@ -902,7 +902,7 @@ process forceSanityCheckLogs {
 	bcftools stats <(gunzip -c $filtvcflog) > tmp2.txt
 	filtval=`grep \"number of records:\" tmp2.txt | cut -f 4`
 	echo \$filtval > ${filtvcflog.baseName.split(".vcf")[0]}.log
-	if [ \$filtval -ge $min_contig_length ]; then ln -s $filtvcflog ${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz; fi
+	if [ \$filtval -ge $min_contig_length ]; then cp $filtvcflog ${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz; fi
 	"""
 	
 }

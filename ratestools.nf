@@ -893,18 +893,16 @@ process forceSanityCheckLogs {
 	input:
 	path filtvcflog
 	val min_contig_length
-	val min_filt_contig_length
 	
 	output:
 	path "${filtvcflog.baseName.split(".vcf")[0]}.log",  emit: log
 	path "${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz", optional: true, emit: ok_vcf
 	
 	"""
-	#!/usr/bin/env bash
 	bcftools stats <(gunzip -c $filtvcflog) > tmp2.txt
 	filtval=`grep \"number of records:\" tmp2.txt | cut -f 4`
 	echo \$filtval > ${filtvcflog.baseName.split(".vcf")[0]}.log
-	if [[ \$filtval -ge $min_filt_contig_length ]]; then ln -s $filtvcflog ${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz; fi
+	if [ \$filtval -ge $min_contig_length ]; then ln -s $filtvcflog ${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz; fi
 	"""
 	
 }
@@ -990,8 +988,9 @@ workflow {
 		prepareRef(params.refseq)
 		prev_vcf_ch = Channel.fromPath(params.filt_vcf)
 		trio_vcf_ch = Channel.fromPath(params.trio_vcf)
-		forceSanityCheckLogs(prev_vcf_ch, params.min_contig_length, params.min_filt_contig_length)
-		gatkFilterSites(forceSanityCheckLogs.out.ok_vcf, params.refseq, prepareRef.out) | logGatkSanity
+		forceSanityCheckLogs(prev_vcf_ch, params.min_contig_length)
+		vcftoolsFilterSites(forceSanityCheckLogs.out.ok_vcf) | logVcftoolsSanity
+		gatkFilterSites(logVcftoolsSanity.out.ok_vcf, params.refseq, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
 			filterRegions(logGatkSanity.out.ok_vcf, params.regbed) | logRegionSanity
 			calcDNMRate(logRegionSanity.out.ok_vcf)

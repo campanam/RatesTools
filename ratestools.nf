@@ -902,9 +902,9 @@ process forceSanityCheckLogs {
 	"""
 	#!/usr/bin/env bash
 	bcftools stats <(gunzip -c $filtvcflog) > tmp2.txt
-	filtval=`grep "number of records:" tmp2.txt | cut -f 4`
+	filtval=`grep \"number of records:\" tmp2.txt | cut -f 4`
 	# Mimic VCFtools output (Danecek et al. 2011. Bioinformatics. 27(15):2156-8. doi: 10.1093/bioinformatics/btr330).
-	echo 'dummy text' > "${filtvcflog.baseName.split(".vcf")[0]}.log"
+	echo 'dummy text' > ${filtvcflog.baseName.split(".vcf")[0]}.log
 	if [[ \$filtval -ge $min_filt_contig_length ]]; then ln -s $filtvcflog ${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz; fi
 	"""
 	

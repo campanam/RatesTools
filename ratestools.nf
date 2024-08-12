@@ -900,7 +900,13 @@ process forceSanityCheckLogs {
 	path "${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz", optional: true, emit: ok_vcf
 	
 	"""
+	#!/usr/bin/env bash
 	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length  > ${logfile.baseName}.log
+	bcftools stats <(gunzip -c $filtvcflog) > tmp2.txt
+	filtval=`grep "number of records:" tmp2.txt | cut -f 4`
+	# Mimic VCFtools output (Danecek et al. 2011. Bioinformatics. 27(15):2156-8. doi: 10.1093/bioinformatics/btr330).
+	echo 'After filtering, kept '$\filtval' out of a possible '\$filtval' Sites'
+	if [[ $filtval -ge $min_filt_contig_length ]]; then ln -s $filtvcflog ${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz; fi
 	"""
 	
 }

@@ -318,6 +318,9 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
+### Version 1.2.4  
+Added BCFtools to conda configuration  
+
 ### Version 1.2.3  
 Updated ReadPosRankSum default filter  
 

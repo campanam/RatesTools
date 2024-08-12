@@ -884,6 +884,27 @@ process generateSummaryStats {
 
 }
 
+process forceSanityCheckLogs {
+
+	// Force a sanity check filtering logs and remove too short contigs as needed 
+
+	label 'gzip'
+	
+	input:
+	path filtvcflog
+	val min_contig_length
+	val min_filt_contig_length
+	
+	output:
+	path "${filtvcflog.baseName.split(".vcf")[0]}.log",  emit: log
+	path "${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz", optional: true, emit: ok_vcf
+	
+	"""
+	logstats.sh $logfile $allvcflog $filtvcflog $min_contig_length $min_filt_contig_length  > ${logfile.baseName}.log
+	"""
+	
+}
+
 workflow.onError {
 	println "RatesTools pipeline encountered an error. Error message: $workflow.errorMessage."
 	if (params.email != "NULL") {
@@ -965,7 +986,8 @@ workflow {
 		prepareRef(params.refseq)
 		prev_vcf_ch = Channel.fromPath(params.filt_vcf)
 		trio_vcf_ch = Channel.fromPath(params.trio_vcf)
-		gatkFilterSites(prev_vcf_ch, params.refseq, prepareRef.out) | logGatkSanity
+		forceSanityCheckLogs(prev_vcf_ch, params.min_contig_length, params.min_filt_contig_length)
+		gatkFilterSites(forceSanityCheckLogs.out.ok_vcf, params.refseq, prepareRef.out) | logGatkSanity
 		if (params.region_filter) { 
 			filterRegions(logGatkSanity.out.ok_vcf, params.regbed) | logRegionSanity
 			calcDNMRate(logRegionSanity.out.ok_vcf)

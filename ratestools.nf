@@ -905,7 +905,7 @@ process forceSanityCheckLogs {
 	filtval=`grep "number of records:" tmp2.txt | cut -f 4`
 	# Mimic VCFtools output (Danecek et al. 2011. Bioinformatics. 27(15):2156-8. doi: 10.1093/bioinformatics/btr330).
 	echo 'dummy text'
-	if [[ $filtval -ge $min_filt_contig_length ]]; then ln -s $filtvcflog ${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz; fi
+	if [[ \$filtval -ge $min_filt_contig_length ]]; then ln -s $filtvcflog ${filtvcflog.baseName.split(".vcf")[0]}.OK.vcf.gz; fi
 	"""
 	
 }

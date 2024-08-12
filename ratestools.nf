@@ -943,13 +943,14 @@ workflow logSanityTrio {
 }
 
 workflow logVcftoolsSanity {
-	// Sanity check logs from VCFtools site filtering
+	// Sanity check logs from VCFtools site filtering.
+	// Modded since the min contig length was already filtered
 	take:
 		tmpfile
 		rawvcf
 		filtvcf
 	main:
-		sanityCheckLogs(tmpfile, rawvcf, filtvcf, params.min_contig_length, params.min_filt_contig_length)
+		sanityCheckLogs(tmpfile, rawvcf, filtvcf, 1, params.min_filt_contig_length)
 	emit:
 		sanelog = sanityCheckLogs.out.log
 		ok_vcf = sanityCheckLogs.out.ok_vcf

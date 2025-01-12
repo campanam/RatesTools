@@ -25,13 +25,15 @@ To the extent possible under law, the Smithsonian Institution and Stanford Unive
 
 ## Citation  
 <img align="left" src="Lion_Project.png" width="200">  
+
 We politely request that this work be cited as:  
+
 Armstrong, E.E., Campana, M.G. (2023) RatesTools: a Nextflow pipeline for detecting *de novo* germline mutations in pedigree sequence data. *Bioinformatics*, __39__, btac784. DOI: [10.1093/bioinformatics/btac784](https://doi.org/10.1093/bioinformatics/btac784).  
 
 Preprint available on *bioRxiv*. DOI: [10.1101/2022.07.18.500472](https://doi.org/10.1101/2022.07.18.500472).  
 
 For RatesTools versions >= 1.0, please also cite:  
-Armstrong, E.E., Carey, S.B., Harkess, A., Zenato Lazzari, G., Solari, K.A., Maldonado, J.E., Fleischer, R.C., Aziz, N., Walsh, P., Koepfli, K.-P., Eizirik, E., Petrov, D.A., Campana, M.G. (2024) Parameterizing Pantherinae: de novo mutation rate estimates from *Panthera* and *Neofelis* pedigrees. *bioRxiv*, 2024.04.06.587788. DOI:[10.1101/2024.04.06.587788](https://doi.org/10.1101/2024.04.06.587788).
+Armstrong, E.E., Carey, S.B., Harkess, A., Zenato Lazzari, G., Solari, K.A., Maldonado, J.E., Fleischer, R.C., Aziz, N., Walsh, P., Koepfli, K.-P., Eizirik, E., Petrov, D.A., Campana, M.G. (2024) Parameterizing Pantherinae: de novo mutation rate estimates from *Panthera* and *Neofelis* pedigrees. *bioRxiv*, 2024.04.06.587788. DOI: [10.1101/2024.04.06.587788](https://doi.org/10.1101/2024.04.06.587788).
 
 ## Conda-Assisted Installation  
 We provide a configuration profile "conda" in the default configuration file (`nextflow.config`) that installs all dependencies using [Conda](https://docs.conda.io/en/latest/). As of RatesTools 1.0.0, we recommend (and default to) the use of [Mamba](https://mamba.readthedocs.io/en/latest/) for environment construction. Using this profile, the user only needs to install [Nextflow](https://www.nextflow.io/) [1], Conda/Mamba and the RatesTools pipeline:  

@@ -33,6 +33,7 @@ Armstrong, E.E., Campana, M.G. (2023) RatesTools: a Nextflow pipeline for detect
 Preprint available on *bioRxiv*. DOI: [10.1101/2022.07.18.500472](https://doi.org/10.1101/2022.07.18.500472).  
 
 For RatesTools versions >= 1.0, please also cite:  
+
 Armstrong, E.E., Carey, S.B., Harkess, A., Zenato Lazzari, G., Solari, K.A., Maldonado, J.E., Fleischer, R.C., Aziz, N., Walsh, P., Koepfli, K.-P., Eizirik, E., Petrov, D.A., Campana, M.G. (2024) Parameterizing Pantherinae: de novo mutation rate estimates from *Panthera* and *Neofelis* pedigrees. *bioRxiv*, 2024.04.06.587788. DOI: [10.1101/2024.04.06.587788](https://doi.org/10.1101/2024.04.06.587788).
 
 ## Conda-Assisted Installation  

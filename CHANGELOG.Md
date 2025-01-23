@@ -1,5 +1,5 @@
 # CHANGE LOG  
-Michael G. Campana & Ellie E. Armstrong, 2019-2025  
+Michael G. Campana & Ellie E. Armstrong, 2019-2024  
 Smithsonian Institution  
 Stanford University  
 
@@ -318,9 +318,6 @@ Improved sanity checks
 Script to correct vcftools site overflow glitch using bcftools stats  
 
 ## nextflow.config  
-### Version 1.2.5  
-Added r-stringi package to conda configuration  
-
 ### Version 1.2.4  
 Added BCFtools to conda configuration  
 
